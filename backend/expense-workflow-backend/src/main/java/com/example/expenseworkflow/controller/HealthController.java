@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
-@RestController
-@RequestMapping
+@RestController // 返り値をJSONとして返す（@ResponseBodyの省略）
+@RequestMapping("/api") // 今後のAPIも /api 配下に揃える
 public class HealthController {
 	
 	

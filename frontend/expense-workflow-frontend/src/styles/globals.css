@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+
+
+/* ここから下は「最小限だけ」 */
+
+/* 必要なら：全体の高さを揃える（レイアウトが楽） */
+html,
+body,
+#root {
+  height: 100%;
+}
+
+/* 必要なら：全体のベース（最小） */
+/* body { */
+  /* Tailwindで bg/text を付けるなら不要 */
+  /* background: white; */
+/* } */
