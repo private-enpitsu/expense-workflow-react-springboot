@@ -48,18 +48,18 @@
 			<version>4.0.1</version>
 		</dependency>
 		
-<!--疎通確認用 20260129-->
-<!--<dependency>-->
-<!--  <groupId>org.springframework.boot</groupId>-->
-<!--  <artifactId>spring-boot-starter-test</artifactId>-->
-<!--  <scope>test</scope>-->
-<!--</dependency>-->
-
-<!-- BCrypt照合（pwハッシュ関数 20260128） -->
-<dependency>
-  <groupId>org.springframework.security</groupId>
-  <artifactId>spring-security-crypto</artifactId>
-</dependency>
+		<!--疎通確認用 20260129-->
+		<!--<dependency>-->
+		<!--  <groupId>org.springframework.boot</groupId>-->
+		<!--  <artifactId>spring-boot-starter-test</artifactId>-->
+		<!--  <scope>test</scope>-->
+		<!--</dependency>-->
+		
+		<!-- BCrypt照合（pwハッシュ関数 20260128） -->
+		<dependency>
+		  <groupId>org.springframework.security</groupId>
+		  <artifactId>spring-security-crypto</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
