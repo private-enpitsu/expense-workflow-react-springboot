@@ -1,0 +1,34 @@
+.app { /* アプリ全体の余白など（CSS Modules） */
+  padding: 16px; /* 全体に余白を付ける */
+} /* .app ここまで */
+
+.nav { /* 上部ナビ（横並び） */
+  display: flex; /* 横並びにする */
+  gap: 12px; /* リンク間の間隔を作る */
+  margin-bottom: 12px; /* 下に余白を作る */
+} /* .nav ここまで */
+
+.navLink { /* ナビリンク */
+  text-decoration: none; /* 下線を消す */
+} /* .navLink ここまで */
+
+.navLink:hover { /* ホバー時 */
+  text-decoration: underline; /* ホバー時だけ下線を出す */
+} /* .navLink:hover ここまで */
+
+.page { /* 各ページのコンテナ */
+  padding: 8px; /* ページ内の余白 */
+} /* .page ここまで */
+
+.title { /* 見出し */
+  margin: 0 0 8px 0; /* 下に少し余白 */
+} /* .title ここまで */
+
+.text { /* 通常テキスト */
+  margin: 4px 0; /* 行間を少し付ける */
+} /* .text ここまで */
+
+.error { /* エラー表示 */
+  margin: 8px 0; /* 余白を付ける */
+  white-space: pre-wrap; /* 文字列が長いとき折り返す */
+} /* .error ここまで */

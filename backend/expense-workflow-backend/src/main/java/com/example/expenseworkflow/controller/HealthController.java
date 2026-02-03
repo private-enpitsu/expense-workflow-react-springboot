@@ -1,24 +1,17 @@
-package com.example.expenseworkflow.controller;
+package com.example.expenseworkflow.controller; // APIコントローラを置くパッケージ
 
-import java.util.Map;
+import java.util.Map; // JSONとして返すための簡易Mapを使う
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.GetMapping; // GETエンドポイントを定義するために使う
+import org.springframework.web.bind.annotation.RequestMapping; // ベースパスをまとめるために使う
+import org.springframework.web.bind.annotation.RestController; // JSONを返すRESTコントローラとして宣言する
 
+@RestController // このクラスがREST APIの入口で、返り値はJSONとして返す
+@RequestMapping("/api") // APIのベースパスを /api に統一する
+public class HealthController { // 起動確認用のhealth APIを提供するクラス
 
-@RestController // 返り値をJSONとして返す（@ResponseBodyの省略）
-@RequestMapping("/api") // 今後のAPIも /api 配下に揃える
-public class HealthController {
-	
-	
-    /**
-     * 疎通確認用。
-     * ブラウザやcurlでアクセスして {"status":"ok"} が返ることを確認します。
-     */
-	@GetMapping("/health")
-	public Map<String, String> health() {
-		return Map.of("status", "ok"); //JSON: {"status":"ok"}
-	}
-
-}
+    @GetMapping("/health") // GET /api/health をこのメソッドに割り当てる
+    public Map<String, String> health() { // 疎通確認のための最小レスポンスを返す
+        return Map.of("status", "ok"); // 返却JSON: {"status":"ok"} を生成して返す
+    } // メソッド終わり
+} // クラス終わり
