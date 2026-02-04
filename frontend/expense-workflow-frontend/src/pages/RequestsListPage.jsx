@@ -7,6 +7,8 @@
   今回の変更点: 「申請一覧（準備中）」の固定文言をやめ、ダミーデータ3件を map で表示するように変更した（1ステップ＝1概念：一覧描画だけ） // 今回のAxisで増えた点を1行で示す
 */
 
+import { Link } from "react-router-dom"; // ルーティング遷移用の Link を使う（IDクリックで詳細へ移動するため）
+
 import styles from "./RequestsListPage.module.css"; // CSS Modules を読み込み
 
 const dummyRequests = [// APIが無い段階でもUIを確認できるように、固定のダミーデータを用意する
@@ -22,7 +24,9 @@ export default function RequestsListPage() {
       <ul className={styles.list}> {/* 申請一覧のリスト（API接続前なのでダミー表示） */}
         {dummyRequests.map((req) => ( /* 配列を map して、1件ずつ表示要素を作る */
           <li key={req.id} className={styles.listItem}> {/* key に申請IDを使い、1行分の見た目をCSSで整える */}
-            <span className={styles.cell}>ID: {req.id}</span> {/* 申請IDを表示する */}
+            <span className={styles.cell}>
+              <Link to={`/requests/${req.id}`}>ID: {req.id}</Link> {/* クリックで /requests/:id に遷移する（:id に req.id を差し込む） */}
+            </span> {/* 申請IDを表示する */}
             <span className={styles.cell}>金額: {req.amount}</span> {/* 金額（数値）を表示する */}
             <span className={styles.cell}>状態: {req.status}</span> {/* 状態（文字列）を表示する */}
           </li> /* 1件分の行ここまで */
