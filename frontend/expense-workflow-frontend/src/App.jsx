@@ -3,7 +3,7 @@
   目的: ルーティングを提供し、/ はBackend Check（疎通UI）を維持しつつ、/login を表示するためのルートコンポーネントを定義する // “Health”命名を避けて疎通UIの役割で表現する
   呼び出し元/使用箇所: src/main.jsx から <App /> として読み込まれ、アプリ全体のルートとして描画される // どこから呼ばれるかを明確化する
   依存: react-router-dom（BrowserRouter/Routes/Route/Link）, @tanstack/react-query（useQuery）, jotai（atom/useSetAtom）, ./lib/apiClient（Axiosクライアント）, ./App.module.css（CSS Modules）, ./pages/LoginPage // 参照している主要依存を列挙する
-  今回の変更点: /requests/new ルート（表示だけ）を追加し、ナビゲーションに New Request を追加した（/ のHealthは壊さない） // 今回のAxis（/requests/new表示）に合わせて説明を更新する
+  今回の変更点: /requests/:id ルート（表示だけ）を追加し、ナビゲーションに Request Detail（/requests/1）を追加した（/ のHealthは壊さない） // 今回のAxis（/requests/:id表示）に合わせて説明を更新する
   入出力: 画面表示のみ（Props なし）。/api/health のレスポンス（例: { status: "OK" }）を表示に反映する // URLは維持する前提を明示する
   注意点: これは命名の置換のみで、疎通確認の実行経路（/api/health 呼び出し）は変えない // L4（既存を壊さない）に寄せる
 */
@@ -19,6 +19,7 @@ import LoginPage from "./pages/LoginPage"; // /login のページコンポーネ
 import RequestsListPage from "./pages/RequestsListPage" // /inbox のページコンポーネントを読み込む（承認待ち一覧：まずは表示だけ）
 import InboxPage from "./pages/InboxPage"; // /inbox のページコンポーネントを読み込む（承認待ち一覧：表示だけ）
 import RequestCreatePage from "./pages/RequestCreatePage"; // /requests/new のページコンポーネントを読み込む（申請作成：まずは表示だけ）
+import RequestDetailPage from "./pages/RequestDetailPage"; // /requests/new のページコンポーネントを読み込む（申請作成：まずは表示だけ）
 
 
 import styles from "./App.module.css"; // CSS Modules（インラインstyle禁止のため）を読み込む
@@ -91,6 +92,7 @@ export default function App() { // ルートコンポーネント（ルーティ
           <Link className={styles.navLink} to="/">Health</Link> {/* / に移動するリンク */}
           <Link className={styles.navLink} to="/requests">Requests</Link> {/* /requests に移動するリンク（申請一覧：表示だけ） */}
           <Link className={styles.navLink} to="/requests/new">New Requests</Link> {/* /requests/new に移動するリンク（申請作成：まずは表示だけ） */}
+          <Link className={styles.navLink} to="/requests/1">Request Detail</Link> {/* /requests/:id の確認用リンク（例として /requests/1 に移動する） */}
           <Link className={styles.navLink} to="/inbox">Inbox</Link> {/* /login に移動するリンク */}
           <Link className={styles.navLink} to="/login">Login</Link> {/* /login に移動するリンク */}
         </nav>
@@ -99,6 +101,7 @@ export default function App() { // ルートコンポーネント（ルーティ
           <Route path="/" element={<HealthCheckPage />} /> {/* / は疎通確認ページ */}
           <Route path="/requests" element={<RequestsListPage />} />  {/* /requests は申請一覧ページ（表示だけ） */}
           <Route path="/requests/new" element={<RequestCreatePage />} />  {/* /requests/new は申請作成ページ（表示だけ） */}
+          <Route path="/requests/:id" element={<RequestDetailPage />} /> {/* /requests/:id は申請詳細ページ（まずは表示だけ） */}
           <Route path="/inbox" element={<InboxPage />} /> {/* /inbox は承認待ち一覧ページ（まずは表示だけ） */}
           <Route path="/login" element={<LoginPage />} /> {/* /login はログインページ */}
         </Routes>
