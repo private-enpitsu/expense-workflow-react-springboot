@@ -3,7 +3,8 @@
   目的: ルーティングを提供し、/ はBackend Check（疎通UI）を維持しつつ、/login を表示するためのルートコンポーネントを定義する // “Health”命名を避けて疎通UIの役割で表現する
   呼び出し元/使用箇所: src/main.jsx から <App /> として読み込まれ、アプリ全体のルートとして描画される // どこから呼ばれるかを明確化する
   依存: react-router-dom（BrowserRouter/Routes/Route/Link）, @tanstack/react-query（useQuery）, jotai（atom/useSetAtom）, ./lib/apiClient（Axiosクライアント）, ./App.module.css（CSS Modules）, ./pages/LoginPage // 参照している主要依存を列挙する
-  今回の変更点: /requests ルート（表示だけ）を追加し、ナビゲーションに Requests を追加した（/ のHealthは壊さない） // 今回のAxisに合わせて説明だけ更新する
+  今回の変更点: /inbox ルート（表示だけ）を追加し、ナビゲーションに Inbox を追加した（/ のHealthは壊さない） // 今回のAxis（/inbox表示）に合わせて説明を更新する
+
   入出力: 画面表示のみ（Props なし）。/api/health のレスポンス（例: { status: "OK" }）を表示に反映する // URLは維持する前提を明示する
   注意点: これは命名の置換のみで、疎通確認の実行経路（/api/health 呼び出し）は変えない // L4（既存を壊さない）に寄せる
 */
@@ -14,8 +15,11 @@ import { useSetAtom } from "jotai"; // Jotaiの「atom更新」だけ使う（at
 import { healthSnapshotAtom } from "./lib/atoms"; // 共有atomを読み込む（/ が書いた状態を他画面で読めるようにする）
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom"; // React Router（ルーティング）を読み込む
 import { apiClient } from "./lib/apiClient"; // Axios共通クライアントを読み込む（疎通確認に使う）
+
 import LoginPage from "./pages/LoginPage"; // /login のページコンポーネントを読み込む
-import RequestsListPage from "./pages/RequestsListPage"
+import RequestsListPage from "./pages/RequestsListPage" // /inbox のページコンポーネントを読み込む（承認待ち一覧：まずは表示だけ）
+import InboxPage from "./pages/InboxPage";
+
 import styles from "./App.module.css"; // CSS Modules（インラインstyle禁止のため）を読み込む
 
 function HealthCheckPage() { // 既存の疎通確認ページ（/ の表示として残す）
@@ -85,12 +89,14 @@ export default function App() { // ルートコンポーネント（ルーティ
         <nav className={styles.nav}> {/* ナビゲーション */}
           <Link className={styles.navLink} to="/">Health</Link> {/* / に移動するリンク */}
           <Link className={styles.navLink} to="/requests">Requests</Link> {/* /requests に移動するリンク（申請一覧：表示だけ） */}
+          <Link className={styles.navLink} to="/inbox">Inbox</Link> {/* /login に移動するリンク */}
           <Link className={styles.navLink} to="/login">Login</Link> {/* /login に移動するリンク */}
         </nav>
 
         <Routes> {/* URLと表示コンポーネントを対応付ける */}
           <Route path="/" element={<HealthCheckPage />} /> {/* / は疎通確認ページ */}
           <Route path="/requests" element={<RequestsListPage />} />  {/* /requests は申請一覧ページ（表示だけ） */}
+          <Route path="/inbox" element={<InboxPage />} /> {/* /inbox は承認待ち一覧ページ（まずは表示だけ） */}
           <Route path="/login" element={<LoginPage />} /> {/* /login はログインページ */}
         </Routes>
       </div>
