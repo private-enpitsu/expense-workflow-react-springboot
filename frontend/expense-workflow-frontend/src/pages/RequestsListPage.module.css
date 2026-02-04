@@ -1,0 +1,20 @@
+.page { /* ページ全体の余白（RequestsListPage専用） */
+  padding: 16px; /* 画面端に寄りすぎないようにする */
+} /* .page ここまで */
+.title { /* 見出し */
+  margin: 0 0 8px 0; /* 下に少し余白 */
+} /* .title ここまで */
+.list { /* 一覧の<ul>にデフォルトの余白を付けすぎないための調整 */
+  margin: 0; /* 余計な外側余白を消す */
+  padding: 0; /* 余計な内側余白を消す */
+  list-style: none; /* 箇条書きの黒丸を消す */
+} /* .list ここまで */
+.listItem { /* 1行分の表示（カード風に見える最小の枠） */
+  display: flex; /* 3項目を横並びにする */
+  gap: 12px; /* 項目間の間隔を空ける */
+  padding: 8px 0; /* 行の上下に余白を付ける */
+  border-bottom: 1px solid #ddd; /* 区切り線を付ける（見やすさ優先） */
+} /* .listItem ここまで */
+.cell { /* 各項目（ID/金額/状態）の表示 */
+  font-size: 14px; /* 文字サイズを少し小さめにする */
+} /* .cell ここまで */
