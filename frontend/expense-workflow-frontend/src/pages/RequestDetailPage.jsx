@@ -8,7 +8,7 @@
   注意点: API接続（GET /api/requests/:id）や認証ガードはこの回では行わない（未来依存を避ける） // 概念を増やさない
 */
 
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 
 export default function RequestDetailPage() { // /requests/:id のページコンポーネントを定義する（表示だけ）
   const params = useParams(); // URLパラメータを取得する
@@ -18,6 +18,7 @@ export default function RequestDetailPage() { // /requests/:id のページコ�
       <h1>Request Detail</h1>
       <p>申請ID：{requestId}</p> {/* URLの :id が取れていることを画面に表示して確認する */}
       <p>申請詳細ページ（表示のみ）</p> {/* この回はAPI接続しないことを明示するテキスト */}
+      <p><Link to="/requests">一覧に戻る</Link></p> {/* クリックで申請一覧（/requests）へ戻る */}
     </div> // コンテナの終わり
   );
 }

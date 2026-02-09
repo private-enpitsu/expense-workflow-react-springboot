@@ -1,0 +1,48 @@
+/*
+  src/components/ToastHost.module.css // ファイルパスを明示する
+  目的: ToastHost.jsx の見た目（位置・色・余白）を最小限で定義する // CSSの役割
+  呼び出し元/使用箇所: src/components/ToastHost.jsx が import して className に適用する // どこで使うか
+  入力と出力: 入力なし / 出力はCSSクラス（host/toast/toastSuccess/toastError/message/closeButton） // 何を提供するか
+  依存/前提: CSS Modules がVite設定で有効であること（.module.css が解決できること） // 依存関係
+  今回の変更点: 成功/失敗の2種類を見分けられる最小スタイルを追加した // 変更点
+*/
+
+.host { /* 画面右上固定のコンテナ */
+  position: fixed; /* スクロールしても位置を固定する */
+  top: 12px; /* 上からの余白を付ける */
+  right: 12px; /* 右からの余白を付ける */
+  z-index: 9999; /* 他要素より前面に表示する */
+} /* host ここまで */
+
+.toast { /* Toast本体の共通スタイル */
+  display: flex; /* メッセージとボタンを横並びにする */
+  align-items: center; /* 縦位置を中央に揃える */
+  gap: 10px; /* メッセージとボタンの間隔 */
+  padding: 10px 12px; /* 内側の余白を付ける */
+  border-radius: 8px; /* 角を少し丸める */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12); /* うっすら影を付ける */
+  background: white; /* ベース背景（type別の色は枠線で表現する） */
+  min-width: 240px; /* 最小幅を確保する */
+} /* toast ここまで */
+
+.toastSuccess { /* 成功の見た目 */
+  border-left: 6px solid #16a34a; /* 左の色で成功を表現する */
+} /* toastSuccess ここまで */
+
+.toastError { /* 失敗の見た目 */
+  border-left: 6px solid #dc2626; /* 左の色で失敗を表現する */
+} /* toastError ここまで */
+
+.message { /* メッセージ本文 */
+  flex: 1; /* ボタン以外の幅を優先して取る */
+  font-size: 14px; /* 小さめの読みやすいサイズ */
+  line-height: 1.4; /* 行間を少し広げる */
+} /* message ここまで */
+
+.closeButton { /* 閉じるボタン */
+  border: none; /* 余計な枠線を消す */
+  background: transparent; /* 背景を透明にする */
+  cursor: pointer; /* クリックできることを示す */
+  font-size: 18px; /* ×を見やすくする */
+  line-height: 1; /* ボタンの高さを詰める */
+} /* closeButton ここまで */
