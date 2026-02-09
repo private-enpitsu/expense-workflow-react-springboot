@@ -15,6 +15,7 @@ public class CorsConfig implements WebMvcConfigurer { // CORS設定を追加す�
                         "http://localhost:3000"  // もし3000で動かす場合にも対応（最小の追加）
                 )
                 .allowedMethods("GET") // 今回はhealth確認のみなのでGETだけ許可（最小）
-                .allowedHeaders("*"); // 送信ヘッダは一旦全許可（healthでは実害が少ないため）
+                .allowedHeaders("*") // 送信ヘッダは一旦全許可（healthでは実害が少ないため）
+                .allowCredentials(true); // Cookie（JSESSIONID）を送受信できるように credentials を許可する // セッション方式の必須要件
     } // CORS設定メソッド終わり
 } // クラス終わり
