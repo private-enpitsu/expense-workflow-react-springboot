@@ -6,7 +6,6 @@
 package com.example.expenseworkflow.controller;
 
 import jakarta.servlet.http.HttpSession;
-import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,42 +15,56 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.expenseworkflow.domain.User;
+import com.example.expenseworkflow.mapper.UserMapper;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController { // ログインAPIを提供するコントローラクラス
 	
 	// セッションに保存するキーを定義する
-	private static final String SESSION_USER_ID = "LOGIN_USER_ID";
-	private static final String SESSION_USER_EMAIL = "LOGIN_USER_EMAIL";
-	private static final String SESSION_USER_ROLE = "LOGIN_USER_ROLE";
+	private static final String SESSION_KEY_USER_ID = "SESSION_KEY_USER_ID"; // セッションに保存する userId のキー名（MeController と一致させる）
+	private final UserMapper userMapper; // email から user を取得する依存（DIで受け取る）
+	private final BCryptPasswordEncoder passwordEncoder; // BCrypt 照合を行うためのエンコーダ（使い回し）
 	
-	private final UserMapper userMapper; // usersを参照するMapperを保持する
-	private final BCryptPasswordEncoder passwordEncoder; // password_hash照合のためのエンコーダを保持する
-	
-	// SpringのDIでUserMapperを受け取るコンストラクタ
-	public AuthController(UserMapper userMapper) {
+	public AuthController(UserMapper userMapper) { // コンストラクタDIで必要な依存を受け取る
 		this.userMapper = userMapper;
-		this.passwordEncoder = new BCryptPasswordEncoder(); // BCrypt照合器をここで生成して保持する（最小構成）
+		this.passwordEncoder = new BCryptPasswordEncoder(); // BCryptPasswordEncoder を生成する（spring-security-crypto 依存）
 	}
+	
+	public static class LoginRequest {
+		public String email;
+		public String password; // 平文パスワード（照合にのみ使い、保存しない）
+	}
+	
+	@PostMapping("/login") // POST /api/auth/login をこのメソッドで処理する
+	public ResponseEntity<Void> login(@RequestBody LoginRequest body, HttpSession session) { // body と session を受け取り、成功ならセッションに userId を保存する
+	
+		if (body == null || body.email == null || body.password == null) { // 必須項目が無ければリクエスト不正として扱う
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); // 400 を返す（未ログイン=401とは分ける）
+		}
+		
+		User user = userMapper.findByEmail(body.email); // email から user を検索する（存在しないなら null）
+		if (user == null) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+		}
+		
+		boolean ok = passwordEncoder.matches(body.password,  user.getPasswordHash()); // password と password_hash（BCrypt）を照合する
+		if (!ok) { // パスワードが一致しなければログイン失敗として扱う
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+		
+		session.setAttribute(SESSION_KEY_USER_ID, user.getId()); // ログイン成功なのでセッションに userId を保存する（以後 /api/me が 200 になる）
+		return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+	}
+	
+	@PostMapping("/logout") // POST /api/auth/logout をこのメソッドで処理する
+	public ResponseEntity<Void> logout(HttpSession session) { // セッションを受け取り、ログアウトとして userId を破棄する
+		session.removeAttribute(SESSION_KEY_USER_ID); // セッションから userId を削除して未ログイン状態に戻す
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+	}
+	
+	
 
-	@PostMapping("/login") //POST /api/auth/login を定義する
-	public ResponseEntity<Void> login(@Valid @RequestBody LoginRequest request, HttpSession session){
-		
-		UserAuth user = userMapper.selectAuthByEmail(request.getEmail()); // emailで users を検索して認証に必要な情報を取得する
-		if (user == null) { // 該当ユーザーが存在しない場合
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // 認証失敗として401を返す
-		}
-		
-		boolean passwordOK = passwordEncoder.maches(request.getPassword(), user.getPasswordHash()); // 入力パスワードとDBのpassword_hashをBCryptで照合する
-		if (!passwordOK) { // パスワードが一致しない場合
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // 認証失敗として401を返す
-		}
-		
-		// /api/me が200を返すためにセッションへ保存する
-		session.setAttribute(SESSION_USER_ID, user.getId());
-		session.setAttribute(SESSION_USER_EMAIL, user.getEmail());
-		session.setAttribute(SESSION_USER_ROLE, user.getRole());
-		
-		return ResponseEntity.noContent().build(); // ログイン成功として204（ボディ無し）を返す
-	}
+
 }

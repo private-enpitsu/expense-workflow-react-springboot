@@ -14,32 +14,45 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.expenseworkflow.controller.dto.MeResponse;
+import com.example.expenseworkflow.domain.User;
+import com.example.expenseworkflow.mapper.UserMapper;
+
+import lombok.RequiredArgsConstructor;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api")
 public class MeController { // /api/me を提供するコントローラ
 	
-	private static final String SESSION_USER_ID = "LOGIN_USER_ID"; // AuthController と同じキーでユーザーIDを読む
-	private static final String SESSION_USER_EMAIL = "LOGIN_USER_EMAIL";
-	private static final String SESSION_USER_ROLE = "LOGIN_USER_ROLE";
+	private static final String SESSION_KEY_USER_ID = "SESSION_KEY_USER_ID"; // AuthController と同じキーでユーザーIDを読む
+	private final UserMapper userMapper;
 	
-	// セッションを受け取り、ログイン状態に応じて200/401を返す
+//	public MeController(UserMapper userMapper) { // コンストラクタDIで UserMapper を受け取る
+//		this.userMapper = userMapper;
+//	}
+	
 	@GetMapping("/me")
-	public ResponseEntity<?> me(HttpSession session) {
+	public ResponseEntity<Void> me(HttpSession session) {
 		
-		Object idObj = session.getAttribute(SESSION_USER_ID); // ログイン中なら保存されているはずのユーザーIDを取得する
-		
-		if (idObj == null) { // セッションにユーザーIDが無い場合（未ログインと判断）
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // 常に401を返すメソッドResponseEntity（ログイン実装後に200返却へ拡張する）
+		Object userIdObj = session.getAttribute(SESSION_KEY_USER_ID);
+		if (userIdObj == null) { // userId が無ければ未ログインとして扱う // 行コメント
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // 未ログイン=401 を返す（設計書の前提）
 		}
 		
-		MeResponse body = new MeResponse(); // 200の時に返すボディを組み立てる
-		body.setId((Long) idObj); // Long にキャスト
-		body.setEmail((String) session.getAttribute(SESSION_USER_EMAIL)); // セッションのemailをレスポンスへ詰める
-		body.setRole((String) session.getAttribute(SESSION_USER_ROLE));
+		Long userId = (userIdObj instanceof Long) ? (Long) userIdObj : null; // 型が想定外なら null 扱いにして安全側に倒す
+		if (userId == null) { // セッション値が壊れている/想定外の型なら未ログイン扱いにする // 行コメント
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+		}
 		
-		return ResponseEntity.ok(body); // ログイン中として200＋JSONボディを返す
+		User user = userMapper.findById(userId); // userId がDB上に存在するかを確認する（存在しないならセッション不整合）
+		if (user == null) { // user が見つからない場合は未ログイン扱いにする（セッション不整合の最小処理）
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+		}
+		
+		return ResponseEntity.ok().build(); // ログイン済み=200 を返す（ボディ無し、判定はステータスで行う）
+		
 	}
+	
+
 
 }

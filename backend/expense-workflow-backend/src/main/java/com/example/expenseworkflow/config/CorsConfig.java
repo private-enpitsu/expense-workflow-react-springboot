@@ -14,7 +14,7 @@ public class CorsConfig implements WebMvcConfigurer { // CORS設定を追加す�
                         "http://localhost:5173", // Viteのデフォルト開発サーバOrigin
                         "http://localhost:3000"  // もし3000で動かす場合にも対応（最小の追加）
                 )
-                .allowedMethods("GET") // 今回はhealth確認のみなのでGETだけ許可（最小）
+                .allowedMethods("GET", "POST", "OPTIONS") // /api/me(GET) と /api/auth/login(POST) と Preflight(OPTIONS) を許可する // 必要最小
                 .allowedHeaders("*") // 送信ヘッダは一旦全許可（healthでは実害が少ないため）
                 .allowCredentials(true); // Cookie（JSESSIONID）を送受信できるように credentials を許可する // セッション方式の必須要件
     } // CORS設定メソッド終わり

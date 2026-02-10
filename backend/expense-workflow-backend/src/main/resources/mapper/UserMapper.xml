@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?> <!-- XML宣言（MyBatisのMapper XMLとして必要） -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> <!-- MyBatis Mapper DTD 宣言 -->
+<mapper namespace="com.example.expenseworkflow.mapper.UserMapper"> <!-- namespace は Java の Mapper インターフェース完全修飾名に合わせる -->
+  <resultMap id="UserResultMap" type="com.example.expenseworkflow.domain.User"> <!-- users 行→User へのマッピング定義（自動任せにせず明示する） -->
+    <id column="id" property="id"/> <!-- 主キー id を User.id に対応付ける -->
+    <result column="email" property="email"/> <!-- email を User.email に対応付ける -->
+    <result column="name" property="name"/> <!-- name を User.name に対応付ける -->
+    <result column="role" property="role"/> <!-- role を User.role に対応付ける -->
+    <result column="manager_id" property="managerId"/> <!-- manager_id を User.managerId に対応付ける -->
+    <result column="is_active" property="isActive"/> <!-- is_active を User.isActive に対応付ける -->
+    <result column="password_hash" property="passwordHash"/> <!-- password_hash を User.passwordHash に対応付ける（ログイン照合用） -->
+  </resultMap> <!-- resultMap 終わり -->
+  <select id="findByEmail" parameterType="string" resultMap="UserResultMap"> <!-- email で1件取得するSQL（ログインで使用） -->
+    SELECT id, email, name, role, manager_id, is_active, password_hash FROM users WHERE email = #{email} <!-- 必要最小のカラムだけ取得する -->
+  </select> <!-- findByEmail 終わり -->
+  <select id="findById" parameterType="long" resultMap="UserResultMap"> <!-- id で1件取得するSQL（/api/me 判定で使用） -->
+    SELECT id, email, name, role, manager_id, is_active, password_hash FROM users WHERE id = #{id} <!-- セッションの userId が実在するか確認する -->
+  </select> <!-- findById 終わり -->
+</mapper> <!-- mapper 終わり -->
+
+<!-- // ヘッダ開始コメント --> <!-- 行コメント -->
+<!-- backend/expense-workflow-backend/src/main/resources/mapper/UserMapper.xml --> <!-- ファイルパスコメント -->
+<!-- 目的: users テーブルの SELECT を定義し、UserMapper（Java）から呼ばれるSQLを提供する --> <!-- 役割コメント -->
+<!-- 呼び出し元/使用箇所: UserMapper.findByEmail / UserMapper.findById から呼ばれる --> <!-- 利用箇所コメント -->
+<!-- 入力と出力: 入力=email または id / 出力=User（resultMapでマッピング） --> <!-- 入出力コメント -->
+<!-- 依存／前提: users のカラム（password_hash 等）が _確定DB.xlsx の定義どおり存在すること --> <!-- 前提コメント -->
