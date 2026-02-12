@@ -50,7 +50,7 @@ public class MeController { // /api/me を提供するコントローラ
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 		}
 		
-		com.example.expenseworkflow.controller.dto.MeResponse body  = new MeResponse(); // 返却用DTOを作り、公開してよい情報だけを詰めます。 
+		MeResponse body  = new MeResponse(); // 返却用DTOを作り、公開してよい情報だけを詰めます。 
 		body.setId(user.getId()); // フロントが識別に使えるようユーザーIDを設定します。
 		body.setEmail(user.getEmail()); // ナビ表示に使えるようemailを設定します。
 		body.setRole(user.getRole()); // 将来のロール別表示制御に使えるようroleを設定します。
