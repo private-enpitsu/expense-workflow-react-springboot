@@ -9,3 +9,7 @@
 .text { /* 説明文 */
   margin: 0; /* 余計な余白をなくす */
 } /* .text ここまで */
+
+form input {
+  border: 1px solid #ddd;
+}

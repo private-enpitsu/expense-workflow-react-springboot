@@ -9,11 +9,11 @@
 */
 
 import { useEffect } from "react"; // Jotai atomへ「表示状態」を同期するためにuseEffectを使う
-import { useQuery } from "@tanstack/react-query"; // TanStack Query の useQuery を読み込む（Healthの取得はこれで実行する）
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"; // TanStack Query の useQuery を読み込む（Healthの取得はこれで実行する）
 import { useSetAtom } from "jotai"; // Jotaiの「atom更新」だけ使う（atom定義はlib/atoms.jsへ移した）
 import { healthSnapshotAtom, toastAtom } from "./lib/atoms"; // 共有atomを読み込む（/ が書いた状態を他画面で読めるようにする）
 // import { BrowserRouter, Routes, Route, Link } from "react-router-dom"; // React Router（ルーティング）を読み込む
-import { BrowserRouter, Routes, Route, Link, Navigate, Outlet, useLocation } from "react-router-dom"; // ルートガード（Navigate/Outlet/useLocation）を使うため追加で読み込む
+import { BrowserRouter, Routes, Route, Link, Navigate, Outlet, useLocation, useNavigate } from "react-router-dom"; // ルートガード（Navigate/Outlet/useLocation）を使うため追加で読み込む
 import { apiClient } from "./lib/apiClient"; // Axios共通クライアントを読み込む（疎通確認に使う）
 
 import LoginPage from "./pages/LoginPage"; // /login のページコンポーネントを読み込む
@@ -48,7 +48,8 @@ function HealthCheckPage() {
     retry: false // 失敗時に自動リトライしない（旧実装の挙動に寄せる）
   }); // useQuery の設定ここまで
 
-  const { data: meData, isLoading: isMeLoading, error: meError } = useQuery({
+  // const { data: meData, isLoading: isMeLoading, error: meError } = useQuery({
+  const { isLoading: isMeLoading, error: meError } = useQuery({
     queryKey: ["me"],
     queryFn: fetchMe,
     refetchOnWindowFocus: false,
@@ -151,40 +152,99 @@ function RequireAuth() {
   if (httpStatus === 401) { // 未認証（401 Unauthorized）ならログインページへリダイレクトする
     return <Navigate to="/login" state={{ from: location }} replace />; // ログイン後に戻ってこれるように state に from を渡す
   }
-// <Navigate />はReact Routerのコンポーネントで、指定したパスへリダイレクトするために使う
-//replaceリダイレクト前の不正なURLを履歴を残さないようにする
+  // <Navigate />はReact Routerのコンポーネントで、指定したパスへリダイレクトするために使う
+  //replaceリダイレクト前の不正なURLを履歴を残さないようにする
   if (error) { // その他のエラーが発生した場合
     return <div className={styles.page}>Auth error</div>; // まずはエラー表示にして原因切り分けを容易にする
   }
 
   return <Outlet />; // 認証済みなら子コンポーネントを表示する（<Route>の子要素がここに入る）
-}
+} // RequireAuthここまで
 
-export default function App() { // ルートコンポーネント（ルーティングのみ）
-  return ( // アプリ全体のUIを返す
-    <BrowserRouter> {/* URLに応じて画面を切り替える */}
-      <div className={styles.app}> {/* 全体コンテナ（アプリの外枠） */}
-        <ToastHost /> {/* 全ページ共通でToastを表示する（App直下に1回だけ置く） */}
-        <nav className={styles.nav}> {/* ナビゲーション（ページ移動） */}
-          <Link className={styles.navLink} to="/">Health</Link> {/* / に移動するリンク */}
-          <Link className={styles.navLink} to="/requests">Requests</Link> {/* /requests に移動するリンク（申請一覧：表示だけ） */}
-          <Link className={styles.navLink} to="/requests/new">New Requests</Link> {/* /requests/new に移動するリンク（申請作成：まずは表示だけ） */}
-          <Link className={styles.navLink} to="/requests/1">Request Detail</Link> {/* /requests/:id の確認用リンク（例として /requests/1 に移動する） */}
-          <Link className={styles.navLink} to="/inbox">Inbox</Link> {/* /login に移動するリンク */}
-          <Link className={styles.navLink} to="/login">Login</Link> {/* /login に移動するリンク */}
-        </nav>
+// --BrowserRouter の内側で useNavigate を使うために、Router配下の描画を担当するコンポーネントを用意する
+// useNavigate は “Router の中” でしか使えない
+// 置換前の App() は <BrowserRouter> を “Appのreturnの中” で作っているので、App() 自体は Routerの外側にいる扱い
+// だから App() の先頭で useNavigate() を呼ぶとエラーになる（＝使えない）
+// そこで Routerの内側にいるコンポーネント（AppShell）を新設して、そこで useNavigate を使うようにした
+function AppShell() {
 
-        <Routes> {/* URLと表示コンポーネントを対応付ける */}
-          <Route path="/" element={<HealthCheckPage />} /> {/* / は疎通確認ページ */}
-          <Route path="/login" element={<LoginPage />} /> {/* /login はログインページ */}
-          <Route element={<RequireAuth />}> {/* 以降のルートは認証が必要 */}
-            <Route path="/requests" element={<RequestsListPage />} /> {/* /requests は申請一覧ページ（表示だけ） */}
-            <Route path="/requests/new" element={<RequestCreatePage />} /> {/* /requests/new は申請作成ページ（表示だけ） */}
-            <Route path="/requests/:id" element={<RequestDetailPage />} /> {/* /requests/:id は申請詳細ページ（表示だけ） */}
-            <Route path="/inbox" element={<InboxPage />} /> {/* /inbox は承認待ち一覧ページ（表示だけ） */}
-          </Route> {/* 認証が必要なルートここまで */}
-        </Routes> {/* 保護ルートのまとまりを閉じる */}
-      </div>
+  const navigate = useNavigate(); // ログアウト後に /login へ遷移するためのナビゲーション関数を取得する
+  const queryClient = useQueryClient(); // ログアウト後に ["me"] を invalidate して再取得させるためのクライアントを取得する
+  const setToast = useSetAtom(toastAtom); // ログアウト成功/失敗をToastで通知するために toastAtom へ書き込む関数を取得する
+  const fetchMeForHeader = async () => { // ヘッダーに表示するための /api/me 取得処理を関数に分けます。
+    const res = await apiClient.get("/me"); // baseURL=/api と合成して GET /api/me を実行する（失敗時は例外が投げられる）
+    return res.data;; // 画面表示に必要なデータ（res.data）だけ返して、React Query の data として扱う
+  };
+
+  // /me を取得して「ヘッダーにログイン状態」を表示する
+  const { data: meData, isLoading: isMeLoading, error: meError } = useQuery({
+    queryKey: ["me"], // ログイン状態の正を ["me"] キャッシュに集約して invalidate で更新できるようにする
+    queryFn: fetchMeForHeader, // /me を実際に取得する関数として fetchMeForHeader を渡す
+    refetchOnWindowFocus: false, // フォーカスで勝手に再取得しない（挙動が追いやすいようにする）
+    retry: false // 401等をそのまま観測したいので自動リトライを無効にする
+  });
+
+  const meHttpStatus = meError?.response?.status ?? null; // AxiosエラーならHTTPステータスを取り出し、無ければnullにする
+  const isLoggedIn = !isMeLoading && meHttpStatus !== 401; // ローディングでも401でもエラーでもないときだけ「ログイン中」と見なす
+  const meLabel = isMeLoading ? "Checking..." : (meHttpStatus === 401 ? "Guest" : (meError ? "Error" : (meData?.email ?? "Logged in"))); // 表示用のラベルを状態に応じて作る
+  const logoutMutation = useMutation({ // ログアウト（POST /api/auth/logout）を Mutation として定義する
+    mutationFn: async () => { // ログアウト時に呼び出すAPI処理を定義する
+      await apiClient.post("/auth/logout"); // baseURL=/api と合成して POST /api/auth/logout を実行し、セッションから userId を削除させる
+    }, // API呼び出しの定義をここで終える
+
+    // ログアウトが成功したときの後処理を定義する
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["me"] }); // /me のキャッシュを無効化して、以後の判定が未ログイン(401)になるように更新する
+      setToast({ // ログアウトが成功したことをユーザーに通知する
+        open: true,
+        type: "success",
+        message: "Logged out successfully"
+      });
+      navigate("/login", { replace: true }); // ログアウト後にログインページへリダイレクトし、履歴を残さない
+    }, // logout 成功時処理の定義をここで終える
+
+    // ログアウトが失敗したときの後処理を定義する
+    onError: (error) => {
+      const msg = error?.response ? `HTTP ${error.response.status}` : String(error); // AxiosエラーならHTTPコードを、そうでなければ文字列化して表示用メッセージを作る
+      setToast({ // 失敗理由をToastで通知して切り分けしやすくする
+        open: true,
+        type: "error",
+        message: `Logout 失敗: ${msg}`
+      });
+    } // 失敗時処理の定義をここで終える
+  });
+  return (
+    <div className={styles.app}> {/* 全ページ共通のレイアウトを適用する外枠コンテナとして表示する */}
+      <ToastHost /> {/* どのページでもToastを出せるようにホストを配置して常時表示にする */}
+      <nav className={styles.nav}> {/* Appのヘッダーとして常時表示するナビ領域を定義する */}
+        <Link className={styles.navLink} to="/">Health</Link> {/* 疎通確認ページへ移動するリンクを表示する */}
+        <Link className={styles.navLink} to="/requests">Requests</Link> {/* 申請一覧ページへ移動するリンクを表示する */}
+        <Link className={styles.navLink} to="/requests/new">New Requests</Link> {/* 申請作成ページへ移動するリンクを表示する */}
+        <Link className={styles.navLink} to="/requests/1">Request Detail</Link> {/* 申請詳細ページの確認用に固定IDへ移動するリンクを表示する */}
+        <Link className={styles.navLink} to="/inbox">Inbox</Link> {/* 承認待ち一覧ページへ移動するリンクを表示する */}
+        <Link className={styles.navLink} to="/login">Login</Link> {/* ログインページへ移動するリンクを表示する */}
+        <span className={styles.navLink}>Me: {meLabel}</span> {/* /api/me の状態をヘッダーに常時表示して認証状態を見える化する */}
+        <button type="button" className={styles.navLink} onClick={() => logoutMutation.mutate()} disabled={!isLoggedIn || logoutMutation.isPending}>Logout</button> {/* ログイン中だけ押せるLogoutボタンを表示し、押したらPOST /api/auth/logoutを実行する */}
+      </nav> {/* ナビ領域の定義をここで閉じる */}
+      <Routes> {/* URLと表示コンポーネントの対応を定義する */}
+        <Route path="/" element={<HealthCheckPage />} /> {/* / は疎通確認ページとして既存機能を維持して表示する */}
+        <Route path="/login" element={<LoginPage />} /> {/* /login はログインページとして表示する */}
+        <Route element={<RequireAuth />}> {/* ここから先を認証が必要なルートとしてまとめる */}
+          <Route path="/requests" element={<RequestsListPage />} /> {/* /requests は申請一覧ページとして表示する */}
+          <Route path="/requests/new" element={<RequestCreatePage />} /> {/* /requests/new は申請作成ページとして表示する */}
+          <Route path="/requests/:id" element={<RequestDetailPage />} /> {/* /requests/:id は申請詳細ページとして表示する */}
+          <Route path="/inbox" element={<InboxPage />} /> {/* /inbox は承認待ち一覧ページとして表示する */}
+        </Route> {/* 認証が必要なルート定義のまとまりをここで閉じる */}
+      </Routes> {/* ルート定義をここで閉じる */}
+    </div> // Router配下の外枠コンテナをここで閉じる
+  );
+} // AppShell ここまで
+
+// BrowserRouter を提供して、Router配下で AppShell を描画する最上位コンポーネントを定義する
+export default function App() { // BrowserRouter を提供して、Router配下で AppShell を描画する最上位コンポーネントを定義する
+  return ( // Router コンテキストを供給するために BrowserRouter を返す
+    <BrowserRouter> {/* ルーティング機能を有効化して、子コンポーネントで useNavigate 等を使えるようにする */}
+      <AppShell /> {/* Router配下のUI（ヘッダー＋Routes）をまとめた AppShell を描画する */}
     </BrowserRouter>
   );
-}
+} // App の定義をここで終える
