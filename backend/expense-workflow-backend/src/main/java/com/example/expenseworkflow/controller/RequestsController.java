@@ -6,20 +6,20 @@
 
 package com.example.expenseworkflow.controller;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.ArrayList; // メモリ上のリストを作るためにArrayListを使うので読み込む
+import java.util.Collections; // 読み取り専用ビューを返すためにCollectionsを使うので読み込む
+import java.util.List; // 返却型としてListを使うので読み込む
+import java.util.concurrent.atomic.AtomicInteger; // スレッド安全に採番するためAtomicIntegerを使うので読み込む
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.GetMapping; // GETのエンドポイントを定義するために読み込む
+import org.springframework.web.bind.annotation.PostMapping; // POSTのエンドポイントを定義するために読み込む
+import org.springframework.web.bind.annotation.RequestBody; // JSONボディを引数に受け取るために読み込む
+import org.springframework.web.bind.annotation.RequestMapping; // コントローラ全体のパス接頭辞を付けるために読み込む
+import org.springframework.web.bind.annotation.RestController; // RESTコントローラとして登録するために読み込む
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Getter;
+import com.example.expenseworkflow.controller.dto.CreateRequestRequest;
+import com.example.expenseworkflow.controller.dto.RequestSummaryResponse;
+
 
 @RestController
 @RequestMapping("/api")
@@ -53,22 +53,24 @@ public class RequestsController {
 		return created; // フロントが成功を判断できるように作成した1件を返す
 	}
 	
-	@Data // アクセッサ
-	public static class CreateRequestRequest { // POST の入力ボディ（JSON）を受け取るための型を定義する
-		private String title;
-		private int amount;
-		private String note;
-	}
-	
-	@Getter // JacksonがJSON化できるようにgetterを用意して、申請ID、件名、金額、状態、備考、を返す
-	@AllArgsConstructor	// コンストラクタ // JSON用オブジェクトを組み立てるためのコンストラクタを定義する
-	public static class RequestSummaryResponse { // GET/POST の戻り値として返す「申請サマリ」を表す型を定義する
-		
-		private String id;
-		private String title;
-		private int amount;
-		private String status;
-		private String note;
-	}
+	// DTO定義は controller/dto 配下に集約するため、このController内には定義しない // Controller内DTO禁止ルールに従う
+
+//	@Data // アクセッサ
+//	public static class CreateRequestRequest { // POST の入力ボディ（JSON）を受け取るための型を定義する
+//		private String title;
+//		private int amount;
+//		private String note;
+//	}
+//	
+//	@Getter // JacksonがJSON化できるようにgetterを用意して、申請ID、件名、金額、状態、備考、を返す
+//	@AllArgsConstructor	// コンストラクタ // JSON用オブジェクトを組み立てるためのコンストラクタを定義する
+//	public static class RequestSummaryResponse { // GET/POST の戻り値として返す「申請サマリ」を表す型を定義する
+//		
+//		private String id;
+//		private String title;
+//		private int amount;
+//		private String status;
+//		private String note;
+//	}
 
 }

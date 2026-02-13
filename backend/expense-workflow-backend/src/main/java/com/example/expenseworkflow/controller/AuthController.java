@@ -15,8 +15,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.expenseworkflow.domain.User;
-import com.example.expenseworkflow.mapper.UserMapper;
+import com.example.expenseworkflow.controller.dto.LoginRequest; // login入力DTOをcontroller外のファイル定義で統一するために読み込む
+import com.example.expenseworkflow.domain.User; // users の1行を表すドメインを使うために読み込む
+import com.example.expenseworkflow.mapper.UserMapper; // users を検索するMyBatis Mapperを使うために読み込む
+
 
 @RestController
 @RequestMapping("/api/auth")
@@ -32,24 +34,24 @@ public class AuthController { // ログインAPIを提供するコントロー�
 		this.passwordEncoder = new BCryptPasswordEncoder(); // BCryptPasswordEncoder を生成する（spring-security-crypto 依存）
 	}
 	
-	public static class LoginRequest {
-		public String email;
-		public String password; // 平文パスワード（照合にのみ使い、保存しない）
-	}
+//	public static class LoginRequest {
+//		public String email;
+//		public String password; // 平文パスワード（照合にのみ使い、保存しない）
+//	}
 	
 	@PostMapping("/login") // POST /api/auth/login をこのメソッドで処理する
 	public ResponseEntity<Void> login(@RequestBody LoginRequest body, HttpSession session) { // body と session を受け取り、成功ならセッションに userId を保存する
 	
-		if (body == null || body.email == null || body.password == null) { // 必須項目が無ければリクエスト不正として扱う
+		if (body == null || body.getEmail() == null || body.getPassword() == null) { // 必須項目が無ければリクエスト不正として扱う
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); // 400 を返す（未ログイン=401とは分ける）
 		}
 		
-		User user = userMapper.findByEmail(body.email); // email から user を検索する（存在しないなら null）
+		User user = userMapper.findByEmail(body.getEmail()); // email から user を検索する（存在しないなら null）
 		if (user == null) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 		}
 		
-		boolean ok = passwordEncoder.matches(body.password,  user.getPasswordHash()); // password と password_hash（BCrypt）を照合する
+		boolean ok = passwordEncoder.matches(body.getPassword(),  user.getPasswordHash()); // password と password_hash（BCrypt）を照合する
 		if (!ok) { // パスワードが一致しなければログイン失敗として扱う
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }

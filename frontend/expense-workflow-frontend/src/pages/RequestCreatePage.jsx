@@ -18,7 +18,7 @@ import { apiClient } from "../lib/apiClient"; // /api を呼ぶ共通クライ�
 
 import styles from "./RequestCreatePage.module.css";
 
-export default function RequestsCreatePage() { // /requests/new のページコンポーネントを定義する（表示だけ）
+export default function RequestCreatePage() { // /requests/new のページコンポーネントを定義する（表示だけ）
 
   const navigate = useNavigate(); // 成功時に /requests へ移動するための関数を取得する
   const queryClient = useQueryClient(); // 成功時に ["requests"] を invalidate するためのクライアントを取得する
