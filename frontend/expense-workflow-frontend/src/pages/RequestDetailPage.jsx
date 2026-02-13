@@ -8,18 +8,52 @@
   注意点: API接続（GET /api/requests/:id）や認証ガードはこの回では行わない（未来依存を避ける） // 概念を増やさない
 */
 
+import { useQuery } from "@tanstack/react-query";
 import { useParams, Link } from "react-router-dom";
+import { apiClient } from "../lib/apiClient";
 
 export default function RequestDetailPage() { // /requests/:id のページコンポーネントを定義する（表示だけ）
   const params = useParams(); // URLパラメータを取得する
   const requestId = params.id; // :id パラメータを取り出す
+
+   // GET /api/requests/{id} の取得処理を関数に切り出す
+  const fetchRequestDetail = async () => {
+    const res = await apiClient.get(`/requests/${requestId}`); // baseURL=/api と合成して GET /api/requests/{id} を実行する
+    return res.data; // 画面表示に使うレスポンスボディだけを返す
+  };
+
+  // requestId ごとに詳細を取得してキャッシュする
+  const { data, isLoading, error } = useQuery({ // 申請詳細データを取得するための useQuery を使う
+    queryKey: ["request", requestId], // キャッシュキーに requestId を含めて、IDごとにキャッシュを分ける
+    queryFn: fetchRequestDetail, // 先ほど定義した取得関数を使う
+    enabled: requestId.length > 0, // requestId が空のときは取得しない（無駄なリクエストを防ぐ）
+  });
+
+  const errorLabel = error ? (error.response?.status ? `HTTP ${error.response.status}` : String(error)) : ""; // エラーがあればHTTPステータス等を短く表示する
+
   return (
     <div>
       <h1>Request Detail</h1>
-      <p>申請ID：{requestId}</p> {/* URLの :id が取れていることを画面に表示して確認する */}
-      <p>申請詳細ページ（表示のみ）</p> {/* この回はAPI接続しないことを明示するテキスト */}
-      <p><Link to="/requests">一覧に戻る</Link></p> {/* クリックで申請一覧（/requests）へ戻る */}
-    </div> // コンテナの終わり
+      <p>申請ID：{requestId}</p> {/* いま見ている申請IDを表示して確認できるようにする */}
+      {isLoading ? ( // ローディング中の分岐を開始する
+        <p>Loading...</p> // ローディング中の表示を行う（HTMLのみ）
+      ) : error ? ( // エラー時の分岐を開始する
+        <p>エラー：{errorLabel}</p> /* エラー要約を表示して、Network/ログと紐付けられるようにする */
+      ) : data ? ( // 成功時（dataが取れた）の分岐を開始する
+        <div>
+          <p>件名：{data.title}</p> {/* 詳細データの件名を表示する */}
+          <p>金額：{data.amount}</p> {/* 詳細データの金額を表示する */}
+          <p>状態：{data.status}</p> {/* 詳細データの状態を表示する */}
+          <p>備考：{data.note}</p> {/* 詳細データの備考を表示する */}
+          <p>履歴件数：{Array.isArray(data.actions) ? data.actions.length : 0}</p> {/* actions配列の件数を表示して「配列が返っている」を確認する */}
+        </div>
+      ) : ( // enabled=false 等で data が無い場合の分岐を開始する
+        <p>データがありません</p> // 取得できなかった場合の表示を行う（HTMLのみ）
+      )}
+      <p>
+        <Link to="/requests">一覧に戻る</Link> {/* クリックで申請一覧（/requests）へ戻る */}
+      </p>
+    </div>
   );
 }
 

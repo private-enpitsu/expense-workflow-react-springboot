@@ -11,13 +11,18 @@ import java.util.Collections; // 読み取り専用ビューを返すためにCo
 import java.util.List; // 返却型としてListを使うので読み込む
 import java.util.concurrent.atomic.AtomicInteger; // スレッド安全に採番するためAtomicIntegerを使うので読み込む
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping; // GETのエンドポイントを定義するために読み込む
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping; // POSTのエンドポイントを定義するために読み込む
 import org.springframework.web.bind.annotation.RequestBody; // JSONボディを引数に受け取るために読み込む
 import org.springframework.web.bind.annotation.RequestMapping; // コントローラ全体のパス接頭辞を付けるために読み込む
 import org.springframework.web.bind.annotation.RestController; // RESTコントローラとして登録するために読み込む
 
 import com.example.expenseworkflow.controller.dto.CreateRequestRequest;
+import com.example.expenseworkflow.controller.dto.RequestActionResponse;
+import com.example.expenseworkflow.controller.dto.RequestDetailResponse;
 import com.example.expenseworkflow.controller.dto.RequestSummaryResponse;
 
 
@@ -53,24 +58,43 @@ public class RequestsController {
 		return created; // フロントが成功を判断できるように作成した1件を返す
 	}
 	
-	// DTO定義は controller/dto 配下に集約するため、このController内には定義しない // Controller内DTO禁止ルールに従う
 
-//	@Data // アクセッサ
-//	public static class CreateRequestRequest { // POST の入力ボディ（JSON）を受け取るための型を定義する
-//		private String title;
-//		private int amount;
-//		private String note;
-//	}
-//	
-//	@Getter // JacksonがJSON化できるようにgetterを用意して、申請ID、件名、金額、状態、備考、を返す
-//	@AllArgsConstructor	// コンストラクタ // JSON用オブジェクトを組み立てるためのコンストラクタを定義する
-//	public static class RequestSummaryResponse { // GET/POST の戻り値として返す「申請サマリ」を表す型を定義する
-//		
-//		private String id;
-//		private String title;
-//		private int amount;
-//		private String status;
-//		private String note;
-//	}
+	 // URLの{id}を受け取り詳細を返す
+	@GetMapping("/requests/{id}")
+	public ResponseEntity<RequestDetailResponse> getRequestDetail(@PathVariable("id") String id) {
+		
+		RequestSummaryResponse found = findSummaryById(id); // メモリ上の一覧からid一致の申請サマリを探す
+		if (found == null) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // 存在しないため404を返す
+		}
+		
+		RequestDetailResponse detail = new RequestDetailResponse(
+				found.getId(),
+				found.getTitle(),
+				found.getAmount(),
+				found.getStatus(),
+				found.getNote(),
+				Collections.<RequestActionResponse>emptyList()
+				);
+		
+		return ResponseEntity.ok(detail);
+		
+	}
+	
+	
+	 // 一覧STOREからid一致の要素を1件探すための補助メソッドを定義する
+	private RequestSummaryResponse findSummaryById(String id) {
+		if (id == null) { // idがnullの場合の分岐
+			return null; // 探しようがないためnullを返す
+		}
+		for (RequestSummaryResponse r : STORE) { // STOREの全要素を先頭から順に見る
+			if (r != null && id.equals(r.getId())) { // 要素がnullでなく、idが一致した場合の分岐
+				return r; // 見つかった要素を返す
+			}
+		}
+		return null; // どれにも一致しなかったためnullを返す
+	}
+	
+	
 
 }

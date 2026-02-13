@@ -34,10 +34,7 @@ public class AuthController { // ログインAPIを提供するコントロー�
 		this.passwordEncoder = new BCryptPasswordEncoder(); // BCryptPasswordEncoder を生成する（spring-security-crypto 依存）
 	}
 	
-//	public static class LoginRequest {
-//		public String email;
-//		public String password; // 平文パスワード（照合にのみ使い、保存しない）
-//	}
+
 	
 	@PostMapping("/login") // POST /api/auth/login をこのメソッドで処理する
 	public ResponseEntity<Void> login(@RequestBody LoginRequest body, HttpSession session) { // body と session を受け取り、成功ならセッションに userId を保存する
