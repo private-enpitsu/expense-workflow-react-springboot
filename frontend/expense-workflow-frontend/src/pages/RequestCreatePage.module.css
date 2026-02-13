@@ -1,0 +1,12 @@
+.container { /* ページ全体の余白を付けて見やすくするためのコンテナ用クラスを定義する */
+  padding: 16px; /* <div style={{ padding: 16 }}> と同等の余白を付ける */
+} /* container の定義を閉じる */
+.form { /* フォーム全体の並びを整えるためのクラスを定義する */
+  display: grid; /* <form style={{ display: "grid" }}> と同等に縦並びのベースを作る */
+  gap: 12px; /* <form style={{ gap: 12 }}> と同等に項目間の間隔を空ける */
+  max-width: 520px; /* <form style={{ maxWidth: 520 }}> と同等にフォーム幅を制限する */
+} /* form の定義を閉じる */
+.field { /* 各入力フィールド（label）の内部配置を整えるためのクラスを定義する */
+  display: grid; /* <label style={{ display: "grid" }}> と同等にラベルと入力を縦に並べる */
+  gap: 4px; /* <label style={{ gap: 4 }}> と同等にラベル文字と入力の間隔を空ける */
+} /* field の定義を閉じる */
