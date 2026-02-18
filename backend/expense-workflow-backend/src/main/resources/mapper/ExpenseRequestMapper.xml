@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?> <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.example.expenseworkflow.mapper.ExpenseRequestMapper">
+	<resultMap id="ExpenseRequestResultMap"
+		type="com.example.expenseworkflow.domain.ExpenseRequest">
+		<id column="id" property="id" />
+		<result column="applicant_id" property="applicantId" />
+		<result column="current_approver_id"
+			property="currentApproverId" />
+		<result column="title" property="title" />
+		<result column="expense_date" property="expenseDate" />
+		<result column="apply_date" property="applyDate" />
+		<result column="amount" property="amount" />
+		<result column="purpose" property="purpose" />
+		<result column="payment_method" property="paymentMethod" />
+		<result column="status" property="status" />
+		<result column="submitted_at" property="submittedAt" />
+		<result column="approved_at" property="approvedAt" />
+		<result column="last_returned_at" property="lastReturnedAt" />
+		<result column="last_return_comment"
+			property="lastReturnComment" />
+		<result column="created_at" property="createdAt" />
+		<result column="updated_at" property="updatedAt" />
+		<result column="note" property="note" />
+	</resultMap>
+
+	<select id="selectRequestSummaries"
+		resultType="com.example.expenseworkflow.controller.dto.RequestSummaryResponse">
+		SELECT CONCAT('REQ-', LPAD(er.id, 3, '0')) AS id, er.title
+		AS title,
+		er.amount AS amount, er.status AS status, COALESCE(er.note,
+		'') AS
+		note FROM expense_requests er ORDER BY er.id DESC
+	</select>
+
+	<select id="selectExpenseRequestById"
+		resultMap="ExpenseRequestResultMap">
+		SELECT er.* FROM expense_requests er WHERE er.id = #{id}
+	</select>
+
+	<insert id="insertExpenseRequest"
+		parameterType="com.example.expenseworkflow.domain.ExpenseRequest"
+		useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO expense_requests (
+		applicant_id, current_approver_id, title,
+		amount, status, note ) VALUES
+		( #{applicantId}, #{currentApproverId},
+		#{title}, #{amount}, #{status},
+		#{note} )
+	</insert>
+
+	<select id="selectInboxItems"
+		resultType="com.example.expenseworkflow.controller.dto.InboxItemResponse">
+		SELECT CONCAT('REQ-', LPAD(er.id, 3, '0')) AS id, er.title
+		AS title,
+		er.amount AS amount, er.status AS status FROM
+		expense_requests er
+		WHERE er.current_approver_id = #{approverUserId}
+		AND er.status =
+		'SUBMITTED' ORDER BY er.id ASC
+	</select>
+
+	<update id="updateStatusForApplicant"> <!-- 申請者のsubmitで、DRAFT→SUBMITTEDへ遷移させつつ承認者を割り当てる更新SQLを定義します。 -->
+		UPDATE expense_requests <!-- 更新対象は申請テーブル（expense_requests）です。 -->
+		SET status = #{toStatus}, <!-- status をSUBMITTEDに更新して、Inbox検索条件（status='SUBMITTED'）を満たします。 -->
+		current_approver_id = #{approverUserId}, <!-- 承認者IDをセットして、Inbox検索条件（current_approver_id一致）を満たします。 -->
+		submitted_at = CURRENT_TIMESTAMP <!-- 提出時刻を記録して、提出済みの事実をDB上に残せるようにします。 -->
+		WHERE id = #{id} <!-- 対象申請IDを一致させて、別の申請を更新しないようにします。 -->
+		AND applicant_id = #{applicantUserId} <!-- 申請者本人の申請だけ更新できるようにして、他人の申請のsubmitを防ぎます。 -->
+		AND status = 'DRAFT' <!-- DRAFTのときだけSUBMITTEDにできるようにして、状態遷移の前提を最低限守ります。 -->
+	</update>
+
+	<update id="updateStatusForApprover">
+		UPDATE expense_requests SET status = #{toStatus}
+		WHERE id = #{id} AND
+		current_approver_id = #{approverUserId}
+	</update>
+
+</mapper>

@@ -1,15 +1,15 @@
-// このファイルは、申請一覧を返すAPIと、申請を新規作成するAPIをまとめて提供します。 // このファイルの目的を自然文で説明する
-// このAPIは、フロントの RequestsListPage と RequestCreatePage が /api/requests を通じて呼び出します。 // 呼び出し元を自然文で説明する
-// 入力は、POST時のJSON（title/amount/note）で、出力は、申請サマリの配列または作成した1件のJSONです。 // 入出力を自然文で説明する
-// 依存は、Spring Web と Jackson（POJOをJSON化）で、DBは使わずメモリ上に保持します。 // 依存と前提を自然文で説明する
-// 今回は「作成→一覧に反映」を成立させるために、メモリ保存とID採番を追加しました。 // 今回変更点を自然文で説明する
+// このファイルは、申請のCRUD（一覧/作成/詳細）だけを提供するために存在します。 // 目的を自然文で説明する
+// このAPIは、フロントの RequestsListPage と RequestCreatePage と RequestDetailPage が /api/requests を通じて呼び出します。 // 呼び出し元を自然文で説明する
+// 入力は、POST時のJSON（title/amount/note）と、詳細取得時のURL{id}です。出力は、申請サマリの配列または詳細のJSONです。 // 入出力を自然文で説明する
+// 依存は、Spring Web と Jackson と、メモリ保存SOTの InMemoryRequestStore です（DBは使いません）。 // 依存と前提を自然文で説明する
+// 今回は STORE/SEQ/初期データをInMemoryRequestStoreへ移し、WorkflowControllerと共有して二重定義を防ぎます。 // 今回変更点を自然文で説明する
 
 package com.example.expenseworkflow.controller;
 
-import java.util.ArrayList; // メモリ上のリストを作るためにArrayListを使うので読み込む
 import java.util.Collections; // 読み取り専用ビューを返すためにCollectionsを使うので読み込む
 import java.util.List; // 返却型としてListを使うので読み込む
-import java.util.concurrent.atomic.AtomicInteger; // スレッド安全に採番するためAtomicIntegerを使うので読み込む
+
+import jakarta.servlet.http.HttpSession;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,82 +19,69 @@ import org.springframework.web.bind.annotation.PostMapping; // POSTのエンド�
 import org.springframework.web.bind.annotation.RequestBody; // JSONボディを引数に受け取るために読み込む
 import org.springframework.web.bind.annotation.RequestMapping; // コントローラ全体のパス接頭辞を付けるために読み込む
 import org.springframework.web.bind.annotation.RestController; // RESTコントローラとして登録するために読み込む
+import org.springframework.web.server.ResponseStatusException;
 
 import com.example.expenseworkflow.controller.dto.CreateRequestRequest;
 import com.example.expenseworkflow.controller.dto.RequestActionResponse;
 import com.example.expenseworkflow.controller.dto.RequestDetailResponse;
 import com.example.expenseworkflow.controller.dto.RequestSummaryResponse;
+import com.example.expenseworkflow.store.RequestStore;
 
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api")
+@RequiredArgsConstructor
 public class RequestsController {
-	
-	private static final List<RequestSummaryResponse> STORE = new ArrayList<>();
-	private static final AtomicInteger SEQ = new AtomicInteger(3);
-	
-	static { // アプリ起動時に初期データを1回だけ投入する（DB 実データ利用までのダミー）
-		
-		STORE.add(new RequestSummaryResponse("REQ-001", "交通費精算", 1200, "DRAFT", "領収書あり")); // 1件目の初期データを追加する
-	    STORE.add(new RequestSummaryResponse("REQ-002", "出張費", 5000, "SUBMITTED", "大阪出張")); // 2件目の初期データを追加する
-	    STORE.add(new RequestSummaryResponse("REQ-003", "備品購入", 300, "APPROVED", "ペン購入")); // 3件目の初期データを追加する
-	  }
-	
+
+	private static final String SESSION_KEY_USER_ID = "SESSION_KEY_USER_ID"; // AuthController と同じキーでユーザーIDを読む
+	private final RequestStore requestStore; // DB実装の保存SOTをDIで受け取る
+
 	@GetMapping("/requests")
 	public List<RequestSummaryResponse> listRequests() { // 申請一覧を返すエンドポイントを定義する
-		return Collections.unmodifiableList(STORE); // 外からの変更を避けるために読み取り専用ビューを返す
+		return requestStore.list(); // DBの保存SOTから一覧を返して、Controller内に保存二重定義を作らない
 	}
-	
+
 	// 申請を新規作成して、作成したサマリを返す
 	@PostMapping("/requests")
-	public RequestSummaryResponse createRequest(@RequestBody CreateRequestRequest body) {
-		int next = SEQ.incrementAndGet(); // 連番を1つ進めて新しい番号を作る
-		String id = String.format("REQ-%03d", next); // 連番を3桁ゼロ埋めしてID文字列にする
+	public RequestSummaryResponse createRequest(HttpSession session, @RequestBody CreateRequestRequest body) { // 申請を新規作成してサマリを返す
 		String safeTitle = body != null && body.getTitle() != null ? body.getTitle() : ""; // title が null でも落ちないように空文字へ寄せる
 		int safeAmount = body != null ? body.getAmount() : 0; // amount が無い場合は 0 として扱う
 		String safeNote = body != null && body.getNote() != null ? body.getNote() : ""; // note が null でも落ちないように空文字へ寄せる
-		RequestSummaryResponse created = new RequestSummaryResponse(id, safeTitle, safeAmount, "DRAFT", safeNote); // 作成直後は DRAFT としてサマリを組み立てる
-		STORE.add(created); // メモリ上の一覧に追加して、次のGETで見えるようにする
-		return created; // フロントが成功を判断できるように作成した1件を返す
+		return requestStore.create(requireUserId(session), safeTitle, safeAmount, safeNote); // 申請者IDはセッションから取得してDBへ保存する
 	}
-	
 
-	 // URLの{id}を受け取り詳細を返す
+	// URLの{id}を受け取り詳細を返す
 	@GetMapping("/requests/{id}")
-	public ResponseEntity<RequestDetailResponse> getRequestDetail(@PathVariable("id") String id) {
-		
-		RequestSummaryResponse found = findSummaryById(id); // メモリ上の一覧からid一致の申請サマリを探す
-		if (found == null) {
+	public ResponseEntity<RequestDetailResponse> getRequestDetail(@PathVariable("id") String id) { // URLの{id}を受け取り詳細を返す
+
+		RequestSummaryResponse found = requestStore.findById(id); // 保存SOT（DB）からid一致の申請サマリを探す
+		if (found == null) { // 見つからない場合の分岐をする
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // 存在しないため404を返す
 		}
-		
-		RequestDetailResponse detail = new RequestDetailResponse(
-				found.getId(),
-				found.getTitle(),
-				found.getAmount(),
-				found.getStatus(),
-				found.getNote(),
-				Collections.<RequestActionResponse>emptyList()
-				);
-		
-		return ResponseEntity.ok(detail);
-		
-	}
-	
-	
-	 // 一覧STOREからid一致の要素を1件探すための補助メソッドを定義する
-	private RequestSummaryResponse findSummaryById(String id) {
-		if (id == null) { // idがnullの場合の分岐
-			return null; // 探しようがないためnullを返す
-		}
-		for (RequestSummaryResponse r : STORE) { // STOREの全要素を先頭から順に見る
-			if (r != null && id.equals(r.getId())) { // 要素がnullでなく、idが一致した場合の分岐
-				return r; // 見つかった要素を返す
-			}
-		}
-		return null; // どれにも一致しなかったためnullを返す
-	}
-	
-	
 
-}
+		RequestDetailResponse detail = new RequestDetailResponse( // 詳細DTOを組み立てる
+				found.getId(), // 外部ID（REQ-xxx）をそのまま返す
+				found.getTitle(), // タイトルを返す
+				found.getAmount(), // 金額を返す
+				found.getStatus(), // ステータスを返す
+				found.getNote(), // note を返す
+				Collections.<RequestActionResponse> emptyList() // Phase1は actions を空配列として返す
+		);
+
+		return ResponseEntity.ok(detail); // 200で詳細DTOを返す
+
+	} // getRequestDetail
+
+	private Long requireUserId(HttpSession session) { // 未ログインで申請作成できないようにユーザーIDを必須化する
+		Object userIdObj = session != null ? session.getAttribute(SESSION_KEY_USER_ID) : null; // セッションから userId を取り出す
+		if (userIdObj == null) { // セッションに userId が無い場合の分岐をする
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED); // 未ログインとして401を返す
+		}
+		if (userIdObj instanceof Long) { // 型が想定どおり Long の場合の分岐をする
+			return (Long) userIdObj; // Long として userId を返す
+		}
+		throw new ResponseStatusException(HttpStatus.UNAUTHORIZED); // 型が想定外なら未ログイン扱いで401を返す
+	}
+
+} //RequestsController
