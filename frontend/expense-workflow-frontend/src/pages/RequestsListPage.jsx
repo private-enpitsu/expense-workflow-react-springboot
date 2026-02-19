@@ -10,8 +10,11 @@
 import { Link } from "react-router-dom"; // ルーティング遷移用の Link を使う（IDクリックで詳細へ移動するため）
 
 import styles from "./RequestsListPage.module.css"; // CSS Modules を読み込み
-import { apiClient } from "../lib/apiClient";
+
 import { useQuery } from "@tanstack/react-query";
+
+import { apiClient } from "../lib/apiClient"; // 共通APIクライアントで /api/requests を呼ぶために読み込む
+import { toStatusLabel } from "../lib/statusLabel"; // ステータス表示を日本語化する変換関数を読み込む
 
 // const dummyRequests = [// APIが無い段階でもUIを確認できるように、固定のダミーデータを用意する
 //   { id: "REQ-001", amount: 1200, status: "DRAFT" }, // 申請ID・金額（1以上）・状態（例）を1件分定義する
@@ -38,7 +41,7 @@ export default function RequestsListPage() {
 
   return (
     <div className={styles.page}> {/* ページ全体のコンテナ（CSS Modules）を適用する */}
-      <h1 className={styles.title}>Requests</h1> {/* ページ見出し（申請一覧）を表示する */}
+      <h1 className={styles.title}>申請一覧</h1> {/* ページ見出し（申請一覧）を表示する */}
       {isLoading && <p className={styles.note}>Loading...</p>} {/* ローディング中は Loading... を表示して状態が分かるようにする */}
       {error && <p className={styles.note}>Error: {errorLabel}</p>} {/* エラー時は Error: ... を表示して切り分けできるようにする */}
       {!isLoading && !error && ( // 取得成功時だけ一覧を描画して、状態分岐を明確にする
@@ -47,13 +50,13 @@ export default function RequestsListPage() {
             <li key={req.id} className={styles.listItem}> {/* key に申請IDを使い、1行分の見た目をCSSで整える */}
               <span className={styles.cell}> {/* 申請ID表示のセル領域を作る */}
                 <Link to={`/requests/${req.id}`}>ID: {req.id}</Link> {/* クリックで /requests/:id に遷移する（:id に req.id を差し込む） */}
-              </span> {/* 申請IDセル領域を閉じる */}
+              </span>
               <span className={styles.cell}>金額: {req.amount}</span> {/* 金額（数値）を表示する */}
-              <span className={styles.cell}>状態: {req.status}</span> {/* 状態（文字列）を表示する */}
+              <span className={styles.cell}>状態: {toStatusLabel(req.status)}</span> {/* 状態（内部コード）を日本語ラベルに変換して表示する */}
             </li> /* 1件分の行をここで終える */
           ))} {/* map の結果（複数行）をここに展開する */}
-        </ul> /* 一覧リストをここで終える */
-      )} {/* 成功時一覧ブロックをここで終える */}
-    </div> /* ページコンテナをここで終える */
+        </ul>
+      )}
+    </div>
   );
 }

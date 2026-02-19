@@ -80,7 +80,10 @@ public class RequestStore { // 申請（ExpenseRequest）に関する「読み�
 		}
 		Long approverUserId = applicant.getManagerId(); // 申請者の上長ID（manager_id）を承認者として採用し、current_approver_idにセットするために取り出します。
 		if (approverUserId == null) { // manager_id が未設定だと承認者が決められず、Inboxに出せない状態になります。
-			return false; // 承認者未設定のままSUBMITTEDにすると破綻しやすいので、ここで止めてfalseにします。
+			throw new org.springframework.web.server.ResponseStatusException( // controllerに「クライアント起因の不正(400)」として返させる例外を投げます。
+				org.springframework.http.HttpStatus.BAD_REQUEST, // HTTP 400 Bad Request を指定して「submit禁止」をHTTPで表現します。
+				"Cannot submit because your manager_id is NULL (approver is not configured)." // 禁止理由をメッセージとして返し、404(対象なし)と区別できるようにします。
+			); // ResponseStatusException の生成をここで閉じます。
 		}
 		int updated = expenseRequestMapper.updateStatusForApplicant(id, userId, approverUserId, "SUBMITTED"); // 申請者本人の申請を、DRAFT→SUBMITTEDにしつつ承認者IDも同時にセットします。
 		return updated == 1; // 更新が1件だけ成功した場合のみtrueとし、0件の場合は条件不一致（権限/状態など）としてfalseにします。

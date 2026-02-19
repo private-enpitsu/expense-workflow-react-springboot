@@ -45,7 +45,7 @@ export default function LoginPage() { // /login で表示するページ（表�
 
   return ( // UIを返す
     <div className={styles.page}> {/* ページコンテナ（CSS Modules） */}
-      <h1 className={styles.title}>Login</h1> {/* 見出し（ログイン画面） */}
+      <h1 className={styles.title}>ログイン</h1> {/* 見出し（ログイン画面） */}
       <p className={styles.text}>ログイン後に戻る先: {fromPathname}</p> {/* RequireAuthから渡された戻り先を表示して確認しやすくする */}
       <p className={styles.text}>Last Health: {healthSnapshot.status}</p> {/* 既存のHealth表示を残して、疎通UIを壊さない */}
 

@@ -5,9 +5,11 @@
 /* 今回は GET /api/inbox を呼び、一覧を表示できるようにします。 */
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "../lib/apiClient";
 import { useSetAtom } from "jotai";
+
+import { apiClient } from "../lib/apiClient";
 import { toastAtom } from "../lib/atoms";
+import { toStatusLabel } from "../lib/statusLabel"; // ステータス表示を日本語化する変換関数を読み込む
 
 
 export default function InboxPage() { // /inbox のページコンポーネントを定義する（表示だけ）
@@ -80,12 +82,12 @@ export default function InboxPage() { // /inbox のページコンポーネン�
   }
 
   if (error) {
-    return <p>Inbox の取得に失敗しました</p>;
+    return <p>受信箱 の取得に失敗しました</p>;
   }
 
   return (
     <div>
-      <h1>Inbox</h1> {/* 画面の見出しとして Inbox を表示する */}
+      <h1>受信箱</h1> {/* 画面の見出しとして Inbox を表示する */}
       <table>
         <thead>
           <tr>
@@ -102,7 +104,7 @@ export default function InboxPage() { // /inbox のページコンポーネン�
               <td>{item.requestId}</td> {/* 申請IDを表示する */}
               <td>{item.title}</td> {/* タイトルを表示する */}
               <td>{item.amount}</td> {/* 金額を表示する */}
-              <td>{item.status}</td> {/* ステータスを表示する */}
+              <td>{toStatusLabel(item.status)}</td> {/* ステータス（内部コード）を日本語ラベルに変換して表示する */}
               <td> {/* 操作ボタンをまとめて表示するセルを定義する */}
 
                 {/* // 承認ボタンを表示する */}

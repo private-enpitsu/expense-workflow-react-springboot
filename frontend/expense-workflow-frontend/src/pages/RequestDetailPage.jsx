@@ -11,8 +11,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSetAtom } from "jotai"; // Toast を出すために jotai atom へ書き込む setter を取得する
 import { useParams, Link } from "react-router-dom"; // URLパラメータ取得（useParams）と一覧へ戻るリンク（Link）を使う
+
 import { toastAtom } from "../lib/atoms"; // 成功/失敗の通知に使う toastAtom を読み込む
 import { apiClient } from "../lib/apiClient"; // baseURL=/api の共通クライアントで submit API を呼ぶ
+import { toStatusLabel } from "../lib/statusLabel"; // ステータス表示を日本語化する変換関数を読み込む
 
 export default function RequestDetailPage() { // /requests/:id のページコンポーネントを定義する（表示だけ）
   const params = useParams(); // URLパラメータ（/requests/:id）から値を取得して、どの申請の詳細かを特定します。
@@ -66,7 +68,7 @@ export default function RequestDetailPage() { // /requests/:id のページコ�
 
   return (
     <div>
-      <h1>Request Detail</h1>
+      <h1>申請詳細</h1>
       <p>申請ID：{requestId}</p> {/* いま見ている申請IDを表示して確認できるようにする */}
       {isLoading ? ( // ローディング中の分岐を開始する
         <p>Loading...</p> // ローディング中の表示を行う（HTMLのみ）
@@ -76,7 +78,7 @@ export default function RequestDetailPage() { // /requests/:id のページコ�
         <div>
           <p>件名：{data.title}</p> {/* 詳細データの件名を表示する */}
           <p>金額：{data.amount}</p> {/* 詳細データの金額を表示する */}
-          <p>状態：{data.status}</p> {/* 詳細データの状態を表示する */}
+          <p>状態：{toStatusLabel(data.status)}</p> {/* 詳細データの状態（内部コード）を日本語ラベルに変換して表示する */}
           <p>備考：{data.note}</p> {/* 詳細データの備考を表示する */}
           <p>履歴件数：{Array.isArray(data.actions) ? data.actions.length : 0}</p> {/* actions配列の件数を表示して「配列が返っている」を確認する */}
 

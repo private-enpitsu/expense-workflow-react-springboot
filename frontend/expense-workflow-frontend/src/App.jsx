@@ -156,14 +156,14 @@ function AppShell() {
     <div className={styles.app}> {/* 全ページ共通の外枠を表示する */}
       <ToastHost /> {/* どのページでもToastを出せるようにする */}
       <nav className={styles.nav}> {/* ヘッダーのナビ領域を表示する */}
-        <Link className={styles.navLink} to="/">Health</Link> {/* / へのリンクを表示する */}
-        <Link className={styles.navLink} to="/requests">Requests</Link> {/* /requests へのリンクを表示する */}
-        <Link className={styles.navLink} to="/requests/new">New Requests</Link> {/* /requests/new へのリンクを表示する */}
+        <Link className={styles.navLink} to="/">疎通確認</Link> {/* Health/ へのリンクを表示する */}
+        <Link className={styles.navLink} to="/requests">申請一覧</Link> {/* /requests へのリンクを表示する */}
+        <Link className={styles.navLink} to="/requests/new">申請作成</Link> {/* /requests/new へのリンクを表示する */}
         {/* <Link className={styles.navLink} to="/requests/1">Request Detail</Link> /requests/1 へのリンクを表示する */}
-        <Link className={styles.navLink} to="/inbox">Inbox</Link> {/* /inbox へのリンクを表示する */}
-        <Link className={styles.navLink} to="/login">Login</Link> {/* /login へのリンクを表示する */}
+        <Link className={styles.navLink} to="/inbox">受信箱</Link> {/* /inbox へのリンクを表示する */}
+        <Link className={styles.navLink} to="/login">ログイン</Link> {/* /login へのリンクを表示する */}
         <span className={styles.navLink}>Me: {meLabel}</span> {/* /api/me の状態を表示する */}
-        <button type="button" className={styles.navLink} onClick={() => logoutMutation.mutate()} disabled={!isLoggedIn || logoutMutation.isPending}>Logout</button> {/* ログアウトボタンを表示する */}
+        <button type="button" className={styles.navLink} onClick={() => logoutMutation.mutate()} disabled={!isLoggedIn || logoutMutation.isPending}>ログアウト</button> {/* ログアウトボタンを表示する */}
       </nav> {/* ナビ領域を閉じる */}
 
       <Routes> {/* ルート定義を開始する */}

@@ -37,7 +37,7 @@ export default function RequestCreatePage() { // /requests/new のページコ�
     onSuccess: async (created) => { // 作成成功時の処理
       await queryClient.invalidateQueries({ queryKey: ["requests"] }); // 一覧を再取得するためのクエリを無効化する
       setToast({ open: true, type: "success", message: `申請が作成されました: ${created?.id ?? ""}` }); // 作成できたことをToastで通知する
-      navigate("/requests", { replace: true }); // 一覧へ戻って、作成前フォームに戻りにくくする
+      navigate(created?.id ? `/requests/${created.id}` : "/requests", { replace: true }); // 作成されたIDが取れれば詳細へ、取れなければ一覧へ遷移する
     },
     onError: (error) => { // 作成失敗時の処理
       const status = error?.response?.status ?? null; // AxiosエラーならHTTPステータスを取り出す
