@@ -108,6 +108,16 @@ public class RequestStore { // 申請（ExpenseRequest）に関する「読み�
 		int updated = expenseRequestMapper.updateStatusForApprover(id, userId, "RETURNED"); // 承認者本人が処理できる申請だけを対象にRETURNEDへ更新し、更新件数を受け取る。
 		return updated == 1; // 1件更新なら成功、そうでなければ失敗。
 	}
+	
+	@Transactional // 内容更新（UPDATE）を行うのでトランザクション境界を張る。
+	public boolean updateReturned(Long applicantUserId, String externalId, String title, int amount, String note) { // 申請者が差戻し（RETURNED）申請の内容を編集して保存する。
+		Long id = parseExternalId(externalId); // 外部ID（REQ-001）をDBの数値IDへ変換して、更新条件に使える形へ整える。
+		if (id == null) { // 外部IDが不正で数値IDに変換できない場合の分岐をする。
+			return false; // 対象が特定できないため、更新せず失敗としてfalseを返す。
+		}
+		int updated = expenseRequestMapper.updateEditableFieldsForApplicant(id, applicantUserId, title, amount, note); // 申請者本人かつRETURNEDの申請だけを対象に、編集可能項目（title/amount/note）を更新する。
+		return updated == 1; // 更新が1件だけ成功した場合のみtrueとし、0件の場合は条件不一致（権限/状態など）としてfalseにする。
+	}
 
 	private Long parseExternalId(String externalId) { // 外部ID（例: REQ-001）をDBの数値ID（例: 1）に変換するヘルパー。
 		if (externalId == null) { // 引数がnullなら変換不能。

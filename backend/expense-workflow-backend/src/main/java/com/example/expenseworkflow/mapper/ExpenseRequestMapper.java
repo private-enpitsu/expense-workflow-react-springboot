@@ -27,6 +27,17 @@ public interface ExpenseRequestMapper { // MyBatisが実装を生成するため
 			@Param("toStatus") String toStatus // 遷移後ステータス（ここではSUBMITTED）を受け取り、statusへセットするために使います。
 		); // 更新件数（0または1）を返し、1なら更新成功として扱います。
 	
-	int updateStatusForApprover(@Param("id") Long id, @Param("approverUserId") Long approverUserId, // 承認者の操作として、指定idの申請を「承認者ID一致」の条件つきで更新するために必要な引数を受け取る
-								@Param("toStatus") String toStatus); // 更新後ステータス（例：APPROVED/RETURNED）を受け取り、更新件数（0または1）を返す
+	int updateStatusForApprover( // 承認者が承認/差戻しを実行するための状態更新メソッドを宣言する
+			@Param("id") Long id, // 更新対象の申請ID（expense_requests.id）を指定して、どの申請を更新するかを決める
+			@Param("approverUserId") Long approverUserId, // 承認者本人のユーザーIDを指定し、他人のInbox申請を更新できないようにする条件に使う
+			@Param("toStatus") String toStatus // 遷移後ステータス（例：APPROVED/RETURNED）を受け取り、statusへセットするために使う
+	); // 更新件数（0または1）を返し、1なら更新成功として扱う
+
+	int updateEditableFieldsForApplicant( // 申請者が差戻し（RETURNED）申請を編集保存するための内容更新メソッドを宣言する
+			@Param("id") Long id, // 更新対象の申請ID（expense_requests.id）を指定して対象申請を決める
+			@Param("applicantUserId") Long applicantUserId, // 申請者本人のユーザーIDを指定し、他人の申請を更新できないようにする条件に使う
+			@Param("title") String title, // 更新後のタイトルを受け取り、titleへセットするために使う
+			@Param("amount") int amount, // 更新後の金額を受け取り、amountへセットするために使う
+			@Param("note") String note // 更新後の備考を受け取り、noteへセットするために使う
+	); // 更新件数（0または1）を返し、1なら更新成功として扱う
 }

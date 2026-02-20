@@ -60,16 +60,27 @@
 		'SUBMITTED' ORDER BY er.id ASC
 	</select>
 
-	<update id="updateStatusForApplicant"> <!-- 申請者のsubmitで、DRAFT→SUBMITTEDへ遷移させつつ承認者を割り当てる更新SQLを定義します。 -->
+	<update id="updateStatusForApplicant"> <!-- 申請者のsubmitで、DRAFT/RETURNED→SUBMITTEDへ遷移させつつ承認者を割り当てる更新SQLを定義します。 -->
 		UPDATE expense_requests <!-- 更新対象は申請テーブル（expense_requests）です。 -->
 		SET status = #{toStatus}, <!-- status をSUBMITTEDに更新して、Inbox検索条件（status='SUBMITTED'）を満たします。 -->
 		current_approver_id = #{approverUserId}, <!-- 承認者IDをセットして、Inbox検索条件（current_approver_id一致）を満たします。 -->
 		submitted_at = CURRENT_TIMESTAMP <!-- 提出時刻を記録して、提出済みの事実をDB上に残せるようにします。 -->
 		WHERE id = #{id} <!-- 対象申請IDを一致させて、別の申請を更新しないようにします。 -->
 		AND applicant_id = #{applicantUserId} <!-- 申請者本人の申請だけ更新できるようにして、他人の申請のsubmitを防ぎます。 -->
-		AND status = 'DRAFT' <!-- DRAFTのときだけSUBMITTEDにできるようにして、状態遷移の前提を最低限守ります。 -->
+		AND status IN ('DRAFT','RETURNED') <!-- DRAFTに加えてRETURNEDからもSUBMITTEDへ再提出できるようにして、差戻し後の再提出を成立させます。 -->
 	</update>
 
+	<update id="updateEditableFieldsForApplicant"> <!-- 申請者が差戻し（RETURNED）申請を編集保存するための更新SQLを定義します。 -->
+		UPDATE expense_requests <!-- 更新対象は申請テーブル（expense_requests）です。 -->
+		SET title = #{title}, <!-- タイトルを更新して、差戻し指摘を反映できるようにします。 -->
+		amount = #{amount}, <!-- 金額を更新して、差戻し指摘を反映できるようにします。 -->
+		note = #{note}, <!-- 備考を更新して、差戻し指摘を反映できるようにします。 -->
+		updated_at = CURRENT_TIMESTAMP <!-- 更新時刻を更新して、編集した事実をDB上に残せるようにします。 -->
+		WHERE id = #{id} <!-- 対象申請IDを一致させて、別の申請を更新しないようにします。 -->
+		AND applicant_id = #{applicantUserId} <!-- 申請者本人の申請だけ更新できるようにして、他人の申請の編集保存を防ぎます。 -->
+		AND status = 'RETURNED' <!-- 差戻し状態（RETURNED）のときだけ編集保存できるようにして、提出済み等の編集を防ぎます。 -->
+	</update>
+	
 	<update id="updateStatusForApprover">
 		UPDATE expense_requests SET status = #{toStatus}
 		WHERE id = #{id} AND
