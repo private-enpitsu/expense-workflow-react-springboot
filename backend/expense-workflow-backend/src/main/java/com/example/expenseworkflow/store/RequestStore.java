@@ -26,6 +26,10 @@ public class RequestStore { // 申請（ExpenseRequest）に関する「読み�
 		return expenseRequestMapper.selectRequestSummaries(); // Mapperのselectでサマリ一覧を取り出し、そのまま返します。
 	}
 
+	public List<RequestSummaryResponse> listByApplicant(Long applicantUserId) { // 申請者本人の申請だけを一覧として取得するメソッド。
+		return expenseRequestMapper.selectRequestSummariesByApplicant(applicantUserId); // applicant_id で絞り込んだサマリ一覧をMapperから取得して返す。
+	}
+
 	@Transactional // このメソッド内のDB操作を1トランザクションとして扱う（途中で例外ならロールバックする）。
 	public RequestSummaryResponse create(Long applicantUserId, String title, int amount, String note) { // 申請を新規作成し、作成結果のサマリを返す。
 		String status = "DRAFT"; // 作成直後の状態をDRAFT（下書き）に固定する（初期状態）。
@@ -55,6 +59,23 @@ public class RequestStore { // 申請（ExpenseRequest）に関する「読み�
 		ExpenseRequest found = expenseRequestMapper.selectExpenseRequestById(id); // 数値IDで申請エンティティを1件取得する。
 		if (found == null) { // DBに該当データが存在しない場合。
 			return null; // 見つからない扱いでnullを返す。
+		}
+
+		String reqId = "REQ-" + String.format("%03d", found.getId()); // 取得したエンティティのIDから外部ID文字列を再構築する。
+		String note = found.getNote() != null ? found.getNote() : ""; // noteがnullなら空文字にする（レスポンス側でnullを避けたい意図）。
+
+		return new RequestSummaryResponse(reqId, found.getTitle(), found.getAmount(), found.getStatus(), note); // 取得結果からサマリDTOを作って返す。
+	}
+
+	public RequestSummaryResponse findByIdForApplicant(Long applicantUserId, String externalId) { // 申請者本人の申請だけを外部IDで取得する。
+		Long id = parseExternalId(externalId); // 外部ID文字列をDBの数値IDに変換する（失敗ならnull）。
+		if (id == null) { // 変換に失敗した場合（形式不正など）。
+			return null; // 見つからない扱いとしてnullを返す（Controller側で404等に変換する想定）。
+		}
+
+		ExpenseRequest found = expenseRequestMapper.selectExpenseRequestByIdAndApplicant(id, applicantUserId); // id と applicant_id の両方で1件取得し、他人の申請は見えないようにする。
+		if (found == null) { // DBに該当データが存在しない場合、または申請者が一致しない場合。
+			return null; // 見つからない扱いでnullを返す（他人の申請も404相当として隠す）。
 		}
 
 		String reqId = "REQ-" + String.format("%03d", found.getId()); // 取得したエンティティのIDから外部ID文字列を再構築する。
@@ -99,15 +120,38 @@ public class RequestStore { // 申請（ExpenseRequest）に関する「読み�
 		return updated == 1; // 1件更新なら成功、そうでなければ失敗。
 	}
 
-	@Transactional // 状態更新（UPDATE）を行うのでトランザクション境界を張る。
-	public boolean returnRequest(Long userId, String externalId) { // 承認者が差戻しする（SUBMITTED→RETURNEDなど）処理。成功ならtrue。
-		Long id = parseExternalId(externalId); // 外部IDを数値IDに変換する。
-		if (id == null) { // 変換できない（形式不正）。
-			return false; // 失敗扱いでfalse。
-		}
-		int updated = expenseRequestMapper.updateStatusForApprover(id, userId, "RETURNED"); // 承認者本人が処理できる申請だけを対象にRETURNEDへ更新し、更新件数を受け取る。
-		return updated == 1; // 1件更新なら成功、そうでなければ失敗。
-	}
+	@Transactional // 状態更新（UPDATE）と履歴INSERTを同一トランザクションにするために境界を張る。
+	public boolean returnRequest(Long userId, String externalId, String comment) { // 承認者が差戻しし、コメントを履歴へ記録する処理。成功ならtrue。
+		Long id = parseExternalId(externalId); // 外部ID（REQ-xxx）をDBの数値IDに変換する。
+		if (id == null) { // 変換できない（形式不正）の分岐をする。
+			return false; // 失敗扱いでfalseを返す。
+		} // 形式不正分岐を閉じる
+
+		ExpenseRequest current = expenseRequestMapper.selectExpenseRequestById(id); // 現在の申請状態を取得し、差戻し可能条件とfrom_status決定に使う。
+		if (current == null) { // 対象申請が存在しない場合の分岐をする。
+			return false; // 見つからない扱いでfalseを返す。
+		} // 存在チェック分岐を閉じる
+
+		Long currentApproverId = current.getCurrentApproverId(); // 現在の承認者IDを取り出し、操作権限の判定に使う。
+		if (currentApproverId == null || !currentApproverId.equals(userId)) { // セッションの承認者と一致しない場合の分岐をする。
+			return false; // 他人の申請は差戻しできないためfalseを返す。
+		} // 承認者一致チェック分岐を閉じる
+
+		String fromStatus = current.getStatus(); // 履歴に残すfrom_statusとして、更新前のstatusを保持する。
+		if (fromStatus == null || !"SUBMITTED".equals(fromStatus)) { // SUBMITTED以外は差戻し不可にして、想定外の状態遷移を防ぐ。
+			return false; // 差戻し不可としてfalseを返す。
+		} // 状態チェック分岐を閉じる
+
+		String toStatus = "RETURNED"; // 遷移後ステータスをRETURNEDに固定する。
+		int updated = expenseRequestMapper.updateStatusForApprover(id, userId, toStatus); // 承認者本人の申請だけを対象にstatusをRETURNEDへ更新する。
+		if (updated != 1) { // 更新件数が1以外の場合の分岐をする。
+			return false; // 更新できなかった扱いでfalseを返す。
+		} // 更新件数分岐を閉じる
+
+		String action = "RETURN"; // actionsテーブルに残す操作名をRETURNに固定する（差戻し操作であることを判別できるようにする）。
+		expenseRequestMapper.insertExpenseRequestAction(id, userId, action, fromStatus, toStatus, comment); // 差戻し履歴を1行INSERTしてコメントをSOTとして保存する。
+		return true; // status更新と履歴INSERTが完了したため成功としてtrueを返す。
+	} // returnRequest を閉じる
 	
 	@Transactional // 内容更新（UPDATE）を行うのでトランザクション境界を張る。
 	public boolean updateReturned(Long applicantUserId, String externalId, String title, int amount, String note) { // 申請者が差戻し（RETURNED）申請の内容を編集して保存する。

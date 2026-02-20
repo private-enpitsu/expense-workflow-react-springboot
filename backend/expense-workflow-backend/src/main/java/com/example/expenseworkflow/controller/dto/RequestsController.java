@@ -36,9 +36,10 @@ public class RequestsController {
 	private final RequestStore requestStore; // DB実装の保存SOTをDIで受け取る
 	
 
-	@GetMapping("/requests")
-	public List<RequestSummaryResponse> listRequests() { // 申請一覧を返すエンドポイントを定義する
-		return requestStore.list(); // DBの保存SOTから一覧を返して、Controller内に保存二重定義を作らない
+	@GetMapping("/requests") // GET /api/requests を受け付けるためのマッピングを定義する
+	public List<RequestSummaryResponse> listRequests(HttpSession session) { // 申請一覧を返す（自分の申請だけに絞る）
+		Long userId = requireUserId(session); // セッションのユーザーIDをSOTとして取得し、絞り込み条件に使う
+		return requestStore.listByApplicant(userId); // applicant_id で絞った一覧だけ返して、他人の申請が見えないようにする
 	}
 
 	// 申請を新規作成して、作成したサマリを返す
@@ -51,12 +52,14 @@ public class RequestsController {
 	}
 
 	// URLの{id}を受け取り詳細を返す
-	@GetMapping("/requests/{id}")
-	public ResponseEntity<RequestDetailResponse> getRequestDetail(@PathVariable("id") String id) { // URLの{id}を受け取り詳細を返す
+	@GetMapping("/requests/{id}") // GET /api/requests/{id} を受け付けるためのマッピングを定義する
+	public ResponseEntity<RequestDetailResponse> getRequestDetail(HttpSession session, @PathVariable("id") String id) { // URLの{id}を受け取り詳細を返す（自分の申請だけ）
 
-		RequestSummaryResponse found = requestStore.findById(id); // 保存SOT（DB）からid一致の申請サマリを探す
-		if (found == null) { // 見つからない場合の分岐をする
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // 存在しないため404を返す
+		Long userId = requireUserId(session); // セッションのユーザーIDをSOTとして取得し、他人の申請が見えないようにする
+
+		RequestSummaryResponse found = requestStore.findByIdForApplicant(userId, id); // id と applicant_id で一致する申請だけ取得する
+		if (found == null) { // 見つからない場合（存在しない or 他人の申請）の分岐をする
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // 詳細を見せないため404として返す
 		}
 
 		RequestDetailResponse detail = new RequestDetailResponse( // 詳細DTOを組み立てる

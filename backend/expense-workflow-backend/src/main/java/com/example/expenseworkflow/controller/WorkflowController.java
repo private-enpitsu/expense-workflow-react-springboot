@@ -67,15 +67,20 @@ public class WorkflowController {
 	}
 
 	// 申請を差戻してSUBMITTED→RETURNEDへ遷移させる
-	@PostMapping("/requests/{id}/return")
-	public ResponseEntity<Void> returnRequest(HttpSession session, @PathVariable("id") String id) {
-		Long userId = requireUserId(session);
-		boolean ok = requestStore.returnRequest(userId, id);
-		if (!ok) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-		}
-		return ResponseEntity.ok().build();
-	}
+	@PostMapping("/requests/{id}/return") // 差戻し操作のURLをこのメソッドに割り当てる
+	public ResponseEntity<Void> returnRequest( // 差戻しのHTTPエンドポイントを定義する
+			HttpSession session, // セッションからログインユーザーIDを取得するために受け取る
+			@PathVariable("id") String id, // パス変数の申請ID（REQ-xxx形式）を受け取る
+			@org.springframework.web.bind.annotation.RequestBody com.example.expenseworkflow.controller.dto.ReturnRequestRequest body // JSONボディからコメントを受け取る
+	) { // メソッド定義を開始する
+		Long userId = requireUserId(session); // セッションからユーザーIDを必須取得し、未ログインなら401にする
+		String comment = body != null ? body.getComment() : null; // ボディが無い場合でもNPEにならないようにコメントを取り出す
+		boolean ok = requestStore.returnRequest(userId, id, comment); // 差戻し（状態更新＋履歴INSERT）をStoreへ委譲する
+		if (!ok) { // 差戻しが失敗した場合の分岐をする
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // 対象が無い/権限や状態が合わない場合は404相当で隠す
+		} // 失敗時分岐を閉じる
+		return ResponseEntity.ok().build(); // 成功時は200 OK（ボディなし）を返す
+	} // returnRequest を閉じる
 
 	 // セッションからユーザーIDを「必須で」取り出す共通処理。取れない/不正なら401にします。
 	private Long requireUserId(HttpSession session) {

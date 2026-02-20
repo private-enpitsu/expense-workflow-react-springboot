@@ -116,53 +116,60 @@ function HealthCheckPage() {
   );
 } // HealthCheckPage ここまで
 
-function AppShell() {
+function AppShell() { // ログイン状態とroleに応じてナビとワークフロー画面を提供する共通シェルを定義する
 
-  const navigate = useNavigate(); // ログアウト後に /login へ遷移するためのナビゲーション関数を取得する
+  const navigate = useNavigate(); // ログアウト後や未ログイン時に /login へ遷移するための関数を取得する
   const queryClient = useQueryClient(); // ログアウト後に ["me"] を invalidate して再取得させるためのクライアントを取得する
   const setToast = useSetAtom(toastAtom); // ログアウト成功/失敗をToastで通知するために toastAtom へ書き込む関数を取得する
 
-
   const { data: meData, isLoading: isMeLoading, error: meError, httpStatus: meHttpStatus } = useMeQuery(); // ヘッダー表示の /api/me 判定を共通hookへ委譲する
   const isLoggedIn = !isMeLoading && meHttpStatus !== 401 && !meError; // ローディング中でも401でもエラーでもないときだけログイン中と扱う
+  const role = isLoggedIn ? (meData?.role ?? "") : ""; // ログイン中だけroleを参照し、未ログインは空文字として扱う
+  const isApplicant = Boolean(isLoggedIn && role === "APPLICANT"); // 申請者ロールのときだけ申請メニューを出すための判定を作る
+  const isApprover = Boolean(isLoggedIn && (role === "APPROVER" || role === "ADMIN")); // 承認者/管理者ロールのときだけ受信箱メニューを出すための判定を作る
   const meLabel = isMeLoading ? "Checking..." : (meHttpStatus === 401 ? "Guest" : (meError ? "Error" : (meData?.email ?? "Logged in"))); // 表示ラベルを状態から作る
+  const meDisplay = isLoggedIn ? meLabel : "Guest"; // 未ログイン時は要求どおり Me: Guest を固定表示にする
 
   const logoutMutation = useMutation({ // ログアウト（POST /api/auth/logout）を Mutation として定義する
     mutationFn: async () => { // ログアウト時に呼び出すAPI処理を定義する
       await apiClient.post("/auth/logout"); // baseURL=/api と合成して POST /api/auth/logout を実行し、セッションから userId を削除させる
     }, // API呼び出しの定義をここで終える
 
-    // ログアウトが成功したときの後処理を定義する
-    onSuccess: async () => {
+    onSuccess: async () => { // ログアウトが成功したときの後処理を定義する
       await queryClient.invalidateQueries({ queryKey: ["me"] }); // /me のキャッシュを無効化して、以後の判定が未ログイン(401)になるように更新する
       setToast({ // ログアウトが成功したことをユーザーに通知する
-        open: true,
-        type: "success",
-        message: "Logged out successfully"
-      });
+        open: true, // Toastを開く指定をする
+        type: "success", // 成功タイプのToastにする
+        message: "Logged out successfully" // ログアウト成功のメッセージを表示する
+      }); // setToast の引数を閉じる
       navigate("/login", { replace: true }); // ログアウト後にログインページへリダイレクトし、履歴を残さない
     }, // logout 成功時処理の定義をここで終える
 
-    // ログアウトが失敗したときの後処理を定義する
-    onError: (error) => {
+    onError: (error) => { // ログアウトが失敗したときの後処理を定義する
       const msg = error?.response ? `HTTP ${error.response.status}` : String(error); // AxiosエラーならHTTPコードを、そうでなければ文字列化して表示用メッセージを作る
       setToast({ // 失敗理由をToastで通知して切り分けしやすくする
-        open: true,
-        type: "error",
-        message: `Logout 失敗: ${msg}`
-      });
+        open: true, // Toastを開く指定をする
+        type: "error", // 失敗タイプのToastにする
+        message: `Logout 失敗: ${msg}` // ログアウト失敗のメッセージを表示する
+      }); // setToast の引数を閉じる
     } // 失敗時処理の定義をここで終える
-  });
-  return (
+  }); // logoutMutation の定義を閉じる
+
+  return ( // JSX を返して画面を構成する
     <div className={styles.app}> {/* 全ページ共通の外枠を表示する */}
       <ToastHost /> {/* どのページでもToastを出せるようにする */}
       <nav className={styles.nav}> {/* ヘッダーのナビ領域を表示する */}
-        <Link className={styles.navLink} to="/">疎通確認</Link> {/* Health/ へのリンクを表示する */}
-        <Link className={styles.navLink} to="/requests">申請一覧</Link> {/* /requests へのリンクを表示する */}
-        <Link className={styles.navLink} to="/requests/new">申請作成</Link> {/* /requests/new へのリンクを表示する */}
-        {/* <Link className={styles.navLink} to="/requests/1">Request Detail</Link> /requests/1 へのリンクを表示する */}
-        <Link className={styles.navLink} to="/inbox">受信箱</Link> {/* /inbox へのリンクを表示する */}
-        <span className={styles.navLink}>Me: {meLabel}</span> {/* /api/me の状態を表示する */}
+        <Link className={styles.navLink} to="/">疎通確認</Link> {/* 疎通確認画面は残して今は触らないため、常に表示する */}
+        {isApplicant ? ( // 申請者のときだけ申請メニューを表示する分岐を開始する
+          <> {/* 申請メニューをまとめて返すためのフラグメントを開始する */}
+            <Link className={styles.navLink} to="/requests">申請一覧</Link> {/* 申請者だけが自分の申請一覧へ行けるようにリンクを表示する */}
+            <Link className={styles.navLink} to="/requests/new">申請作成</Link> {/* 申請者だけが新規申請作成へ行けるようにリンクを表示する */}
+          </> /* 申請メニューのフラグメントを閉じる */
+        ) : null} {/* 申請者以外は申請メニューを表示しない */}
+        {isApprover ? ( // 承認者（または管理者）のときだけ受信箱メニューを表示する分岐を開始する
+          <Link className={styles.navLink} to="/inbox">受信箱</Link> /* 承認者（または管理者）だけが受信箱へ行けるようにリンクを表示する */
+        ) : null} {/* 承認者（または管理者）以外は受信箱メニューを表示しない */}
+        <span className={styles.navLink}>Me: {meDisplay}</span> {/* 未ログイン時は Guest を固定し、ログイン時は email 等を表示する */}
         <button
           type="button" // フォーム送信ではなくクリック操作として扱うために type="button" を指定する
           className={styles.navLink} // 既存のナビリンク用スタイルをボタンにも適用する
@@ -171,7 +178,7 @@ function AppShell() {
         >
           {isLoggedIn ? "ログアウト" : "ログイン"} {/* ログイン状態に応じてボタンの文言を切り替える */}
         </button> {/* ログイン/ログアウトを1つのボタンに統合して表示する */}
-      </nav>
+      </nav> {/* ナビ領域を閉じる */}
 
       <Routes> {/* ルート定義を開始する */}
         <Route path="/" element={<HealthCheckPage />} /> {/* / は疎通確認ページを表示する */}
@@ -179,14 +186,15 @@ function AppShell() {
         <Route element={<RequireAuth />}> {/* 認証が必要なルートをまとめる */}
           <Route path="/requests" element={<RequestsListPage />} /> {/* /requests を表示する */}
           <Route path="/requests/new" element={<RequestCreatePage />} /> {/* /requests/new を表示する */}
-          <Route path="/requests/:id" element={<RequestDetailPage />} /> {/* /requests/:id を表示する（閲覧） */}
-          <Route path="/requests/:id/edit" element={<RequestEditPage />} /> {/* /requests/:id/edit を表示する（RETURNED編集/再提出） */}
-          <Route path="/inbox" element={<InboxPage />} /> {/* /inbox を表示する */}
-        </Route> {/* 認証ルートのまとまりを閉じる */}
-      </Routes>
-    </div>
-  );
-} // AppShell ここまで
+          <Route path="/requests/:id" element={<RequestDetailPage />} /> {/* /requests/:id を表示する */}
+          <Route path="/requests/:id/edit" element={<RequestEditPage />} /> {/* /requests/:id/edit を表示する */}
+          <Route path="/inbox" element={<InboxPage />} /> {/* /inbox（一覧入口）を表示する */}
+          <Route path="/inbox/:id" element={<InboxDetailPage />} /> {/* /inbox/:id（承認者用詳細）を表示する */}
+        </Route> {/* RequireAuth グループを閉じる */}
+      </Routes> {/* ルート定義を閉じる */}
+    </div> /* appコンテナを閉じる */
+  ); // return を閉じる
+} // AppShell を閉じる
 
 // BrowserRouter を提供して、Router配下で AppShell を描画する最上位コンポーネントを定義する
 export default function App() { // BrowserRouter を提供して、Router配下で AppShell を描画する最上位コンポーネントを定義する
