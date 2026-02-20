@@ -18,56 +18,90 @@ import { apiClient } from "../lib/apiClient"; // /api を呼ぶ共通クライ�
 
 import styles from "./RequestCreatePage.module.css";
 
-export default function RequestCreatePage() { // /requests/new のページコンポーネントを定義する（表示だけ）
-
-  const navigate = useNavigate(); // 成功時に /requests へ移動するための関数を取得する
-  const queryClient = useQueryClient(); // 成功時に ["requests"] を invalidate するためのクライアントを取得する
+export default function RequestCreatePage() { // /requests/new のページコンポーネントを定義する（新規作成フォームで保存/提出を行う）
+  const navigate = useNavigate(); // 成功時に詳細へ移動するための関数を取得する
+  const queryClient = useQueryClient(); // 成功時にキャッシュを無効化するためのクライアントを取得する
   const setToast = useSetAtom(toastAtom); // 成功/失敗をToastで表示するための setter を取得する
-  const [title, setTitle] = useState(""); // 件名（仮）の入力値
-  const [amount, setAmount] = useState(""); // 金額（仮）の入力値（まずは文字列で保持）
-  const [note, setNote] = useState(""); // 備考（仮）の入力値
+  const [title, setTitle] = useState(""); // 件名の入力値を state で保持する
+  const [amount, setAmount] = useState(""); // 金額の入力値（文字列）を state で保持する
+  const [note, setNote] = useState(""); // 備考の入力値を state で保持する
 
-  const createMutation = useMutation({ // 送信時に実行する処理を関数として定義する
-    mutationFn: async () => { // 申請作成のための非同期関数を定義する
-      const amountNumber = Number(amount || 0); // 文字列の金額を数値へ変換して、バックエンドの int と揃える
-      const body = { title, amount: amountNumber, note }; // バックエンドが受け取るJSONの形に合わせてボディを組み立てる
-      const res = await apiClient.post("/requests", body); // POST /api/requests を呼び出す（baseURL=/api は apiClient 側で設定済み）
-      return res.data; // 作成された申請データを返す
+  const createMutation = useMutation({ // 「保存（下書き作成）」として使う mutation を定義する
+    mutationFn: async () => { // DRAFT作成（POST /api/requests）を行う非同期関数を定義する
+      const amountNumber = Number(amount || 0); // 文字列の金額を数値へ変換してAPIへ送る準備をする
+      const body = { title, amount: amountNumber, note }; // 作成APIが受け取る形に合わせてリクエストボディを作る
+      const res = await apiClient.post("/requests", body); // POST /api/requests を呼び出して下書きを作成する
+      return res.data; // 作成された申請データ（id等）を返す
     },
-    onSuccess: async (created) => { // 作成成功時の処理
-      await queryClient.invalidateQueries({ queryKey: ["requests"] }); // 一覧を再取得するためのクエリを無効化する
-      setToast({ open: true, type: "success", message: `申請が作成されました: ${created?.id ?? ""}` }); // 作成できたことをToastで通知する
+    onSuccess: async (created) => { // 保存成功時の処理を定義する
+      await queryClient.invalidateQueries({ queryKey: ["requests"] }); // 一覧を再取得するために requests を無効化する
+      setToast({ open: true, type: "success", message: `保存しました: ${created?.id ?? ""}` }); // 保存できたことをToastで通知する
       navigate(created?.id ? `/requests/${created.id}` : "/requests", { replace: true }); // 作成されたIDが取れれば詳細へ、取れなければ一覧へ遷移する
     },
-    onError: (error) => { // 作成失敗時の処理
+    onError: (error) => { // 保存失敗時の処理を定義する
       const status = error?.response?.status ?? null; // AxiosエラーならHTTPステータスを取り出す
-      const msg = status ? `HTTP ${status}` : String(error); // 画面に出す文字列を最小の形で組み立てる
-      setToast({ open: true, type: "error", message: `作成に失敗しました: ${msg}` }); // 失敗理由をToastで通知する
-    }
-  });
+      const msg = status ? `HTTP ${status}` : String(error); // 表示用メッセージを最小で組み立てる
+      setToast({ open: true, type: "error", message: `保存に失敗しました: ${msg}` }); // 失敗理由をToastで通知する
+    },
+  }); // createMutation
 
-  const isSubmitting = createMutation.isPending; // 送信中かどうかを分かりやすい名前にしてUIで使う
+  const submitNewMutation = useMutation({ // 「提出（作成→submit）」として使う mutation を定義する
+    mutationFn: async () => { // 新規作成後に submit を呼ぶ非同期関数を定義する
+      const amountNumber = Number(amount || 0); // 文字列の金額を数値へ変換してAPIへ送る準備をする
+      const body = { title, amount: amountNumber, note }; // 作成APIが受け取る形に合わせてリクエストボディを作る
+      const createdRes = await apiClient.post("/requests", body); // POST /api/requests を呼び出して下書きを作成する
+      const created = createdRes.data; // 作成結果（id等）を取り出して次のsubmitに使う
+      const newId = created?.id ?? null; // submit対象のIDを取り出し、無ければnullにする
+      if (!newId) { throw new Error("created.id is missing"); } // 作成に成功してもidが無い場合はsubmitできないので例外にする
+      await apiClient.post(`/requests/${newId}/submit`); // POST /api/requests/{id}/submit を呼び出して提出（SUBMITTED）へ遷移させる
+      return { id: newId }; // 成功後に遷移先を組み立てるため、idだけ返す
+    },
+    onSuccess: async (result) => { // 提出成功時の処理を定義する
+      await queryClient.invalidateQueries({ queryKey: ["requests"] }); // 申請一覧を再取得するために requests を無効化する
+      await queryClient.invalidateQueries({ queryKey: ["inbox"] }); // 承認者Inboxへ反映させるために inbox を無効化する
+      setToast({ open: true, type: "success", message: `提出しました: ${result?.id ?? ""}` }); // 提出できたことをToastで通知する
+      navigate(result?.id ? `/requests/${result.id}` : "/requests", { replace: true }); // 提出後は詳細へ遷移して状態を確認できるようにする
+    },
+    onError: (error) => { // 提出失敗時の処理を定義する
+      const status = error?.response?.status ?? null; // AxiosエラーならHTTPステータスを取り出す
+      const msg = status ? `HTTP ${status}` : String(error); // 表示用メッセージを最小で組み立てる
+      setToast({ open: true, type: "error", message: `提出に失敗しました: ${msg}` }); // 失敗理由をToastで通知する
+    },
+  }); // submitNewMutation
+
+  const isSubmitting = Boolean(createMutation.isPending || submitNewMutation.isPending); // 保存/提出のどちらかが進行中なら送信中として扱う
+  const canSubmit = Boolean(title.trim().length > 0); // 最低限、件名が空のときは保存/提出を押せないようにする
 
   return ( // 画面として返すJSXを開始する
-    <div className={styles.container}> {/* 余白などの見た目を CSS Modules 側へ移すためのコンテナにする */}
+    <div className={styles.container}> {/* 見た目を CSS Modules 側へ寄せるためのコンテナを使う */}
       <h1>申請作成</h1> {/* ページの見出しを表示する */}
-      <form onSubmit={(e) => { e.preventDefault(); createMutation.mutate(); }} className={styles.form}> {/* form のレイアウトを CSS Modules へ移して inline style を撤去する */}
-        <label className={styles.field}> {/* label のレイアウトを CSS Modules へ移して inline style を撤去する */}
-          <span>件名</span> {/* 件名のラベル文字を表示する */}
+      <form
+        onSubmit={(e) => { e.preventDefault(); if (!canSubmit) return; createMutation.mutate(); }} // Enter送信は「保存（下書き作成）」として扱う
+        className={styles.form} // form のレイアウトを CSS Modules へ寄せる
+      >
+        <label className={styles.field}> {/* 入力行のレイアウトを CSS Modules へ寄せる */}
+          <span>件名</span>
           <input value={title} onChange={(e) => setTitle(e.target.value)} disabled={isSubmitting} placeholder="例）交通費精算" /> {/* 件名の入力を受け取り、送信中は操作できないようにする */}
-        </label> {/* 件名入力のまとまりを閉じる */}
-        <label className={styles.field}> {/* label のレイアウトを CSS Modules へ移して inline style を撤去する */}
-          <span>金額</span> {/* 金額のラベル文字を表示する */}
+        </label>
+        <label className={styles.field}> {/* 入力行のレイアウトを CSS Modules へ寄せる */}
+          <span>金額</span>
           <input value={amount} onChange={(e) => setAmount(e.target.value)} disabled={isSubmitting} placeholder="例）1200" inputMode="numeric" /> {/* 金額の入力を受け取り、送信中は操作できないようにする */}
-        </label> {/* 金額入力のまとまりを閉じる */}
-        <label className={styles.field}> {/* label のレイアウトを CSS Modules へ移して inline style を撤去する */}
-          <span>備考</span> {/* 備考のラベル文字を表示する */}
+        </label>
+        <label className={styles.field}> {/* 入力行のレイアウトを CSS Modules へ寄せる */}
+          <span>備考</span>
           <textarea value={note} onChange={(e) => setNote(e.target.value)} disabled={isSubmitting} placeholder="例）領収書あり" rows={4} /> {/* 備考の入力を受け取り、送信中は操作できないようにする */}
-        </label> {/* 備考入力のまとまりを閉じる */}
-        <button type="submit" disabled={isSubmitting}> {isSubmitting ? "送信中..." : "作成"} </button> {/* 送信中は押せないようにして二重送信を防ぐ */}
-      </form> {/* フォームを閉じる */}
-    </div> // ページコンテナを閉じる
+        </label>
+
+        <button type="submit" disabled={isSubmitting || !canSubmit}> {/* 保存ボタンとして submit を使い、送信中や件名空では押せないようにする */}
+          {isSubmitting ? "処理中..." : "保存"} {/* 送信中は表示を変えて二重送信を防ぐ */}
+        </button>
+
+        <button type="button" disabled={isSubmitting || !canSubmit} onClick={() => submitNewMutation.mutate()}> {/* 提出ボタンは作成→submitを行うため button でクリック処理にする */}
+          {isSubmitting ? "処理中..." : "提出"} {/* 送信中は表示を変えて二重送信を防ぐ */}
+        </button>
+      </form>
+    </div>
   );
-}
+} // RequestCreatePage
 
 

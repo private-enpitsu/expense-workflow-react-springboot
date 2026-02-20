@@ -23,6 +23,7 @@ import RequestsListPage from "./pages/RequestsListPage"; // /requests のペー�
 import InboxPage from "./pages/InboxPage"; // /inbox のページコンポーネントを読み込む
 import RequestCreatePage from "./pages/RequestCreatePage"; // /requests/new のページコンポーネントを読み込む
 import RequestDetailPage from "./pages/RequestDetailPage"; // /requests/:id のページコンポーネントを読み込む
+import RequestEditPage from "./pages/RequestEditPage"; // /requests/:id/edit のページコンポーネントを読み込む（RETURNED編集/再提出の受け皿）
 import ToastHost from "./components/ToastHost"; // アプリ共通Toastを表示するホストを読み込む
 
 import styles from "./App.module.css"; // CSS Modules を読み込む
@@ -161,10 +162,16 @@ function AppShell() {
         <Link className={styles.navLink} to="/requests/new">申請作成</Link> {/* /requests/new へのリンクを表示する */}
         {/* <Link className={styles.navLink} to="/requests/1">Request Detail</Link> /requests/1 へのリンクを表示する */}
         <Link className={styles.navLink} to="/inbox">受信箱</Link> {/* /inbox へのリンクを表示する */}
-        <Link className={styles.navLink} to="/login">ログイン</Link> {/* /login へのリンクを表示する */}
         <span className={styles.navLink}>Me: {meLabel}</span> {/* /api/me の状態を表示する */}
-        <button type="button" className={styles.navLink} onClick={() => logoutMutation.mutate()} disabled={!isLoggedIn || logoutMutation.isPending}>ログアウト</button> {/* ログアウトボタンを表示する */}
-      </nav> {/* ナビ領域を閉じる */}
+        <button
+          type="button" // フォーム送信ではなくクリック操作として扱うために type="button" を指定する
+          className={styles.navLink} // 既存のナビリンク用スタイルをボタンにも適用する
+          onClick={() => { if (isLoggedIn) { logoutMutation.mutate(); } else { navigate("/login"); } }} // ログイン中はログアウト、未ログインはログイン画面へ遷移させる
+          disabled={isMeLoading || logoutMutation.isPending} // 判定中は「ログイン」表示のまま非アクティブにし、送信中も二重操作を防ぐ
+        >
+          {isLoggedIn ? "ログアウト" : "ログイン"} {/* ログイン状態に応じてボタンの文言を切り替える */}
+        </button> {/* ログイン/ログアウトを1つのボタンに統合して表示する */}
+      </nav>
 
       <Routes> {/* ルート定義を開始する */}
         <Route path="/" element={<HealthCheckPage />} /> {/* / は疎通確認ページを表示する */}
@@ -172,11 +179,12 @@ function AppShell() {
         <Route element={<RequireAuth />}> {/* 認証が必要なルートをまとめる */}
           <Route path="/requests" element={<RequestsListPage />} /> {/* /requests を表示する */}
           <Route path="/requests/new" element={<RequestCreatePage />} /> {/* /requests/new を表示する */}
-          <Route path="/requests/:id" element={<RequestDetailPage />} /> {/* /requests/:id を表示する */}
+          <Route path="/requests/:id" element={<RequestDetailPage />} /> {/* /requests/:id を表示する（閲覧） */}
+          <Route path="/requests/:id/edit" element={<RequestEditPage />} /> {/* /requests/:id/edit を表示する（RETURNED編集/再提出） */}
           <Route path="/inbox" element={<InboxPage />} /> {/* /inbox を表示する */}
         </Route> {/* 認証ルートのまとまりを閉じる */}
-      </Routes> {/* ルート定義を閉じる */}
-    </div> // 外枠を閉じる
+      </Routes>
+    </div>
   );
 } // AppShell ここまで
 
