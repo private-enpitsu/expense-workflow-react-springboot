@@ -53,7 +53,7 @@ public class RequestsController {
 
 	// URLの{id}を受け取り詳細を返す
 	@GetMapping("/requests/{id}") // GET /api/requests/{id} を受け付けるためのマッピングを定義する
-	public ResponseEntity<RequestDetailResponse> getRequestDetail(HttpSession session, @PathVariable("id") String id) { // URLの{id}を受け取り詳細を返す（自分の申請だけ）
+	public ResponseEntity<RequestDetailResponse> getRequestDetail(HttpSession session, @PathVariable("id") Long id) { // URLの{id}を受け取り詳細を返す（自分の申請だけ）
 
 		Long userId = requireUserId(session); // セッションのユーザーIDをSOTとして取得し、他人の申請が見えないようにする
 
@@ -78,7 +78,7 @@ public class RequestsController {
 	
 	// 差戻し（RETURNED）の申請を編集して保存する（表示は次のGETで確認する前提で204を返す） // 何をするメソッドかを説明する
 	@PatchMapping("/requests/{id}") // /api/requests/{id} をPATCHで受け、既存申請の内容更新を行う
-	public ResponseEntity<Void> updateRequest(HttpSession session, @PathVariable("id") String id, @RequestBody UpdateRequestRequest body) { // 差戻し申請の編集保存を行う
+	public ResponseEntity<Void> updateRequest(HttpSession session, @PathVariable("id") Long id, @RequestBody UpdateRequestRequest body) { // 差戻し申請の編集保存を行う
 
 		String safeTitle = body != null && body.getTitle() != null ? body.getTitle() : ""; // title が null でも落ちないように空文字へ寄せる
 		int safeAmount = body != null ? body.getAmount() : 0; // amount が無い場合は 0 として扱う

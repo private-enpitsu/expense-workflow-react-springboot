@@ -26,8 +26,7 @@
 
 	<select id="selectRequestSummaries"
 		resultType="com.example.expenseworkflow.controller.dto.RequestSummaryResponse">
-		SELECT CONCAT('REQ-', LPAD(er.id, 3, '0')) AS id, er.title
-		AS title,
+		SELECT er.id AS id, er.title AS title,
 		er.amount AS amount, er.status AS status, COALESCE(er.note,
 		'') AS
 		note FROM expense_requests er ORDER BY er.id DESC
@@ -35,11 +34,9 @@
 
 	<select id="selectRequestSummariesByApplicant"
 		resultType="com.example.expenseworkflow.controller.dto.RequestSummaryResponse">
-		SELECT CONCAT('REQ-', LPAD(er.id, 3, '0')) AS id, er.title
-		AS title,
+		SELECT er.id AS id, er.title AS title,
 		er.amount AS amount, er.status AS status, COALESCE(er.note,
-		'') AS
-		note FROM expense_requests er WHERE er.applicant_id = #{applicantUserId} ORDER BY er.id DESC
+		'') AS note FROM expense_requests er WHERE er.applicant_id = #{applicantUserId} ORDER BY er.id DESC
 	</select>
 
 	<select id="selectExpenseRequestById"
@@ -83,13 +80,18 @@
 
 	<select id="selectInboxItems"
 		resultType="com.example.expenseworkflow.controller.dto.InboxItemResponse">
-		SELECT CONCAT('REQ-', LPAD(er.id, 3, '0')) AS id, er.title
-		AS title,
+		SELECT er.id AS id, er.title AS title,
 		er.amount AS amount, er.status AS status FROM
 		expense_requests er
 		WHERE er.current_approver_id = #{approverUserId}
 		AND er.status =
 		'SUBMITTED' ORDER BY er.id ASC
+	</select>
+
+	<select id="selectExpenseRequestByIdAndApprover"
+		resultMap="ExpenseRequestResultMap">
+		SELECT er.* FROM expense_requests er
+		WHERE er.id = #{id} AND er.current_approver_id = #{approverUserId}
 	</select>
 
 	<update id="updateStatusForApplicant"> <!-- 申請者のsubmitで、DRAFT/RETURNED→SUBMITTEDへ遷移させつつ承認者を割り当てる更新SQLを定義します。 -->

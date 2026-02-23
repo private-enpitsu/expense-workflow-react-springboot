@@ -22,7 +22,9 @@ public interface ExpenseRequestMapper { // MyBatisが実装を生成するため
 	
 	int insertExpenseRequest(ExpenseRequest entity); // ExpenseRequestの内容を expense_requests にINSERTし、挿入件数（通常1）を返す
 
-	List<InboxItemResponse> selectInboxItems(@Param("approverUserId") Long approverUserId); // 承認者のInbox向けに、該当ユーザーの受信箱アイテムDTO一覧をDBから取得する
+	List<InboxItemResponse> selectInboxItems(@Param("approverUserId") Long approverUserId);
+
+	ExpenseRequest selectExpenseRequestByIdAndApprover(@Param("id") Long id, @Param("approverUserId") Long approverUserId); // 承認者が自分のInbox申請を詳細取得するために id と current_approver_id の両方で1件取得する
 
 	int updateStatusForApplicant( // 申請者の提出操作として、申請者本人の申請だけを対象に状態更新するためのメソッド宣言です。
 			@Param("id") Long id, // 更新対象の申請ID（expense_requests.id）を指定して、どの申請を更新するかを決めます。

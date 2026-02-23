@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.expenseworkflow.controller.dto.InboxItemResponse;
+import com.example.expenseworkflow.controller.dto.RequestDetailResponse;
 import com.example.expenseworkflow.controller.dto.RequestSummaryResponse;
 import com.example.expenseworkflow.domain.ExpenseRequest;
 import com.example.expenseworkflow.domain.User;
@@ -45,14 +46,12 @@ public class RequestStore { // 申請（ExpenseRequest）に関する「読み�
 		expenseRequestMapper.insertExpenseRequest(entity); // INSERTを実行する（MyBatisの設定により、採番されたIDがentityに反映される想定）。
 
 		Long newId = entity.getId(); // INSERT後に採番された主キーID（DBの数値ID）を取り出す。
-		String externalId = "REQ-" + String.format("%03d", newId); // 画面やAPIで扱う外部IDを作る（例: REQ-001）。%03dは3桁ゼロ埋め。
 
-		return new RequestSummaryResponse(externalId, title, amount, status, note); // 作成した申請のサマリDTOを組み立てて返す（DBから再取得せず入力値と生成IDで返している）。
+		return new RequestSummaryResponse(newId, title, amount, status, note); // 作成した申請のサマリDTOを組み立てて返す（数値IDをそのまま返す）。
 	}
 
-	public RequestSummaryResponse findById(String externalId) { // 外部ID（REQ-001形式）から申請のサマリを1件取得する。
-		Long id = parseExternalId(externalId); // 外部ID文字列をDBの数値IDに変換する（失敗ならnull）。
-		if (id == null) { // 変換に失敗した場合（形式不正など）。
+	public RequestSummaryResponse findById(Long id) { // 数値IDから申請のサマリを1件取得する。
+		if (id == null) { // 引数がnullなら取得不能。
 			return null; // 見つからない扱いとしてnullを返す（Controller側で404等に変換する想定）。
 		}
 
@@ -61,15 +60,13 @@ public class RequestStore { // 申請（ExpenseRequest）に関する「読み�
 			return null; // 見つからない扱いでnullを返す。
 		}
 
-		String reqId = "REQ-" + String.format("%03d", found.getId()); // 取得したエンティティのIDから外部ID文字列を再構築する。
 		String note = found.getNote() != null ? found.getNote() : ""; // noteがnullなら空文字にする（レスポンス側でnullを避けたい意図）。
 
-		return new RequestSummaryResponse(reqId, found.getTitle(), found.getAmount(), found.getStatus(), note); // 取得結果からサマリDTOを作って返す。
+		return new RequestSummaryResponse(found.getId(), found.getTitle(), found.getAmount(), found.getStatus(), note); // 取得結果からサマリDTOを作って返す。
 	}
 
-	public RequestSummaryResponse findByIdForApplicant(Long applicantUserId, String externalId) { // 申請者本人の申請だけを外部IDで取得する。
-		Long id = parseExternalId(externalId); // 外部ID文字列をDBの数値IDに変換する（失敗ならnull）。
-		if (id == null) { // 変換に失敗した場合（形式不正など）。
+	public RequestSummaryResponse findByIdForApplicant(Long applicantUserId, Long id) { // 申請者本人の申請だけを数値IDで取得する。
+		if (id == null) { // 引数がnullなら取得不能。
 			return null; // 見つからない扱いとしてnullを返す（Controller側で404等に変換する想定）。
 		}
 
@@ -78,10 +75,9 @@ public class RequestStore { // 申請（ExpenseRequest）に関する「読み�
 			return null; // 見つからない扱いでnullを返す（他人の申請も404相当として隠す）。
 		}
 
-		String reqId = "REQ-" + String.format("%03d", found.getId()); // 取得したエンティティのIDから外部ID文字列を再構築する。
 		String note = found.getNote() != null ? found.getNote() : ""; // noteがnullなら空文字にする（レスポンス側でnullを避けたい意図）。
 
-		return new RequestSummaryResponse(reqId, found.getTitle(), found.getAmount(), found.getStatus(), note); // 取得結果からサマリDTOを作って返す。
+		return new RequestSummaryResponse(found.getId(), found.getTitle(), found.getAmount(), found.getStatus(), note); // 取得結果からサマリDTOを作って返す。
 	}
 
 	public List<InboxItemResponse> inbox(Long approverUserId) { // 承認者ユーザーIDに紐づくInbox（承認待ち一覧など）を取得する。
@@ -89,11 +85,29 @@ public class RequestStore { // 申請（ExpenseRequest）に関する「読み�
 		return items != null ? items : new ArrayList<>(); // nullが返ってきた場合に備えて、必ず空リストを返す（呼び出し側のnullチェックを不要にする）。
 	}
 
+	public RequestDetailResponse findByIdForApprover(Long approverUserId, Long id) { // 承認者本人が担当する申請を詳細取得する。
+		if (id == null) {
+			return null;
+		}
+		ExpenseRequest found = expenseRequestMapper.selectExpenseRequestByIdAndApprover(id, approverUserId); // id と current_approver_id の両方で1件取得し、他人のInbox申請は見えないようにする。
+		if (found == null) {
+			return null;
+		}
+		String note = found.getNote() != null ? found.getNote() : "";
+		return new RequestDetailResponse(
+			found.getId(),
+			found.getTitle(),
+			found.getAmount(),
+			found.getStatus(),
+			note,
+			java.util.Collections.emptyList() // actionsは現フェーズでは空配列で返す
+		);
+	}
+
 	@Transactional // 状態更新（UPDATE）を行うのでトランザクション境界を張る。
-	public boolean submit(Long userId, String externalId) { // 申請者が提出する（DRAFT→SUBMITTEDなど）処理。成功ならtrue。
-		Long id = parseExternalId(externalId); // 外部ID（REQ-001）をDBの数値IDへ変換して、DB更新に使える形へ整えます。
-		if (id == null) { // 外部IDが不正で数値IDに変換できない場合は、対象が特定できない状態です。
-			return false; // 対象不明のため更新せず、失敗としてfalseを返します。
+	public boolean submit(Long userId, Long id) { // 申請者が提出する（DRAFT→SUBMITTED）処理。成功ならtrue。
+		if (id == null) { // 引数がnullなら対象が特定できない状態。
+			return false; // 対象不明のため更新せず、失敗としてfalseを返す。
 		}
 		User applicant = userMapper.findById(userId); // submitした本人（申請者）を users から取得して、上長（承認者）の決定に使います。
 		if (applicant == null) { // セッションのuserIdがusersに存在しない場合は、前提が崩れている状態です。
@@ -111,9 +125,8 @@ public class RequestStore { // 申請（ExpenseRequest）に関する「読み�
 	}
 
 	@Transactional // 状態更新（UPDATE）を行うのでトランザクション境界を張る。
-	public boolean approve(Long userId, String externalId) { // 承認者が承認する（SUBMITTED→APPROVEDなど）処理。成功ならtrue。
-		Long id = parseExternalId(externalId); // 外部IDを数値IDに変換する。
-		if (id == null) { // 変換できない（形式不正）。
+	public boolean approve(Long userId, Long id) { // 承認者が承認する（SUBMITTED→APPROVED）処理。成功ならtrue。
+		if (id == null) { // 引数がnullなら対象が特定できない。
 			return false; // 失敗扱いでfalse。
 		}
 		int updated = expenseRequestMapper.updateStatusForApprover(id, userId, "APPROVED"); // 承認者本人が処理できる申請だけを対象にAPPROVEDへ更新し、更新件数を受け取る。
@@ -121,11 +134,10 @@ public class RequestStore { // 申請（ExpenseRequest）に関する「読み�
 	}
 
 	@Transactional // 状態更新（UPDATE）と履歴INSERTを同一トランザクションにするために境界を張る。
-	public boolean returnRequest(Long userId, String externalId, String comment) { // 承認者が差戻しし、コメントを履歴へ記録する処理。成功ならtrue。
-		Long id = parseExternalId(externalId); // 外部ID（REQ-xxx）をDBの数値IDに変換する。
-		if (id == null) { // 変換できない（形式不正）の分岐をする。
+	public boolean returnRequest(Long userId, Long id, String comment) { // 承認者が差戻しし、コメントを履歴へ記録する処理。成功ならtrue。
+		if (id == null) { // 引数がnullなら対象が特定できない。
 			return false; // 失敗扱いでfalseを返す。
-		} // 形式不正分岐を閉じる
+		}
 
 		ExpenseRequest current = expenseRequestMapper.selectExpenseRequestById(id); // 現在の申請状態を取得し、差戻し可能条件とfrom_status決定に使う。
 		if (current == null) { // 対象申請が存在しない場合の分岐をする。
@@ -154,28 +166,13 @@ public class RequestStore { // 申請（ExpenseRequest）に関する「読み�
 	} // returnRequest を閉じる
 	
 	@Transactional // 内容更新（UPDATE）を行うのでトランザクション境界を張る。
-	public boolean updateReturned(Long applicantUserId, String externalId, String title, int amount, String note) { // 申請者が差戻し（RETURNED）申請の内容を編集して保存する。
-		Long id = parseExternalId(externalId); // 外部ID（REQ-001）をDBの数値IDへ変換して、更新条件に使える形へ整える。
-		if (id == null) { // 外部IDが不正で数値IDに変換できない場合の分岐をする。
+	public boolean updateReturned(Long applicantUserId, Long id, String title, int amount, String note) { // 申請者が差戻し（RETURNED）申請の内容を編集して保存する。
+		if (id == null) { // 引数がnullなら対象が特定できない。
 			return false; // 対象が特定できないため、更新せず失敗としてfalseを返す。
 		}
 		int updated = expenseRequestMapper.updateEditableFieldsForApplicant(id, applicantUserId, title, amount, note); // 申請者本人かつRETURNEDの申請だけを対象に、編集可能項目（title/amount/note）を更新する。
 		return updated == 1; // 更新が1件だけ成功した場合のみtrueとし、0件の場合は条件不一致（権限/状態など）としてfalseにする。
 	}
 
-	private Long parseExternalId(String externalId) { // 外部ID（例: REQ-001）をDBの数値ID（例: 1）に変換するヘルパー。
-		if (externalId == null) { // 引数がnullなら変換不能。
-			return null; // 変換失敗としてnullを返す。
-		}
-		if (!externalId.startsWith("REQ-")) { // "REQ-"で始まらないなら想定フォーマットではない。
-			return null; // 変換失敗としてnullを返す。
-		}
-		String numPart = externalId.substring("REQ-".length()); // "REQ-"の後ろ（数値部分）だけを切り出す（例: "001"）。
-		try { // 数値変換が失敗する可能性があるので例外処理を用意する。
-			return Long.valueOf(numPart); // 数値部分をLongに変換して返す（例: "001" -> 1）。
-		} catch (NumberFormatException e) { // 数字でない文字が混ざっていた場合などに発生する例外。
-			return null; // 変換失敗としてnullを返す。
-		}
-	}
 
 }

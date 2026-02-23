@@ -12,7 +12,13 @@ import { useEffect } from "react"; // Health表示状態をatomへ同期する�
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"; // Health取得（useQuery）とログアウト（useMutation）とinvalidate（useQueryClient）に使う
 import { useSetAtom } from "jotai"; // Toast/Health状態を書き込むために setter を使う
 import { healthSnapshotAtom, toastAtom } from "./lib/atoms"; // 共有atom（health表示状態/Toast）を読み込む
-import { BrowserRouter, Routes, Route, Link, useNavigate } from "react-router-dom"; // ルーティングとログアウト後遷移のために Router API を使う
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Link,
+  useNavigate,
+} from "react-router-dom"; // ルーティングとログアウト後遷移のために Router API を使う
 import { apiClient } from "./lib/apiClient"; // Axios共通クライアントで /api/health を呼ぶために使う
 
 import { useMeQuery } from "./hooks/useMeQuery"; // /api/me の判定ロジックを共通化したhookを読み込む
@@ -21,6 +27,7 @@ import RequireAuth from "./components/RequireAuth"; // 認証ガード（401→/
 import LoginPage from "./pages/LoginPage"; // /login のページコンポーネントを読み込む
 import RequestsListPage from "./pages/RequestsListPage"; // /requests のページコンポーネントを読み込む
 import InboxPage from "./pages/InboxPage"; // /inbox のページコンポーネントを読み込む
+import InboxDetailPage from "./pages/InboxDetailPage"; // /inbox/:id の承認者用詳細ページを読み込んでRouteで使えるようにする
 import RequestCreatePage from "./pages/RequestCreatePage"; // /requests/new のページコンポーネントを読み込む
 import RequestDetailPage from "./pages/RequestDetailPage"; // /requests/:id のページコンポーネントを読み込む
 import RequestEditPage from "./pages/RequestEditPage"; // /requests/:id/edit のページコンポーネントを読み込む（RETURNED編集/再提出の受け皿）
@@ -30,7 +37,6 @@ import styles from "./App.module.css"; // CSS Modules を読み込む
 
 // 既存の疎通確認ページ（/ の表示として残す）
 function HealthCheckPage() {
-
   // useQuery の queryFn として疎通確認APIを叩く関数を定義する
   const fetchHealth = async () => {
     const res = await apiClient.get("/health"); // baseURL=/api と合成して GET /api/health を実行する（失敗時は例外が投げられる）
@@ -38,44 +44,61 @@ function HealthCheckPage() {
   };
 
   // Healthの取得状態（data/isLoading/error）を1つの概念として扱う
-  const { data, isLoading, error } = useQuery({ // 分割代入で取得状態を取り出す
+  const { data, isLoading, error } = useQuery({
+    // 分割代入で取得状態を取り出す
     queryKey: ["health"], // キャッシュキー（この画面の疎通確認を識別する）
     queryFn: fetchHealth, // 実際に通信する関数（上で定義した fetchHealth を使う）
     refetchOnWindowFocus: false, // 画面フォーカスで勝手に再取得しない（旧実装の「初回1回」に寄せる）
-    retry: false // 失敗時に自動リトライしない（旧実装の挙動に寄せる）
+    retry: false, // 失敗時に自動リトライしない（旧実装の挙動に寄せる）
   }); // useQuery の設定ここまで
 
-  const { isLoading: isMeLoading, error: meError, httpStatus: meHttpStatus } = useMeQuery(); // /api/me の判定を共通hookへ委譲する
-  const meStatus = isMeLoading ? "Loading" : (meHttpStatus === 401 ? "未ログイン(401)" : (meError ? "エラー" : "ログイン中")); // 200/401/その他で表示を切り替える
+  const {
+    isLoading: isMeLoading,
+    error: meError,
+    httpStatus: meHttpStatus,
+  } = useMeQuery(); // /api/me の判定を共通hookへ委譲する
+  const meStatus = isMeLoading
+    ? "Loading"
+    : meHttpStatus === 401
+      ? "未ログイン(401)"
+      : meError
+        ? "エラー"
+        : "ログイン中"; // 200/401/その他で表示を切り替える
 
   const status = error ? "失敗" : (data?.status ?? "未確認"); // 表示用ステータス（失敗なら失敗、成功ならstatus、未取得なら未確認）
-  const errorMessage = error  // エラー表示用の文字列を作る（旧実装の表示に寄せる）
-    ? (error?.response ? `HTTP ${error.response.status}` : String(error)) // AxiosエラーならHTTPコード、そうでなければ文字列化する
+  const errorMessage = error // エラー表示用の文字列を作る（旧実装の表示に寄せる）
+    ? error?.response
+      ? `HTTP ${error.response.status}`
+      : String(error) // AxiosエラーならHTTPコード、そうでなければ文字列化する
     : ""; // エラーが無ければ空文字にする
 
   const setHealthSnapshot = useSetAtom(healthSnapshotAtom); // Healthの表示状態を共有atomへ書き込む setter を取得する
   const setToast = useSetAtom(toastAtom); // Toastの表示を共有atomへ書き込む setter を取得する（成功/失敗の通知に使う）
 
-  useEffect(() => { // Healthの表示状態を共有atomへ同期する
+  useEffect(() => {
+    // Healthの表示状態を共有atomへ同期する
     setHealthSnapshot({ status, isLoading, errorMessage }); // 現在の表示状態（status/loading/error）を保存する
   }, [setHealthSnapshot, status, isLoading, errorMessage]); // 表示状態が変わったら同期する
 
-  useEffect(() => { // 疎通結果に応じてToastを表示する
+  useEffect(() => {
+    // 疎通結果に応じてToastを表示する
     if (isLoading) return; // ローディング中はToastを出さない
 
-    if (errorMessage) { // エラー発生時はエラートーストを出す
+    if (errorMessage) {
+      // エラー発生時はエラートーストを出す
       setToast({
         open: true,
         type: "error",
-        message: `Health 失敗: ${errorMessage}` // 失敗Toastを表示する
+        message: `Health 失敗: ${errorMessage}`, // 失敗Toastを表示する
       });
       return; // 失敗時はここで終了する（成功Toastは出さない）
     }
-    if (data?.status) { // 成功（statusが取れた）場合
+    if (data?.status) {
+      // 成功（statusが取れた）場合
       setToast({
         open: true,
         type: "success",
-        message: `Health 成功: ${data.status}` // 成功Toastを表示する
+        message: `Health 成功: ${data.status}`, // 成功Toastを表示する
       });
     }
   }, [isLoading, errorMessage, data?.status, setToast]); // 成功/失敗が確定したタイミングで実行する
@@ -105,102 +128,178 @@ function HealthCheckPage() {
   // },[]); // 依存配列を空にして、初回マウント時に1回だけ実行する
 
   return (
-    <div className={styles.page}> {/* ページコンテナ（CSS Modules） */}
+    <div className={styles.page}>
+      {" "}
+      {/* ページコンテナ（CSS Modules） */}
       <h1 className={styles.title}>Health Check</h1>
-      <p className={styles.text}>Loading:{String(isLoading)}</p> {/* ローディング状態 */}
+      <p className={styles.text}>Loading:{String(isLoading)}</p>{" "}
+      {/* ローディング状態 */}
       <p className={styles.text}>Status: {status}</p> {/* ステータス表示 */}
-      <p className={styles.text}>Me: {meStatus}</p> {/* /me の状態表示 ・/api/me の判定結果（未ログイン/ログイン中/エラー）を表示する*/}
-      {errorMessage && <p className={styles.error}>Error: {errorMessage}</p>} {/* エラーがあれば表示する */}
-      <p className={styles.text}>Backend URL: /api/health</p> {/* 叩いているURLを明示する */}
+      <p className={styles.text}>Me: {meStatus}</p>{" "}
+      {/* /me の状態表示 ・/api/me の判定結果（未ログイン/ログイン中/エラー）を表示する*/}
+      {errorMessage && <p className={styles.error}>Error: {errorMessage}</p>}{" "}
+      {/* エラーがあれば表示する */}
+      <p className={styles.text}>Backend URL: /api/health</p>{" "}
+      {/* 叩いているURLを明示する */}
     </div>
   );
 } // HealthCheckPage ここまで
 
-function AppShell() { // ログイン状態とroleに応じてナビとワークフロー画面を提供する共通シェルを定義する
+function AppShell() {
+  // ログイン状態とroleに応じてナビとワークフロー画面を提供する共通シェルを定義する
 
   const navigate = useNavigate(); // ログアウト後や未ログイン時に /login へ遷移するための関数を取得する
   const queryClient = useQueryClient(); // ログアウト後に ["me"] を invalidate して再取得させるためのクライアントを取得する
   const setToast = useSetAtom(toastAtom); // ログアウト成功/失敗をToastで通知するために toastAtom へ書き込む関数を取得する
 
-  const { data: meData, isLoading: isMeLoading, error: meError, httpStatus: meHttpStatus } = useMeQuery(); // ヘッダー表示の /api/me 判定を共通hookへ委譲する
+  const {
+    data: meData,
+    isLoading: isMeLoading,
+    error: meError,
+    httpStatus: meHttpStatus,
+  } = useMeQuery(); // ヘッダー表示の /api/me 判定を共通hookへ委譲する
   const isLoggedIn = !isMeLoading && meHttpStatus !== 401 && !meError; // ローディング中でも401でもエラーでもないときだけログイン中と扱う
   const role = isLoggedIn ? (meData?.role ?? "") : ""; // ログイン中だけroleを参照し、未ログインは空文字として扱う
   const isApplicant = Boolean(isLoggedIn && role === "APPLICANT"); // 申請者ロールのときだけ申請メニューを出すための判定を作る
-  const isApprover = Boolean(isLoggedIn && (role === "APPROVER" || role === "ADMIN")); // 承認者/管理者ロールのときだけ受信箱メニューを出すための判定を作る
-  const meLabel = isMeLoading ? "Checking..." : (meHttpStatus === 401 ? "Guest" : (meError ? "Error" : (meData?.email ?? "Logged in"))); // 表示ラベルを状態から作る
+  const isApprover = Boolean(
+    isLoggedIn && (role === "APPROVER" || role === "ADMIN"),
+  ); // 承認者/管理者ロールのときだけ受信箱メニューを出すための判定を作る
+  const meLabel = isMeLoading
+    ? "Checking..."
+    : meHttpStatus === 401
+      ? "Guest"
+      : meError
+        ? "Error"
+        : (meData?.email ?? "Logged in"); // 表示ラベルを状態から作る
   const meDisplay = isLoggedIn ? meLabel : "Guest"; // 未ログイン時は要求どおり Me: Guest を固定表示にする
 
-  const logoutMutation = useMutation({ // ログアウト（POST /api/auth/logout）を Mutation として定義する
-    mutationFn: async () => { // ログアウト時に呼び出すAPI処理を定義する
+  const logoutMutation = useMutation({
+    // ログアウト（POST /api/auth/logout）を Mutation として定義する
+    mutationFn: async () => {
+      // ログアウト時に呼び出すAPI処理を定義する
       await apiClient.post("/auth/logout"); // baseURL=/api と合成して POST /api/auth/logout を実行し、セッションから userId を削除させる
     }, // API呼び出しの定義をここで終える
 
-    onSuccess: async () => { // ログアウトが成功したときの後処理を定義する
+    onSuccess: async () => {
+      // ログアウトが成功したときの後処理を定義する
       await queryClient.invalidateQueries({ queryKey: ["me"] }); // /me のキャッシュを無効化して、以後の判定が未ログイン(401)になるように更新する
-      setToast({ // ログアウトが成功したことをユーザーに通知する
+      setToast({
+        // ログアウトが成功したことをユーザーに通知する
         open: true, // Toastを開く指定をする
         type: "success", // 成功タイプのToastにする
-        message: "Logged out successfully" // ログアウト成功のメッセージを表示する
+        message: "Logged out successfully", // ログアウト成功のメッセージを表示する
       }); // setToast の引数を閉じる
       navigate("/login", { replace: true }); // ログアウト後にログインページへリダイレクトし、履歴を残さない
     }, // logout 成功時処理の定義をここで終える
 
-    onError: (error) => { // ログアウトが失敗したときの後処理を定義する
-      const msg = error?.response ? `HTTP ${error.response.status}` : String(error); // AxiosエラーならHTTPコードを、そうでなければ文字列化して表示用メッセージを作る
-      setToast({ // 失敗理由をToastで通知して切り分けしやすくする
+    onError: (error) => {
+      // ログアウトが失敗したときの後処理を定義する
+      const msg = error?.response
+        ? `HTTP ${error.response.status}`
+        : String(error); // AxiosエラーならHTTPコードを、そうでなければ文字列化して表示用メッセージを作る
+      setToast({
+        // 失敗理由をToastで通知して切り分けしやすくする
         open: true, // Toastを開く指定をする
         type: "error", // 失敗タイプのToastにする
-        message: `Logout 失敗: ${msg}` // ログアウト失敗のメッセージを表示する
+        message: `Logout 失敗: ${msg}`, // ログアウト失敗のメッセージを表示する
       }); // setToast の引数を閉じる
-    } // 失敗時処理の定義をここで終える
+    }, // 失敗時処理の定義をここで終える
   }); // logoutMutation の定義を閉じる
 
-  return ( // JSX を返して画面を構成する
-    <div className={styles.app}> {/* 全ページ共通の外枠を表示する */}
+  return (
+    // JSX を返して画面を構成する
+    <div className={styles.app}>
+      {" "}
+      {/* 全ページ共通の外枠を表示する */}
       <ToastHost /> {/* どのページでもToastを出せるようにする */}
-      <nav className={styles.nav}> {/* ヘッダーのナビ領域を表示する */}
-        <Link className={styles.navLink} to="/">疎通確認</Link> {/* 疎通確認画面は残して今は触らないため、常に表示する */}
+      <nav className={styles.nav}>
+        {" "}
+        {/* ヘッダーのナビ領域を表示する */}
+        <Link className={styles.navLink} to="/">
+          疎通確認
+        </Link>{" "}
+        {/* 疎通確認画面は残して今は触らないため、常に表示する */}
         {isApplicant ? ( // 申請者のときだけ申請メニューを表示する分岐を開始する
-          <> {/* 申請メニューをまとめて返すためのフラグメントを開始する */}
-            <Link className={styles.navLink} to="/requests">申請一覧</Link> {/* 申請者だけが自分の申請一覧へ行けるようにリンクを表示する */}
-            <Link className={styles.navLink} to="/requests/new">申請作成</Link> {/* 申請者だけが新規申請作成へ行けるようにリンクを表示する */}
+          <>
+            {" "}
+            {/* 申請メニューをまとめて返すためのフラグメントを開始する */}
+            <Link className={styles.navLink} to="/requests">
+              申請一覧
+            </Link>{" "}
+            {/* 申請者だけが自分の申請一覧へ行けるようにリンクを表示する */}
+            <Link className={styles.navLink} to="/requests/new">
+              申請作成
+            </Link>{" "}
+            {/* 申請者だけが新規申請作成へ行けるようにリンクを表示する */}
           </> /* 申請メニューのフラグメントを閉じる */
-        ) : null} {/* 申請者以外は申請メニューを表示しない */}
+        ) : null}{" "}
+        {/* 申請者以外は申請メニューを表示しない */}
         {isApprover ? ( // 承認者（または管理者）のときだけ受信箱メニューを表示する分岐を開始する
-          <Link className={styles.navLink} to="/inbox">受信箱</Link> /* 承認者（または管理者）だけが受信箱へ行けるようにリンクを表示する */
-        ) : null} {/* 承認者（または管理者）以外は受信箱メニューを表示しない */}
-        <span className={styles.navLink}>Me: {meDisplay}</span> {/* 未ログイン時は Guest を固定し、ログイン時は email 等を表示する */}
+          <Link className={styles.navLink} to="/inbox">
+            受信箱
+          </Link> /* 承認者（または管理者）だけが受信箱へ行けるようにリンクを表示する */
+        ) : null}{" "}
+        {/* 承認者（または管理者）以外は受信箱メニューを表示しない */}
+        <span className={styles.navLink}>Me: {meDisplay}</span>{" "}
+        {/* 未ログイン時は Guest を固定し、ログイン時は email 等を表示する */}
         <button
           type="button" // フォーム送信ではなくクリック操作として扱うために type="button" を指定する
           className={styles.navLink} // 既存のナビリンク用スタイルをボタンにも適用する
-          onClick={() => { if (isLoggedIn) { logoutMutation.mutate(); } else { navigate("/login"); } }} // ログイン中はログアウト、未ログインはログイン画面へ遷移させる
+          onClick={() => {
+            if (isLoggedIn) {
+              logoutMutation.mutate();
+            } else {
+              navigate("/login");
+            }
+          }} // ログイン中はログアウト、未ログインはログイン画面へ遷移させる
           disabled={isMeLoading || logoutMutation.isPending} // 判定中は「ログイン」表示のまま非アクティブにし、送信中も二重操作を防ぐ
         >
-          {isLoggedIn ? "ログアウト" : "ログイン"} {/* ログイン状態に応じてボタンの文言を切り替える */}
-        </button> {/* ログイン/ログアウトを1つのボタンに統合して表示する */}
-      </nav> {/* ナビ領域を閉じる */}
-
-      <Routes> {/* ルート定義を開始する */}
-        <Route path="/" element={<HealthCheckPage />} /> {/* / は疎通確認ページを表示する */}
-        <Route path="/login" element={<LoginPage />} /> {/* /login はログインページを表示する */}
-        <Route element={<RequireAuth />}> {/* 認証が必要なルートをまとめる */}
-          <Route path="/requests" element={<RequestsListPage />} /> {/* /requests を表示する */}
-          <Route path="/requests/new" element={<RequestCreatePage />} /> {/* /requests/new を表示する */}
-          <Route path="/requests/:id" element={<RequestDetailPage />} /> {/* /requests/:id を表示する */}
-          <Route path="/requests/:id/edit" element={<RequestEditPage />} /> {/* /requests/:id/edit を表示する */}
-          <Route path="/inbox" element={<InboxPage />} /> {/* /inbox（一覧入口）を表示する */}
-          <Route path="/inbox/:id" element={<InboxDetailPage />} /> {/* /inbox/:id（承認者用詳細）を表示する */}
-        </Route> {/* RequireAuth グループを閉じる */}
-      </Routes> {/* ルート定義を閉じる */}
+          {isLoggedIn ? "ログアウト" : "ログイン"}{" "}
+          {/* ログイン状態に応じてボタンの文言を切り替える */}
+        </button>{" "}
+        {/* ログイン/ログアウトを1つのボタンに統合して表示する */}
+      </nav>{" "}
+      {/* ナビ領域を閉じる */}
+      <Routes>
+        {" "}
+        {/* ルート定義を開始する */}
+        <Route path="/" element={<HealthCheckPage />} />{" "}
+        {/* / は疎通確認ページを表示する */}
+        <Route path="/login" element={<LoginPage />} />{" "}
+        {/* /login はログインページを表示する */}
+        <Route element={<RequireAuth />}>
+          {" "}
+          {/* 認証が必要なルートをまとめる */}
+          <Route path="/requests" element={<RequestsListPage />} />{" "}
+          {/* /requests を表示する */}
+          <Route path="/requests/new" element={<RequestCreatePage />} />{" "}
+          {/* /requests/new を表示する */}
+          <Route path="/requests/:id" element={<RequestDetailPage />} />{" "}
+          {/* /requests/:id を表示する */}
+          <Route path="/requests/:id/edit" element={<RequestEditPage />} />{" "}
+          {/* /requests/:id/edit を表示する */}
+          <Route path="/inbox" element={<InboxPage />} />{" "}
+          {/* /inbox（一覧入口）を表示する */}
+          <Route path="/inbox/:id" element={<InboxDetailPage />} />{" "}
+          {/* /inbox/:id（承認者用詳細）を表示する */}
+        </Route>{" "}
+        {/* RequireAuth グループを閉じる */}
+      </Routes>{" "}
+      {/* ルート定義を閉じる */}
     </div> /* appコンテナを閉じる */
   ); // return を閉じる
 } // AppShell を閉じる
 
 // BrowserRouter を提供して、Router配下で AppShell を描画する最上位コンポーネントを定義する
-export default function App() { // BrowserRouter を提供して、Router配下で AppShell を描画する最上位コンポーネントを定義する
-  return ( // Router コンテキストを供給するために BrowserRouter を返す
-    <BrowserRouter> {/* ルーティング機能を有効化して、子コンポーネントで useNavigate 等を使えるようにする */}
-      <AppShell /> {/* Router配下のUI（ヘッダー＋Routes）をまとめた AppShell を描画する */}
+export default function App() {
+  // BrowserRouter を提供して、Router配下で AppShell を描画する最上位コンポーネントを定義する
+  return (
+    // Router コンテキストを供給するために BrowserRouter を返す
+    <BrowserRouter>
+      {" "}
+      {/* ルーティング機能を有効化して、子コンポーネントで useNavigate 等を使えるようにする */}
+      <AppShell />{" "}
+      {/* Router配下のUI（ヘッダー＋Routes）をまとめた AppShell を描画する */}
     </BrowserRouter>
   );
 }

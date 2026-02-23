@@ -7,12 +7,14 @@
 package com.example.expenseworkflow.controller.dto; // RequestsControllerからimportして使うdtoパッケージを宣言する
 
 import lombok.AllArgsConstructor; // Controller側で簡単に生成できる全引数コンストラクタを作るために読み込む
-import lombok.Getter; // JSON化のためにgetterを生成するために読み込む
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter // Jacksonがフィールド値を取得できるようにgetterを生成する
+@Data
+@NoArgsConstructor
 @AllArgsConstructor // Controllerで new するときに必要な全引数コンストラクタを生成する
 public class RequestSummaryResponse { // 申請サマリを表す返却DTOクラスを定義する
-	private String id; // 申請ID（例：REQ-001）を返すフィールドを定義する
+	private Long  id; // 申請ID（例：REQ-001）を返すフィールドを定義する
 	private String title; // 件名を返すフィールドを定義する
 	private int amount; // 金額を返すフィールドを定義する
 	private String status; // 状態（例：DRAFT）を返すフィールドを定義する

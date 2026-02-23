@@ -14,9 +14,10 @@ import { useSetAtom } from "jotai"; // 成功/失敗をToastで通知するた�
 
 import { apiClient } from "../lib/apiClient"; // /api へ通信するAxiosクライアントを使うために読み込む
 import { toastAtom } from "../lib/atoms"; // Toast表示状態を更新するためのatomを読み込む
-import { toStatusLabel } from "../lib/statusLabel"; // ステータス表示を日本語化する変換関数を読み込む
+import { toStatusLabel, toRequestLabel } from "../lib/statusLabel"; // ステータス・申請ID表示の変換関数を読み込む
 
-export default function InboxDetailPage() { // /inbox/:id の承認者用詳細ページを定義する
+export default function InboxDetailPage() {
+  // /inbox/:id の承認者用詳細ページを定義する
 
   const params = useParams(); // URLの :id を取り出すためにパラメータを取得する
   const requestId = params.id; // /inbox/:id の :id を申請ID（REQ-xxx）として扱う
@@ -26,48 +27,74 @@ export default function InboxDetailPage() { // /inbox/:id の承認者用詳細�
 
   const [returnComment, setReturnComment] = useState(""); // 差戻しコメント入力欄の内容を保持するstateを用意する
 
-  const fetchDetail = async () => { // 承認者用の詳細表示に必要な情報を取得する関数を定義する
-    const res = await apiClient.get(`/requests/${requestId}`); // 既存の詳細取得API（GET /api/requests/{id}）を呼び出して詳細データを取得する
+  const fetchDetail = async () => {
+    // 承認者用の詳細表示に必要な情報を取得する関数を定義する
+    const res = await apiClient.get(`/inbox/${requestId}`); // 承認者専用の詳細取得API（GET /api/inbox/{id}）を呼び出して詳細データを取得する
     return res.data; // 取得した詳細データを返してuseQuery側で使えるようにする
   }; // fetchDetail の定義を閉じる
 
-  const { data, isLoading, error } = useQuery({ // 詳細取得クエリを定義する
+  const { data, isLoading, error } = useQuery({
+    // 詳細取得クエリを定義する
     queryKey: ["requestDetailForInbox", requestId], // 承認者詳細のキャッシュキーを申請ID単位にする
     queryFn: fetchDetail, // 実際の取得処理は fetchDetail に委譲する
-    enabled: Boolean(requestId) // requestId が取れているときだけ取得して無駄な通信を防ぐ
+    enabled: Boolean(requestId), // requestId が取れているときだけ取得して無駄な通信を防ぐ
   }); // useQuery の定義を閉じる
 
-  const approveMutation = useMutation({ // 承認操作（POST /approve）を実行するMutationを定義する
-    mutationFn: async () => { // 承認時に呼ぶ関数を定義する
+  const approveMutation = useMutation({
+    // 承認操作（POST /approve）を実行するMutationを定義する
+    mutationFn: async () => {
+      // 承認時に呼ぶ関数を定義する
       await apiClient.post(`/requests/${requestId}/approve`); // POST /api/requests/{id}/approve を呼び出して承認遷移させる
     }, // mutationFn を閉じる
-    onSuccess: async () => { // 承認成功時の後処理を定義する
+    onSuccess: async () => {
+      // 承認成功時の後処理を定義する
       await queryClient.invalidateQueries({ queryKey: ["inbox"] }); // 受信箱一覧を再取得して最新化する
-      await queryClient.invalidateQueries({ queryKey: ["requestDetailForInbox", requestId] }); // この詳細も再取得して表示を最新化する
+      await queryClient.invalidateQueries({
+        queryKey: ["requestDetailForInbox", requestId],
+      }); // この詳細も再取得して表示を最新化する
       setToast({ open: true, type: "success", message: "承認しました" }); // 成功をToastで通知する
       navigate("/inbox", { replace: true }); // 一覧へ戻して次の処理に進めるようにする
     }, // onSuccess を閉じる
-    onError: (e) => { // 承認失敗時の処理を定義する
-      setToast({ open: true, type: "error", message: `承認に失敗: ${String(e)}` }); // 失敗理由をToastへ出して切り分けしやすくする
-    } // onError を閉じる
+    onError: (e) => {
+      // 承認失敗時の処理を定義する
+      setToast({
+        open: true,
+        type: "error",
+        message: `承認に失敗: ${String(e)}`,
+      }); // 失敗理由をToastへ出して切り分けしやすくする
+    }, // onError を閉じる
   }); // approveMutation を閉じる
 
-  const returnMutation = useMutation({ // 差戻し操作（POST /return）を実行するMutationを定義する
-    mutationFn: async () => { // 差戻し時に呼ぶ関数を定義する
-      await apiClient.post(`/requests/${requestId}/return`, { comment: returnComment }); // 差戻しコメントをbodyに付けて POST /api/requests/{id}/return を呼ぶ
+  const returnMutation = useMutation({
+    // 差戻し操作（POST /return）を実行するMutationを定義する
+    mutationFn: async () => {
+      // 差戻し時に呼ぶ関数を定義する
+      await apiClient.post(`/requests/${requestId}/return`, {
+        comment: returnComment,
+      }); // 差戻しコメントをbodyに付けて POST /api/requests/{id}/return を呼ぶ
     }, // mutationFn を閉じる
-    onSuccess: async () => { // 差戻し成功時の後処理を定義する
+    onSuccess: async () => {
+      // 差戻し成功時の後処理を定義する
       await queryClient.invalidateQueries({ queryKey: ["inbox"] }); // 受信箱一覧を再取得して最新化する
-      await queryClient.invalidateQueries({ queryKey: ["requestDetailForInbox", requestId] }); // この詳細も再取得して表示を最新化する
+      await queryClient.invalidateQueries({
+        queryKey: ["requestDetailForInbox", requestId],
+      }); // この詳細も再取得して表示を最新化する
       setToast({ open: true, type: "success", message: "差戻しました" }); // 成功をToastで通知する
       navigate("/inbox", { replace: true }); // 一覧へ戻して次の処理に進めるようにする
     }, // onSuccess を閉じる
-    onError: (e) => { // 差戻し失敗時の処理を定義する
-      setToast({ open: true, type: "error", message: `差戻しに失敗: ${String(e)}` }); // 失敗理由をToastへ出して切り分けしやすくする
-    } // onError を閉じる
+    onError: (e) => {
+      // 差戻し失敗時の処理を定義する
+      setToast({
+        open: true,
+        type: "error",
+        message: `差戻しに失敗: ${String(e)}`,
+      }); // 失敗理由をToastへ出して切り分けしやすくする
+    }, // onError を閉じる
   }); // returnMutation を閉じる
 
-  const canReturn = Boolean(returnComment && String(returnComment).trim().length > 0); // コメントが空でないときだけ差戻し送信を許可する判定を作る
+  const canReturn = Boolean(
+    returnComment && String(returnComment).trim().length > 0,
+  ); // コメントが空でないときだけ差戻し送信を許可する判定を作る
 
   if (isLoading) return <p>Loading...</p>; // 詳細取得中はローディング表示にする
   if (error) return <p>エラー: {String(error)}</p>; // 取得失敗時はエラー表示にして状況を見える化する
@@ -76,13 +103,16 @@ export default function InboxDetailPage() { // /inbox/:id の承認者用詳細�
   return (
     <div>
       <h1>受信箱：詳細</h1> {/* 承認者が詳細画面だと分かる見出しを表示する */}
-      <p>申請ID：{requestId}</p> {/* URL由来の申請IDを表示して対象を明確にする */}
-      <p>ステータス：{toStatusLabel(data.status)}</p> {/* 取得したstatusを日本語ラベルに変換して表示する */}
+      <p>申請ID：{toRequestLabel(requestId)}</p>{" "}
+      {/* URL由来の申請IDを表示して対象を明確にする */}
+      <p>ステータス：{toStatusLabel(data.status)}</p>{" "}
+      {/* 取得したstatusを日本語ラベルに変換して表示する */}
       <p>タイトル：{data.title}</p> {/* 申請タイトルを表示して判断材料にする */}
       <p>金額：{data.amount}</p> {/* 金額を表示して判断材料にする */}
-      <p>目的：{data.purpose ?? "-"}</p> {/* purpose が取得できる場合は表示し、無ければ - を表示する */}
-      <p>メモ：{data.note ?? "-"}</p> {/* note が取得できる場合は表示し、無ければ - を表示する */}
-
+      <p>目的：{data.purpose ?? "-"}</p>{" "}
+      {/* purpose が取得できる場合は表示し、無ければ - を表示する */}
+      <p>メモ：{data.note ?? "-"}</p>{" "}
+      {/* note が取得できる場合は表示し、無ければ - を表示する */}
       <h2>操作</h2> {/* 承認者の操作ブロックであることを示す見出しを表示する */}
       <button
         type="button" // フォーム送信ではなくクリック操作として扱う
@@ -91,7 +121,6 @@ export default function InboxDetailPage() { // /inbox/:id の承認者用詳細�
       >
         承認
       </button>
-
       <div>
         <h3>差戻し</h3> {/* 差戻し操作であることを見出しで示す */}
         <textarea
@@ -108,7 +137,6 @@ export default function InboxDetailPage() { // /inbox/:id の承認者用詳細�
           差戻す
         </button>
       </div>
-
       <p>
         <Link to="/inbox">一覧に戻る</Link>
       </p>

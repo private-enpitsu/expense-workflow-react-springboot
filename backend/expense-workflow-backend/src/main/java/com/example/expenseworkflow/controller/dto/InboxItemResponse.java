@@ -8,13 +8,15 @@
 package com.example.expenseworkflow.controller.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter
+@Data
+@NoArgsConstructor
 @AllArgsConstructor
 public class InboxItemResponse {
 	
-	private String requestId; // 申請ID（例：REQ-001）を返すフィールドを保持する
+	private Long id;
 	private String title; // 件名を返すフィールドを保持する
 	private int amount; // 金額を返すフィールドを保持する
 	private String status; // 状態（例：SUBMITTED）を返すフィールドを保持する

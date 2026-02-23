@@ -6,23 +6,25 @@
 
 // import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 // import { useSetAtom } from "jotai";
-
+import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "../lib/apiClient";
 // import { toastAtom } from "../lib/atoms";
-import { toStatusLabel } from "../lib/statusLabel"; // ステータス表示を日本語化する変換関数を読み込む
+import { toStatusLabel, toRequestLabel } from "../lib/statusLabel"; // ステータス・申請ID表示の変換関数を読み込む
 
+export default function InboxPage() {
+  // /inbox のページコンポーネントを定義し、一覧から詳細へ遷移する入口を提供する
 
-export default function InboxPage() { // /inbox のページコンポーネントを定義し、一覧から詳細へ遷移する入口を提供する
-
-  const fetchInbox = async () => { // Inbox一覧を取得する関数を定義する
+  const fetchInbox = async () => {
+    // Inbox一覧を取得する関数を定義する
     const res = await apiClient.get("/inbox"); // baseURL=/api と合成して GET /api/inbox を呼び出す
     return res.data; // 受信箱の一覧データを返す
   }; // fetchInbox の定義を閉じる
 
-  const { data, isLoading, error } = useQuery({ // /api/inbox を取得するクエリを定義する
+  const { data, isLoading, error } = useQuery({
+    // /api/inbox を取得するクエリを定義する
     queryKey: ["inbox"], // Inbox一覧のキャッシュキーを ["inbox"] に固定する
-    queryFn: fetchInbox // 実際の取得処理は fetchInbox に委譲する
+    queryFn: fetchInbox, // 実際の取得処理は fetchInbox に委譲する
   }); // useQuery の定義を閉じる
 
   if (isLoading) return <p>Loading...</p>; // 読み込み中はローディング表示にする
@@ -42,24 +44,37 @@ export default function InboxPage() { // /inbox のページコンポーネン�
           </tr>
         </thead>
         <tbody>
-          {data.map((item) => ( // 取得した一覧データを1行ずつ処理する
-            <tr key={item.requestId}> {/* requestId を行の一意キーとして使う */}
-              <td> {/* 申請IDセルを定義する */}
-                <Link to={`/inbox/${item.requestId}`}>{item.requestId}</Link> {/* 申請IDから承認者用詳細へ遷移できるようにリンクにする */}
-              </td> {/* 申請IDセルを閉じる */}
-              <td>{item.title}</td> {/* タイトルを表示する */}
-              <td>{item.amount}</td> {/* 金額を表示する */}
-              <td>{toStatusLabel(item.status)}</td> {/* ステータス（内部コード）を日本語ラベルに変換して表示する */}
-              <td> {/* 操作セルを定義する */}
-                <Link to={`/inbox/${item.requestId}`}>詳細</Link> {/* 一覧は入口に徹し、操作は詳細で行うため詳細リンクだけを表示する */}
-              </td>
-            </tr>
-          ))}
+          {data.map(
+            (
+              item, // 取得した一覧データを1行ずつ処理する
+            ) => (
+              <tr key={item.id}>
+                {" "}
+                {/* requestId を行の一意キーとして使う */}
+                <td>
+                  {" "}
+                  {/* 申請IDセルを定義する */}
+                  <Link to={`/inbox/${item.id}`}>
+                    {toRequestLabel(item.id)}
+                  </Link>{" "}
+                  {/* 申請IDから承認者用詳細へ遷移できるようにリンクにする */}
+                </td>{" "}
+                {/* 申請IDセルを閉じる */}
+                <td>{item.title}</td> {/* タイトルを表示する */}
+                <td>{item.amount}</td> {/* 金額を表示する */}
+                <td>{toStatusLabel(item.status)}</td>{" "}
+                {/* ステータス（内部コード）を日本語ラベルに変換して表示する */}
+                <td>
+                  {" "}
+                  {/* 操作セルを定義する */}
+                  <Link to={`/inbox/${item.id}`}>詳細</Link>{" "}
+                  {/* 一覧は入口に徹し、操作は詳細で行うため詳細リンクだけを表示する */}
+                </td>
+              </tr>
+            ),
+          )}
         </tbody>
       </table>
     </div>
   );
 }
-
-
-

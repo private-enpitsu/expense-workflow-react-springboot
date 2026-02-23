@@ -31,3 +31,16 @@ build/
 
 ### VS Code ###
 .vscode/
+
+
+### エクリプス プロジェクト設定
+*.properties
+
+
+# .gitignore は
+# 「これから新しく追加するファイルを無視する
+
+### ●● railway対応用 ●● ###
+### application.propertiesを、GitHub上では更新しない ###
+# 変更の追跡を一時的に停止 を実施 コマンドで実施
+# git update-index --assume-unchanged <ファイル名>

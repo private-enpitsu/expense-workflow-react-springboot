@@ -15,7 +15,7 @@ import lombok.Getter; // JSON化で参照されるgetterを自動生成するた
 @Getter
 @AllArgsConstructor
 public class RequestDetailResponse {
-	private String id; // 申請ID（例：REQ-001）を返すフィールドを保持する
+	private Long id; // 申請ID（例：REQ-001）を返すフィールドを保持する
 	private String title; // 件名を返すフィールドを保持する
 	private int amount; // 金額を返すフィールドを保持する
 	private String status; // ステータス（例：DRAFT/SUBMITTED/APPROVED）を返すフィールドを保持する

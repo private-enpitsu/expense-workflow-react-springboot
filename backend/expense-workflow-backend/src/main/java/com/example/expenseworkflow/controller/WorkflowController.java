@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.example.expenseworkflow.controller.dto.InboxItemResponse;
+import com.example.expenseworkflow.controller.dto.RequestDetailResponse;
 import com.example.expenseworkflow.store.RequestStore;
 
 import lombok.RequiredArgsConstructor;
@@ -44,9 +45,20 @@ public class WorkflowController {
 		return ResponseEntity.ok(items); // HTTP 200でJSON（items）を返します。
 	}
 
+	// 承認者が自分のInbox申請を詳細取得する（GET /api/inbox/{id}）
+	@GetMapping("/inbox/{id}")
+	public ResponseEntity<RequestDetailResponse> inboxDetail(HttpSession session, @PathVariable("id") Long id) {
+		Long userId = requireUserId(session); // 未ログインなら401にする
+		RequestDetailResponse detail = requestStore.findByIdForApprover(userId, id); // 承認者専用の詳細取得をStoreへ委譲する
+		if (detail == null) { // 見つからない/権限なしの場合
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+		}
+		return ResponseEntity.ok(detail);
+	}
+
 	// 申請を提出してDRAFT→SUBMITTEDへ遷移させる
 	@PostMapping("/requests/{id}/submit") // POST /requests/{id}/submit をこのメソッドに割り当てます（{id}はパス変数）。
-	public ResponseEntity<Void> submit(HttpSession session, @PathVariable("id") String id) { // 戻りはボディなし（Void）。成功/失敗はHTTPステータスで表す設計です。idはURLの {id} を文字列で受け取ります。
+	public ResponseEntity<Void> submit(HttpSession session, @PathVariable("id") Long id) { // 戻りはボディなし（Void）。成功/失敗はHTTPステータスで表す設計です。idはURLの {id} を数値で受け取ります。 { // 戻りはボディなし（Void）。成功/失敗はHTTPステータスで表す設計です。idはURLの {id} を文字列で受け取ります。
 		Long userId = requireUserId(session); // セッションからユーザーIDを必須取得（未ログインなら401）。
 		boolean ok = requestStore.submit(userId, id); // 申請を「提出」する処理を委譲。成功したらtrue、対象がない/権限なし等ならfalseにする想定。
 		if (!ok) { // submitが失敗（false）だった場合の分岐です。
@@ -57,7 +69,7 @@ public class WorkflowController {
 
 	// 申請を承認してSUBMITTED→APPROVEDへ遷移させる
 	@PostMapping("/requests/{id}/approve")
-	public ResponseEntity<Void> approve(HttpSession session, @PathVariable("id") String id) {
+	public ResponseEntity<Void> approve(HttpSession session, @PathVariable("id") Long id) {
 		Long userId = requireUserId(session);
 		boolean ok = requestStore.approve(userId, id);
 		if (!ok) {
@@ -70,7 +82,7 @@ public class WorkflowController {
 	@PostMapping("/requests/{id}/return") // 差戻し操作のURLをこのメソッドに割り当てる
 	public ResponseEntity<Void> returnRequest( // 差戻しのHTTPエンドポイントを定義する
 			HttpSession session, // セッションからログインユーザーIDを取得するために受け取る
-			@PathVariable("id") String id, // パス変数の申請ID（REQ-xxx形式）を受け取る
+			@PathVariable("id") Long id, // パス変数の申請ID（REQ-xxx形式）を受け取る
 			@org.springframework.web.bind.annotation.RequestBody com.example.expenseworkflow.controller.dto.ReturnRequestRequest body // JSONボディからコメントを受け取る
 	) { // メソッド定義を開始する
 		Long userId = requireUserId(session); // セッションからユーザーIDを必須取得し、未ログインなら401にする
