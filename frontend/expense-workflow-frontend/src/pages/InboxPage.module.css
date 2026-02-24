@@ -1,0 +1,64 @@
+/* ============================================================
+   InboxPage.module.css
+   ニューモーフィズム準拠（globals.css の変数・汎用クラスを活用）
+   ============================================================ */
+
+.page {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* 申請行（凹インセットカード） */
+.item {
+  background: var(--bg);
+  border-radius: 14px;
+  box-shadow:
+    inset 4px 4px 10px var(--shadow-dark),
+    inset -4px -4px 10px var(--shadow-light);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  text-decoration: none;
+  transition: box-shadow 0.2s;
+}
+
+.item:hover {
+  box-shadow:
+    4px 4px 12px var(--shadow-dark),
+    -4px -4px 12px var(--shadow-light);
+}
+
+/* 申請ID */
+.itemId {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  min-width: 80px;
+}
+
+/* タイトル */
+.itemTitle {
+  flex: 1;
+  font-size: 14px;
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+/* 金額 */
+.itemAmount {
+  font-size: 13px;
+  color: var(--text-main);
+  white-space: nowrap;
+}
+
+/* 空状態 */
+.empty {
+  text-align: center;
+  padding: 40px 0;
+  color: var(--text-sub);
+  font-size: 14px;
+}

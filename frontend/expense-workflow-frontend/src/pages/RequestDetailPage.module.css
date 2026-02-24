@@ -1,0 +1,157 @@
+/* ============================================================
+   RequestDetailPage.module.css
+   ニューモーフィズム準拠（globals.css の変数・汎用クラスを活用）
+   ============================================================ */
+
+.page {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ============================================================
+   情報カード（凸）
+   ============================================================ */
+
+.card {
+  background: var(--bg);
+  border-radius: var(--radius);
+  box-shadow:
+    8px 8px 20px var(--shadow-dark),
+    -8px -8px 20px var(--shadow-light);
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* 各フィールド行（凹インセット） */
+.field {
+  background: var(--bg);
+  border-radius: 14px;
+  box-shadow:
+    inset 4px 4px 10px var(--shadow-dark),
+    inset -4px -4px 10px var(--shadow-light);
+  padding: 12px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fieldLabel {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-sub);
+}
+
+.fieldValue {
+  font-size: 14px;
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+/* ステータス行：バッジで表示 */
+.statusRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 差戻しコメント（RETURNED時） */
+.returnComment {
+  background: var(--bg);
+  border-radius: 14px;
+  box-shadow:
+    inset 4px 4px 10px var(--shadow-dark),
+    inset -4px -4px 10px var(--shadow-light);
+  padding: 12px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.returnCommentLabel {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent4);
+}
+
+.returnCommentValue {
+  font-size: 14px;
+  color: var(--text-main);
+  line-height: 1.6;
+}
+
+/* ============================================================
+   アクションボタン行
+   ============================================================ */
+
+.actions {
+  display: flex;
+  gap: 12px;
+}
+
+/* 修正するボタン（アクセント） */
+.btnEdit {
+  flex: 1;
+  padding: 13px 0;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent);
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: center;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow:
+    5px 5px 12px var(--shadow-dark),
+    -5px -5px 12px var(--shadow-light);
+}
+.btnEdit:hover {
+  background: #4a6fa8;
+  transform: translateY(-2px);
+  box-shadow:
+    7px 7px 16px var(--shadow-dark),
+    -7px -7px 16px var(--shadow-light);
+}
+
+/* 一覧に戻るボタン（通常） */
+.btnBack {
+  flex: 1;
+  padding: 13px 0;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-sub);
+  background: var(--bg);
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: center;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow:
+    5px 5px 12px var(--shadow-dark),
+    -5px -5px 12px var(--shadow-light);
+}
+.btnBack:hover {
+  color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow:
+    7px 7px 16px var(--shadow-dark),
+    -7px -7px 16px var(--shadow-light);
+}

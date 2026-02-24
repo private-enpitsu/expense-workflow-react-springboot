@@ -57,7 +57,7 @@
 }
 
 /* ============================================================
-   申請行（凹インセットカード）
+   申請行（凹インセットカード → ホバーで凸浮上）
    ============================================================ */
 
 .item {
@@ -70,6 +70,15 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  text-decoration: none;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.item:hover {
+  box-shadow:
+    4px 4px 12px var(--shadow-dark),
+    -4px -4px 12px var(--shadow-light);
+  transform: translateY(-2px);
 }
 
 /* 行の上段：ID・金額を横並び */
@@ -84,11 +93,6 @@
   font-size: 13px;
   font-weight: 600;
   color: var(--accent);
-  text-decoration: none;
-  transition: color 0.2s;
-}
-.itemId:hover {
-  color: #4a6fa8;
 }
 
 .itemAmount {

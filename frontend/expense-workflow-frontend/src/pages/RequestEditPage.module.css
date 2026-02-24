@@ -1,0 +1,231 @@
+/* ============================================================
+   RequestEditPage.module.css
+   ニューモーフィズム準拠（globals.css の変数・汎用クラスを活用）
+   ============================================================ */
+
+.page {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ============================================================
+   フォームカード（凸）
+   ============================================================ */
+
+.card {
+  background: var(--bg);
+  border-radius: var(--radius);
+  box-shadow:
+    8px 8px 20px var(--shadow-dark),
+    -8px -8px 20px var(--shadow-light);
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ラベル＋入力のセット */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.field span {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-sub);
+  padding-left: 4px;
+}
+
+/* 凹入力欄 */
+.field input,
+.field textarea {
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: var(--bg);
+  font-size: 14px;
+  color: var(--text-main);
+  border: none;
+  outline: none;
+  resize: none;
+  font-family: inherit;
+  transition: box-shadow 0.2s;
+  box-shadow:
+    inset 5px 5px 12px var(--shadow-dark),
+    inset -5px -5px 12px var(--shadow-light);
+}
+
+.field input:focus,
+.field textarea:focus {
+  box-shadow:
+    inset 5px 5px 12px var(--shadow-dark),
+    inset -5px -5px 12px var(--shadow-light),
+    0 0 0 2px rgba(108, 142, 191, 0.4);
+}
+
+.field input:disabled,
+.field textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ============================================================
+   差戻しコメント表示エリア
+   ============================================================ */
+
+.returnComment {
+  background: var(--bg);
+  border-radius: var(--radius);
+  box-shadow:
+    8px 8px 20px var(--shadow-dark),
+    -8px -8px 20px var(--shadow-light);
+  padding: 18px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.returnCommentLabel {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent4);
+}
+
+.returnCommentValue {
+  font-size: 14px;
+  color: var(--text-main);
+  line-height: 1.6;
+}
+
+/* ============================================================
+   編集不可メッセージカード
+   ============================================================ */
+
+.notEditable {
+  background: var(--bg);
+  border-radius: var(--radius);
+  box-shadow:
+    8px 8px 20px var(--shadow-dark),
+    -8px -8px 20px var(--shadow-light);
+  padding: 24px 28px;
+  color: var(--text-sub);
+  font-size: 14px;
+}
+
+/* ============================================================
+   アクションボタン行
+   ============================================================ */
+
+.actions {
+  display: flex;
+  gap: 12px;
+}
+
+/* 保存ボタン（通常） */
+.btnSave {
+  flex: 1;
+  padding: 13px 0;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-sub);
+  background: var(--bg);
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  box-shadow:
+    5px 5px 12px var(--shadow-dark),
+    -5px -5px 12px var(--shadow-light);
+}
+.btnSave:hover:not(:disabled) {
+  color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow:
+    7px 7px 16px var(--shadow-dark),
+    -7px -7px 16px var(--shadow-light);
+}
+.btnSave:active:not(:disabled) {
+  transform: none;
+  box-shadow:
+    inset 4px 4px 8px var(--shadow-dark),
+    inset -4px -4px 8px var(--shadow-light);
+}
+.btnSave:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 再提出ボタン（アクセント） */
+.btnResubmit {
+  flex: 1;
+  padding: 13px 0;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent);
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  box-shadow:
+    5px 5px 12px var(--shadow-dark),
+    -5px -5px 12px var(--shadow-light);
+}
+.btnResubmit:hover:not(:disabled) {
+  background: #4a6fa8;
+  transform: translateY(-2px);
+  box-shadow:
+    7px 7px 16px var(--shadow-dark),
+    -7px -7px 16px var(--shadow-light);
+}
+.btnResubmit:active:not(:disabled) {
+  transform: none;
+  box-shadow:
+    inset 4px 4px 8px rgba(0,0,0,0.15),
+    inset -2px -2px 6px rgba(255,255,255,0.1);
+}
+.btnResubmit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 詳細に戻るリンクボタン（通常） */
+.btnBack {
+  flex: 1;
+  padding: 13px 0;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-sub);
+  background: var(--bg);
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: center;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow:
+    5px 5px 12px var(--shadow-dark),
+    -5px -5px 12px var(--shadow-light);
+}
+.btnBack:hover {
+  color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow:
+    7px 7px 16px var(--shadow-dark),
+    -7px -7px 16px var(--shadow-light);
+}

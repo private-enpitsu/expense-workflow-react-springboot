@@ -58,6 +58,7 @@ button {
   cursor: pointer;
   border: none;
   outline: none;
+  text-align: center;
 }
 
 input, textarea, select {

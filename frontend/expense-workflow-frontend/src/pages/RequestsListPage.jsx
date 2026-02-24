@@ -61,16 +61,13 @@ export default function RequestsListPage() {
 
                 {/* 申請行（凹インセット） */}
                 {items.map((req) => (
-                  <div key={req.id} className={styles.item}>
+                  <Link key={req.id} to={`/requests/${req.id}`} className={styles.item}>
 
                     {/* ID・金額 */}
                     <div className={styles.itemRow}>
-                      <Link
-                        to={`/requests/${req.id}`}
-                        className={styles.itemId}
-                      >
+                      <span className={styles.itemId}>
                         {toRequestLabel(req.id)}
-                      </Link>
+                      </span>
                       <span className={styles.itemAmount}>
                         ¥{req.amount.toLocaleString()}
                       </span>
@@ -84,7 +81,7 @@ export default function RequestsListPage() {
                       </div>
                     )}
 
-                  </div>
+                  </Link>
                 ))}
 
               </section>
