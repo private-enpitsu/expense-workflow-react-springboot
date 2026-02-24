@@ -40,7 +40,8 @@ export default function RequestDetailPage() {
     ? error.response?.status ? `HTTP ${error.response.status}` : String(error)
     : "";
 
-  const canEditReturned = Boolean(data && data.status === "RETURNED");
+  const canEdit = Boolean(data && (data.status === "RETURNED" || data.status === "DRAFT"));
+  const isReturned = Boolean(data && data.status === "RETURNED");
 
   return (
     <div className={styles.page}>
@@ -90,7 +91,7 @@ export default function RequestDetailPage() {
           </div>
 
           {/* 差戻しコメント（RETURNEDかつコメントありのみ） */}
-          {canEditReturned && data.lastReturnComment && (
+          {isReturned && data.lastReturnComment && (
             <div className={styles.returnComment}>
               <span className={styles.returnCommentLabel}>差戻しコメント</span>
               <span className={styles.returnCommentValue}>{data.lastReturnComment}</span>
@@ -99,7 +100,7 @@ export default function RequestDetailPage() {
 
           {/* アクションボタン */}
           <div className={styles.actions}>
-            {canEditReturned && (
+            {canEdit && (
               <Link to={`/requests/${requestId}/edit`} className={styles.btnEdit}>
                 修正する
               </Link>

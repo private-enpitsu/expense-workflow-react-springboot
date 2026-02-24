@@ -45,7 +45,8 @@ export default function RequestEditPage() {
     setIsEditStarted(true);
   };
 
-  const canEditReturned = Boolean(data && data.status === "RETURNED");
+  const canEdit = Boolean(data && (data.status === "RETURNED" || data.status === "DRAFT"));
+  const isReturned = Boolean(data && data.status === "RETURNED");
 
   const saveMutation = useMutation({
     mutationFn: async () => {
@@ -99,24 +100,24 @@ export default function RequestEditPage() {
 
       {!isLoading && !error && data && (
         <>
-          {/* RETURNED以外：編集不可の案内 */}
-          {!canEditReturned && (
+          {/* RETURNED以外かつDRAFT以外：編集不可の案内 */}
+          {!canEdit && (
             <div className={styles.notEditable}>
-              <p>この申請は差戻し（RETURNED）のときだけ編集できます。</p>
+              <p>この申請は下書き（DRAFT）または差戻し（RETURNED）のときだけ編集できます。</p>
               <p>現在の状態：{toStatusLabel(data.status)}</p>
             </div>
           )}
 
           {/* RETURNED：差戻しコメント表示 */}
-          {canEditReturned && data.lastReturnComment && (
+          {isReturned && data.lastReturnComment && (
             <div className={styles.returnComment}>
               <span className={styles.returnCommentLabel}>差戻しコメント</span>
               <span className={styles.returnCommentValue}>{data.lastReturnComment}</span>
             </div>
           )}
 
-          {/* RETURNED：編集フォーム */}
-          {canEditReturned && (
+          {/* DRAFT / RETURNED：編集フォーム */}
+          {canEdit && (
             <div className={styles.card}>
 
               <label className={styles.field}>
@@ -159,7 +160,7 @@ export default function RequestEditPage() {
 
           {/* アクションボタン */}
           <div className={styles.actions}>
-            {canEditReturned && (
+            {canEdit && (
               <>
                 <button
                   type="button"

@@ -115,7 +115,7 @@
 		updated_at = CURRENT_TIMESTAMP <!-- 更新時刻を更新して、編集した事実をDB上に残せるようにします。 -->
 		WHERE id = #{id} <!-- 対象申請IDを一致させて、別の申請を更新しないようにします。 -->
 		AND applicant_id = #{applicantUserId} <!-- 申請者本人の申請だけ更新できるようにして、他人の申請の編集保存を防ぎます。 -->
-		AND status = 'RETURNED' <!-- 差戻し状態（RETURNED）のときだけ編集保存できるようにして、提出済み等の編集を防ぎます。 -->
+		AND status IN ('DRAFT','RETURNED') <!-- DRAFT（下書き）とRETURNED（差戻し）のときだけ編集保存できるようにして、提出済み等の編集を防ぎます。 -->
 	</update>
 	
 	<update id="updateStatusForApprover">
