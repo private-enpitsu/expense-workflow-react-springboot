@@ -1,34 +1,150 @@
-.app { /* アプリ全体の余白など（CSS Modules） */
-  padding: 16px; /* 全体に余白を付ける */
-} /* .app ここまで */
+/* ============================================================
+   App.module.css
+   ・ナビ：上部中央寄せ、区切り線なし
+   ・コンテンツ：ニューモーフィズムカードで画面中央に表示
+   ============================================================ */
 
-.nav { /* 上部ナビ（横並び） */
-  display: flex; /* 横並びにする */
-  gap: 12px; /* リンク間の間隔を作る */
-  margin-bottom: 12px; /* 下に余白を作る */
-} /* .nav ここまで */
+/* --- アプリ全体ラッパー --- */
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--bg);
+}
 
-.navLink { /* ナビリンク */
-  text-decoration: none; /* 下線を消す */
-} /* .navLink ここまで */
+/* ============================================================
+   ナビバー（上部・中央寄せ・区切り線なし）
+   ============================================================ */
 
-.navLink:hover { /* ホバー時 */
-  text-decoration: underline; /* ホバー時だけ下線を出す */
-} /* .navLink:hover ここまで */
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px 32px;
+  background: var(--bg);
+  /* 区切り線なし・影なし：背景に溶け込ませる */
+  flex-wrap: wrap;
+}
 
-.page { /* 各ページのコンテナ */
-  padding: 8px; /* ページ内の余白 */
-} /* .page ここまで */
+/* --- ナビリンク（凸ボタン） --- */
+.navLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border-radius: 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-sub);
+  text-decoration: none;
+  background: var(--bg);
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  box-shadow:
+    5px 5px 12px var(--shadow-dark),
+    -5px -5px 12px var(--shadow-light);
+  white-space: nowrap;
+}
 
-.title { /* 見出し */
-  margin: 0 0 8px 0; /* 下に少し余白 */
-} /* .title ここまで */
+.navLink:hover {
+  color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow:
+    7px 7px 16px var(--shadow-dark),
+    -7px -7px 16px var(--shadow-light);
+}
 
-.text { /* 通常テキスト */
-  margin: 4px 0; /* 行間を少し付ける */
-} /* .text ここまで */
+/* アクティブ（凹） */
+.navLinkActive {
+  color: var(--accent);
+  box-shadow:
+    inset 4px 4px 8px var(--shadow-dark),
+    inset -4px -4px 8px var(--shadow-light);
+  transform: none;
+}
 
-.error { /* エラー表示 */
-  margin: 8px 0; /* 余白を付ける */
-  white-space: pre-wrap; /* 文字列が長いとき折り返す */
-} /* .error ここまで */
+.navLinkActive:hover {
+  transform: none;
+  box-shadow:
+    inset 4px 4px 8px var(--shadow-dark),
+    inset -4px -4px 8px var(--shadow-light);
+}
+
+.navLink:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* --- ユーザー表示（凹インセット） --- */
+.navUser {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 18px;
+  border-radius: 14px;
+  font-size: 13px;
+  color: var(--text-sub);
+  background: var(--bg);
+  box-shadow:
+    inset 3px 3px 7px var(--shadow-dark),
+    inset -3px -3px 7px var(--shadow-light);
+  white-space: nowrap;
+}
+
+/* ============================================================
+   メインコンテンツエリア
+   ニューモーフィズムカードを画面中央に配置
+   ============================================================ */
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;       /* 水平中央 */
+  justify-content: flex-start;
+  padding: 40px 24px 60px;
+  width: 100%;
+}
+
+/* コンテンツを包むカード（参考コード .neu-card 準拠） */
+.contentCard {
+  width: 100%;
+  max-width: 900px;
+  background: var(--bg);
+  border-radius: var(--radius);
+  box-shadow:
+    8px 8px 20px var(--shadow-dark),
+    -8px -8px 20px var(--shadow-light);
+  padding: 40px 48px;
+}
+
+/* ============================================================
+   疎通確認ページ用
+   ============================================================ */
+
+.page {
+  width: 100%;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.text {
+  font-size: 15px;
+  color: var(--text-sub);
+  margin-bottom: 6px;
+}
+
+.error {
+  color: var(--accent4);
+  font-size: 13px;
+  margin-top: 8px;
+}

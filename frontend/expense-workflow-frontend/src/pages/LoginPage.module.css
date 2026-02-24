@@ -1,19 +1,119 @@
+/* ============================================================
+   LoginPage.module.css  ―  ログインページ専用スタイル
+   contentCard の中で表示されるため、カード自体は App 側が担当
+   ============================================================ */
+
 .page {
-  /* ページ全体の余白（LoginPage専用） */
-  padding: 16px; /* 画面端に寄りすぎないようにする */
-} /* .page ここまで */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
 
 .title {
-  /* 見出し */
-  margin: 0 0 8px 0; /* 下に少し余白 */
-} /* .title ここまで */
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+  text-align: center;
+}
 
-.text {
-  /* 説明文 */
-  margin: 0; /* 余計な余白をなくす */
-} /* .text ここまで */
+.sub {
+  font-size: 14px;
+  color: var(--text-sub);
+  margin-bottom: 32px;
+  text-align: center;
+}
 
-form input {
-  width: 250px;
-  border: 1px solid #ddd;
+/* --- フォーム --- */
+.form {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* --- ラベル --- */
+.label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-sub);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+/* --- 入力欄（参考コード .modal-input 準拠） --- */
+.input {
+  width: 100%;
+  padding: 14px 18px;
+  border: none;
+  border-radius: 14px;
+  background: var(--bg);
+  font-size: 14px;
+  color: var(--text-main);
+  outline: none;
+  transition: box-shadow 0.2s;
+  box-shadow:
+    inset 5px 5px 12px var(--shadow-dark),
+    inset -5px -5px 12px var(--shadow-light);
+}
+.input::placeholder { color: var(--text-sub); }
+.input:focus {
+  box-shadow:
+    inset 5px 5px 12px var(--shadow-dark),
+    inset -5px -5px 12px var(--shadow-light),
+    0 0 0 2px rgba(108, 142, 191, 0.4);
+}
+.input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* --- ログインボタン（参考コード .modal-btn.primary 準拠） --- */
+.btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 14px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: all 0.2s ease;
+  box-shadow:
+    5px 5px 12px var(--shadow-dark),
+    -5px -5px 12px var(--shadow-light);
+}
+.btn:hover {
+  background: #4a6fa8;
+  transform: translateY(-2px);
+  box-shadow:
+    7px 7px 16px var(--shadow-dark),
+    -7px -7px 16px var(--shadow-light);
+}
+.btn:active {
+  transform: none;
+  box-shadow:
+    inset 4px 4px 8px rgba(0,0,0,0.15),
+    inset -2px -2px 6px rgba(255,255,255,0.1);
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* --- デバッグ情報（小さめに） --- */
+.debugInfo {
+  margin-top: 24px;
+  font-size: 11px;
+  color: var(--text-sub);
+  text-align: center;
+  opacity: 0.7;
 }

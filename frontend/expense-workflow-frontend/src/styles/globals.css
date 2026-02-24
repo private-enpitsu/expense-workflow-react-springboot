@@ -1,18 +1,247 @@
-@import "tailwindcss";
+/* ============================================================
+   globals.css  ―  ニューモーフィズム デザインシステム
+   参考: ニューモーフィズム_w_Genspark.html に忠実準拠
+   ============================================================ */
 
-
-
-/* ここから下は「最小限だけ」 */
-
-/* 必要なら：全体の高さを揃える（レイアウトが楽） */
-html,
-body,
-#root {
-  height: 100%;
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-/* 必要なら：全体のベース（最小） */
-/* body { */
-  /* Tailwindで bg/text を付けるなら不要 */
-  /* background: white; */
-/* } */
+/* --- CSS変数（参考コードと完全一致） --- */
+:root {
+  --bg:           #e0e5ec;
+  --shadow-dark:  #a3b1c6;
+  --shadow-light: #ffffff;
+  --text-main:    #4a5568;
+  --text-sub:     #8a9bb5;
+  --accent:       #6c8ebf;
+  --accent2:      #7ec8a4;
+  --accent3:      #f0a05a;
+  --accent4:      #e07b7b;
+  --radius:       20px;
+
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text-main);
+  min-height: 100vh;
+}
+
+/* --- タイポグラフィリセット --- */
+h1 { font-size: 1.5rem; font-weight: 700; color: var(--text-main); margin-bottom: 16px; }
+h2 { font-size: 1.15rem; font-weight: 600; color: var(--text-main); margin-bottom: 10px; }
+h3 { font-size: 1rem; font-weight: 600; color: var(--text-sub); margin-bottom: 8px; }
+p  { color: var(--text-sub); margin-bottom: 6px; }
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+a:hover { color: #4a6fa8; }
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+input, textarea, select {
+  font-family: inherit;
+  font-size: 14px;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text-main);
+}
+input::placeholder,
+textarea::placeholder { color: var(--text-sub); }
+
+/* --- スクロールバー --- */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--shadow-dark); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-sub); }
+
+/* ============================================================
+   ニューモーフィズム 汎用クラス（参考コード準拠）
+   ============================================================ */
+
+/* 凸カード（参考コード .neu-card 完全一致） */
+.neu-card {
+  background: var(--bg);
+  border-radius: var(--radius);
+  box-shadow:
+    8px 8px 20px var(--shadow-dark),
+    -8px -8px 20px var(--shadow-light);
+}
+
+/* 凹カード（参考コード .neu-card-inset 完全一致） */
+.neu-card-inset {
+  background: var(--bg);
+  border-radius: var(--radius);
+  box-shadow:
+    inset 6px 6px 14px var(--shadow-dark),
+    inset -6px -6px 14px var(--shadow-light);
+}
+
+/* 凸ボタン（参考コード .add-task-btn / .modal-btn 準拠） */
+.neu-btn {
+  background: var(--bg);
+  color: var(--text-sub);
+  border-radius: 14px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  box-shadow:
+    5px 5px 12px var(--shadow-dark),
+    -5px -5px 12px var(--shadow-light);
+}
+.neu-btn:hover {
+  color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow:
+    7px 7px 16px var(--shadow-dark),
+    -7px -7px 16px var(--shadow-light);
+}
+.neu-btn:active {
+  transform: none;
+  box-shadow:
+    inset 4px 4px 8px var(--shadow-dark),
+    inset -4px -4px 8px var(--shadow-light);
+}
+.neu-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* 凸ボタン（アクセント：参考コード .modal-btn.primary 準拠） */
+.neu-btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border-radius: 14px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow:
+    5px 5px 12px var(--shadow-dark),
+    -5px -5px 12px var(--shadow-light);
+}
+.neu-btn-primary:hover {
+  background: #4a6fa8;
+  transform: translateY(-2px);
+  box-shadow:
+    7px 7px 16px var(--shadow-dark),
+    -7px -7px 16px var(--shadow-light);
+}
+.neu-btn-primary:active {
+  transform: none;
+  box-shadow:
+    inset 4px 4px 8px rgba(0,0,0,0.15),
+    inset -2px -2px 6px rgba(255,255,255,0.1);
+}
+.neu-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* 凸ボタン（危険） */
+.neu-btn-danger {
+  background: var(--accent4);
+  color: #fff;
+  border-radius: 14px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow:
+    5px 5px 12px var(--shadow-dark),
+    -5px -5px 12px var(--shadow-light);
+}
+.neu-btn-danger:hover {
+  background: #c86060;
+  transform: translateY(-2px);
+}
+.neu-btn-danger:active {
+  transform: none;
+  box-shadow:
+    inset 4px 4px 8px rgba(0,0,0,0.15),
+    inset -2px -2px 6px rgba(255,255,255,0.1);
+}
+.neu-btn-danger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* 凹入力欄（参考コード .modal-input 準拠） */
+.neu-input {
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: var(--bg);
+  font-size: 14px;
+  color: var(--text-main);
+  transition: box-shadow 0.2s;
+  box-shadow:
+    inset 5px 5px 12px var(--shadow-dark),
+    inset -5px -5px 12px var(--shadow-light);
+}
+.neu-input:focus {
+  box-shadow:
+    inset 5px 5px 12px var(--shadow-dark),
+    inset -5px -5px 12px var(--shadow-light),
+    0 0 0 2px rgba(108, 142, 191, 0.4);
+}
+.neu-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ステータスバッジ（参考コード .task-tag 準拠） */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.badge-draft     { background: #dce8fb; color: #4a78c4; }
+.badge-submitted { background: #fdebd5; color: #c47a2b; }
+.badge-approved  { background: #d6f5e8; color: #3a9e71; }
+.badge-returned  { background: #fcdede; color: #c44a4a; }
+
+/* ローディング・エラー・空状態 */
+.state-loading, .state-empty {
+  padding: 48px;
+  text-align: center;
+  color: var(--text-sub);
+  font-size: 14px;
+}
+.state-error {
+  padding: 48px;
+  text-align: center;
+  color: var(--accent4);
+  font-size: 14px;
+}
