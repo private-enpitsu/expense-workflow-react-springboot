@@ -102,7 +102,7 @@ export default function InboxDetailPage() {
 
   return (
     <div>
-      <h1>受信箱：詳細</h1> {/* 承認者が詳細画面だと分かる見出しを表示する */}
+      <h2>受信箱：詳細</h2> {/* 承認者が詳細画面だと分かる見出しを表示する */}
       <p>申請ID：{toRequestLabel(requestId)}</p>{" "}
       {/* URL由来の申請IDを表示して対象を明確にする */}
       <p>ステータス：{toStatusLabel(data.status)}</p>{" "}

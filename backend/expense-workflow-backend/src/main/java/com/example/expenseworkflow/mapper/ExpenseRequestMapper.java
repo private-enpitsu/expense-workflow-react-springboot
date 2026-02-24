@@ -39,6 +39,13 @@ public interface ExpenseRequestMapper { // MyBatisが実装を生成するため
 			@Param("toStatus") String toStatus // 遷移後ステータス（例：APPROVED/RETURNED）を受け取り、statusへセットするために使う
 	); // 更新件数（0または1）を返し、1なら更新成功として扱う
 
+	int updateStatusForApproverWithComment( // 差戻し専用：statusをRETURNEDに更新しつつlast_return_commentとlast_returned_atも同時に書き込むメソッドを宣言する
+			@Param("id") Long id, // 更新対象の申請ID（expense_requests.id）を指定して、どの申請を更新するかを決める
+			@Param("approverUserId") Long approverUserId, // 承認者本人のユーザーIDを指定し、他人のInbox申請を更新できないようにする条件に使う
+			@Param("toStatus") String toStatus, // 遷移後ステータス（RETURNED）を受け取り、statusへセットするために使う
+			@Param("comment") String comment // 差戻しコメントを受け取り、last_return_commentへセットするために使う
+	); // 更新件数（0または1）を返し、1なら更新成功として扱う
+
 	int insertExpenseRequestAction( // 差戻しなどの操作履歴を expense_request_actions に1行INSERTするためのメソッドを宣言する
 			@Param("requestId") Long requestId, // 対象申請のDB数値ID（expense_requests.id）を受け取って actions.request_id に保存する
 			@Param("actorId") Long actorId, // 操作したユーザーIDを受け取って actions.actor_id に保存する

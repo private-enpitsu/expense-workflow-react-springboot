@@ -44,7 +44,7 @@ export default function LoginPage() {
 
   return (
     <div className={styles.page}>
-      <h1 className={styles.title}>ログイン</h1>
+      <h2 className={styles.title}>ログイン</h2>
       <p className={styles.sub}>経費申請システムにログインしてください</p>
 
       <form className={styles.form} onSubmit={handleSubmit}>

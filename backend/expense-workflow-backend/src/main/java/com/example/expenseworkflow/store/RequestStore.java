@@ -47,7 +47,7 @@ public class RequestStore { // 申請（ExpenseRequest）に関する「読み�
 
 		Long newId = entity.getId(); // INSERT後に採番された主キーID（DBの数値ID）を取り出す。
 
-		return new RequestSummaryResponse(newId, title, amount, status, note); // 作成した申請のサマリDTOを組み立てて返す（数値IDをそのまま返す）。
+		return new RequestSummaryResponse(newId, title, amount, status, note, null); // 作成直後はlastReturnCommentがないのでnullを渡す。
 	}
 
 	public RequestSummaryResponse findById(Long id) { // 数値IDから申請のサマリを1件取得する。
@@ -62,7 +62,7 @@ public class RequestStore { // 申請（ExpenseRequest）に関する「読み�
 
 		String note = found.getNote() != null ? found.getNote() : ""; // noteがnullなら空文字にする（レスポンス側でnullを避けたい意図）。
 
-		return new RequestSummaryResponse(found.getId(), found.getTitle(), found.getAmount(), found.getStatus(), note); // 取得結果からサマリDTOを作って返す。
+		return new RequestSummaryResponse(found.getId(), found.getTitle(), found.getAmount(), found.getStatus(), note, found.getLastReturnComment()); // lastReturnCommentをエンティティから取り出して渡す。
 	}
 
 	public RequestSummaryResponse findByIdForApplicant(Long applicantUserId, Long id) { // 申請者本人の申請だけを数値IDで取得する。
@@ -77,7 +77,7 @@ public class RequestStore { // 申請（ExpenseRequest）に関する「読み�
 
 		String note = found.getNote() != null ? found.getNote() : ""; // noteがnullなら空文字にする（レスポンス側でnullを避けたい意図）。
 
-		return new RequestSummaryResponse(found.getId(), found.getTitle(), found.getAmount(), found.getStatus(), note); // 取得結果からサマリDTOを作って返す。
+		return new RequestSummaryResponse(found.getId(), found.getTitle(), found.getAmount(), found.getStatus(), note, found.getLastReturnComment()); // lastReturnCommentをエンティティから取り出して渡す。
 	}
 
 	public List<InboxItemResponse> inbox(Long approverUserId) { // 承認者ユーザーIDに紐づくInbox（承認待ち一覧など）を取得する。
@@ -100,7 +100,8 @@ public class RequestStore { // 申請（ExpenseRequest）に関する「読み�
 			found.getAmount(),
 			found.getStatus(),
 			note,
-			java.util.Collections.emptyList() // actionsは現フェーズでは空配列で返す
+			java.util.Collections.emptyList(), // actionsは現フェーズでは空配列で返す
+			found.getLastReturnComment() // lastReturnCommentをエンティティから取り出して渡す
 		);
 	}
 
@@ -155,7 +156,7 @@ public class RequestStore { // 申請（ExpenseRequest）に関する「読み�
 		} // 状態チェック分岐を閉じる
 
 		String toStatus = "RETURNED"; // 遷移後ステータスをRETURNEDに固定する。
-		int updated = expenseRequestMapper.updateStatusForApprover(id, userId, toStatus); // 承認者本人の申請だけを対象にstatusをRETURNEDへ更新する。
+		int updated = expenseRequestMapper.updateStatusForApproverWithComment(id, userId, toStatus, comment); // 差戻し専用UPDATEでstatus/last_return_comment/last_returned_atを同時に更新する。
 		if (updated != 1) { // 更新件数が1以外の場合の分岐をする。
 			return false; // 更新できなかった扱いでfalseを返す。
 		} // 更新件数分岐を閉じる

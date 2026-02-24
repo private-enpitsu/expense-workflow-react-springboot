@@ -12,6 +12,16 @@
   background: var(--bg);
 }
 
+/* タイトル */
+.site_title {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 50px;
+    letter-spacing: 0.5px;
+    text-align: center;
+}
+
 /* ============================================================
    ナビバー（上部・中央寄せ・区切り線なし）
    ============================================================ */
@@ -111,8 +121,8 @@
 
 /* コンテンツを包むカード（参考コード .neu-card 準拠） */
 .contentCard {
-  width: 100%;
-  max-width: 900px;
+  width: 85%;
+  max-width: 600px;
   background: var(--bg);
   border-radius: var(--radius);
   box-shadow:

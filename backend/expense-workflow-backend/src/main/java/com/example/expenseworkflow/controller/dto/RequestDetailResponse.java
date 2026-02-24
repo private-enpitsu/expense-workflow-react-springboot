@@ -1,8 +1,8 @@
 // [目的] GET /api/requests/{id} のレスポンスとして「申請詳細+履歴actions」を返すDTOを提供する // このファイルの目的を説明する
 // [呼び出し元/使用箇所] RequestsController.getRequestDetail が ResponseEntity.ok(...) で返すボディとして使う // どこから使われるかを説明する
-// [入力と出力] 入力=コンストラクタ引数(id/title/amount/status/note/actions) 出力=getter経由でJSON化される値 // 入出力を説明する
+// [入力と出力] 入力=コンストラクタ引数(id/title/amount/status/note/actions/lastReturnComment) 出力=getter経由でJSON化される値 // 入出力を説明する
 // [依存／前提] Lombok(@Getter/@AllArgsConstructor) と SpringのJackson変換が有効である前提で動作する // 依存関係を説明する
-// [今回変更点] 設計API一覧の「申請詳細取得（詳細+履歴actionsを含む）」に合わせ、詳細レスポンスDTOを新設した // 今回変更点を説明する
+// [今回変更点] lastReturnComment フィールドを追加し、申請者画面で差戻しコメントを表示できるようにした // 今回変更点を説明する
 
 package com.example.expenseworkflow.controller.dto; // Controller入出力DTOの置き場として統一したパッケージを宣言する
 
@@ -21,4 +21,5 @@ public class RequestDetailResponse {
 	private String status; // ステータス（例：DRAFT/SUBMITTED/APPROVED）を返すフィールドを保持する
 	private String note; // 備考を返すフィールドを保持する
 	private List<RequestActionResponse> actions; // 履歴actionsを配列で返すフィールドを保持する
+	private String lastReturnComment; // 最新の差戻しコメントを返すフィールドを保持する（差戻しなしの場合はnull）
 } // DTOクラス定義を閉じる

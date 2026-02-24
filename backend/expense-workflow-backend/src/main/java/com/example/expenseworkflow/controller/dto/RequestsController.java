@@ -2,7 +2,7 @@
 // このAPIは、フロントの RequestsListPage と RequestCreatePage と RequestDetailPage が /api/requests を通じて呼び出します。 // 呼び出し元を自然文で説明する
 // 入力は、POST時のJSON（title/amount/note）と、詳細取得時のURL{id}です。出力は、申請サマリの配列または詳細のJSONです。 // 入出力を自然文で説明する
 // 依存は、Spring Web と Jackson と、メモリ保存SOTの InMemoryRequestStore です（DBは使いません）。 // 依存と前提を自然文で説明する
-// 今回は STORE/SEQ/初期データをInMemoryRequestStoreへ移し、WorkflowControllerと共有して二重定義を防ぎます。 // 今回変更点を自然文で説明する
+// 今回変更点: getRequestDetail で lastReturnComment を RequestDetailResponse へ渡すようにした // 今回変更点を自然文で説明する
 
 package com.example.expenseworkflow.controller.dto;
 
@@ -68,7 +68,8 @@ public class RequestsController {
 				found.getAmount(), // 金額を返す
 				found.getStatus(), // ステータスを返す
 				found.getNote(), // note を返す
-				Collections.<RequestActionResponse> emptyList() // Phase1は actions を空配列として返す
+				Collections.<RequestActionResponse> emptyList(), // Phase1は actions を空配列として返す
+				found.getLastReturnComment() // 差戻しコメントをそのまま渡す（差戻しなしの場合はnull）
 		);
 
 		return ResponseEntity.ok(detail); // 200で詳細DTOを返す

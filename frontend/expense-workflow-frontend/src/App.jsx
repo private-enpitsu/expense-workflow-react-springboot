@@ -36,6 +36,8 @@ import ToastHost from "./components/ToastHost";
 
 import styles from "./App.module.css";
 
+import './index.css'; // リセットCSSをインポートする
+
 /* ============================================================
    疎通確認ページ（/ のまま維持）
 ============================================================ */
@@ -172,59 +174,62 @@ function AppShell() {
   });
 
   return (
-    <div className={styles.app}>
-      <ToastHost />
+    <>
+      <h1 className={styles.site_title}>Expense Workflow App</h1>
+      <div className={styles.app}>
+        <ToastHost />
 
-      {/* ===== 上部ナビバー（中央寄せ・区切り線なし） ===== */}
-      <nav className={styles.nav}>
-        <NavItem to="/" label="疎通確認" />
+        {/* ===== 上部ナビバー（中央寄せ・区切り線なし） ===== */}
+        <nav className={styles.nav}>
+          <NavItem to="/" label="疎通確認" />
 
-        {isApplicant && (
-          <>
-            <NavItem to="/requests"     label="申請一覧" />
-            <NavItem to="/requests/new" label="申請作成" />
-          </>
-        )}
+          {isApplicant && (
+            <>
+              <NavItem to="/requests"     label="申請一覧" />
+              <NavItem to="/requests/new" label="申請作成" />
+            </>
+          )}
 
-        {isApprover && (
-          <NavItem to="/inbox" label="受信箱" />
-        )}
+          {isApprover && (
+            <NavItem to="/inbox" label="受信箱" />
+          )}
 
-        <span className={styles.navUser}>{meDisplay}</span>
+          <span className={styles.navUser}>{meDisplay}</span>
 
-        <button
-          className={styles.navLink}
-          onClick={() => {
-            if (isLoggedIn) {
-              logoutMutation.mutate();
-            } else {
-              navigate("/login");
-            }
-          }}
-          disabled={isMeLoading || logoutMutation.isPending}
-        >
-          {isLoggedIn ? "ログアウト" : "ログイン"}
-        </button>
-      </nav>
+          <button
+            className={styles.navLink}
+            onClick={() => {
+              if (isLoggedIn) {
+                logoutMutation.mutate();
+              } else {
+                navigate("/login");
+              }
+            }}
+            disabled={isMeLoading || logoutMutation.isPending}
+          >
+            {isLoggedIn ? "ログアウト" : "ログイン"}
+          </button>
+        </nav>
 
-      {/* ===== メインコンテンツ（ニューモーフィズムカードで中央表示） ===== */}
-      <main className={styles.main}>
-        <div className={styles.contentCard}>
-          <Routes>
-            <Route path="/" element={<HealthCheckPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route element={<RequireAuth />}>
-              <Route path="/requests"          element={<RequestsListPage />} />
-              <Route path="/requests/new"      element={<RequestCreatePage />} />
-              <Route path="/requests/:id"      element={<RequestDetailPage />} />
-              <Route path="/requests/:id/edit" element={<RequestEditPage />} />
-              <Route path="/inbox"             element={<InboxPage />} />
-              <Route path="/inbox/:id"         element={<InboxDetailPage />} />
-            </Route>
-          </Routes>
-        </div>
-      </main>
-    </div>
+        {/* ===== メインコンテンツ（ニューモーフィズムカードで中央表示） ===== */}
+        <main className={styles.main}>
+          <div className={styles.contentCard}>
+            <Routes>
+              <Route path="/" element={<HealthCheckPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route element={<RequireAuth />}>
+                <Route path="/requests"          element={<RequestsListPage />} />
+                <Route path="/requests/new"      element={<RequestCreatePage />} />
+                <Route path="/requests/:id"      element={<RequestDetailPage />} />
+                <Route path="/requests/:id/edit" element={<RequestEditPage />} />
+                <Route path="/inbox"             element={<InboxPage />} />
+                <Route path="/inbox/:id"         element={<InboxDetailPage />} />
+              </Route>
+            </Routes>
+          </div>
+        </main>
+      </div>
+    </>
   );
 }
 

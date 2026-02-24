@@ -28,15 +28,18 @@
 		resultType="com.example.expenseworkflow.controller.dto.RequestSummaryResponse">
 		SELECT er.id AS id, er.title AS title,
 		er.amount AS amount, er.status AS status, COALESCE(er.note,
-		'') AS
-		note FROM expense_requests er ORDER BY er.id DESC
+		'') AS note,
+		er.last_return_comment AS lastReturnComment
+		FROM expense_requests er ORDER BY er.id DESC
 	</select>
 
 	<select id="selectRequestSummariesByApplicant"
 		resultType="com.example.expenseworkflow.controller.dto.RequestSummaryResponse">
 		SELECT er.id AS id, er.title AS title,
 		er.amount AS amount, er.status AS status, COALESCE(er.note,
-		'') AS note FROM expense_requests er WHERE er.applicant_id = #{applicantUserId} ORDER BY er.id DESC
+		'') AS note,
+		er.last_return_comment AS lastReturnComment
+		FROM expense_requests er WHERE er.applicant_id = #{applicantUserId} ORDER BY er.id DESC
 	</select>
 
 	<select id="selectExpenseRequestById"
@@ -119,6 +122,15 @@
 		UPDATE expense_requests SET status = #{toStatus}
 		WHERE id = #{id} AND
 		current_approver_id = #{approverUserId}
+	</update>
+
+	<update id="updateStatusForApproverWithComment"> <!-- 差戻し専用：status/last_return_comment/last_returned_atを同時更新するSQLを定義する -->
+		UPDATE expense_requests
+		SET status = #{toStatus}, <!-- statusをRETURNEDに更新して差戻し状態を反映する -->
+		last_return_comment = #{comment}, <!-- 差戻しコメントをexpense_requestsに直接書き込み、申請者が一覧・詳細で参照できるようにする -->
+		last_returned_at = CURRENT_TIMESTAMP <!-- 差戻し日時を記録して、いつ差し戻されたかをDB上に残す -->
+		WHERE id = #{id} <!-- 対象申請IDを一致させて、別の申請を更新しないようにする -->
+		AND current_approver_id = #{approverUserId} <!-- 承認者本人の申請だけ更新できるようにして、他人のInbox申請の操作を防ぐ -->
 	</update>
 
 </mapper>

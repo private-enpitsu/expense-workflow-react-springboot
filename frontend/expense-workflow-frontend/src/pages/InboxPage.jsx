@@ -32,7 +32,7 @@ export default function InboxPage() {
 
   return (
     <div>
-      <h1>受信箱</h1> {/* 画面の見出しとして Inbox を表示する */}
+      <h2>受信箱</h2> {/* 画面の見出しとして Inbox を表示する */}
       <table>
         <thead>
           <tr>

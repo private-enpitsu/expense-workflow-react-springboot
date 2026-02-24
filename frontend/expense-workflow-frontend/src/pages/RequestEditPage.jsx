@@ -133,7 +133,7 @@ export default function RequestEditPage() {
     <div>
       {" "}
       {/* 画面のルート要素を定義する */}
-      <h1>申請編集</h1> {/* 画面の見出しを表示する */}
+      <h2>申請編集</h2> {/* 画面の見出しを表示する */}
       <p>申請ID：{toRequestLabel(requestId)}</p>{" "}
       {/* いま編集対象の申請IDを表示する */}
       {isLoading ? ( // ローディング中の分岐を開始する

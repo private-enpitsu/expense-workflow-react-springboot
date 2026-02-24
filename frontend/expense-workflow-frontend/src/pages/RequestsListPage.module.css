@@ -1,20 +1,113 @@
-/* .page {
-  padding: 16px;
-}
-.title {
-  margin: 0 0 8px 0;
-}
-.list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.listItem {
+/* ============================================================
+   RequestsListPage.module.css
+   ステータス別セクション表示（ニューモーフィズム準拠）
+   ============================================================ */
+
+/* ページ全体ラッパー */
+.page {
+  width: 100%;
   display: flex;
-  gap: 12px;
-  padding: 8px 0;
-  border-bottom: 1px solid #ddd;
+  flex-direction: column;
+  gap: 28px;
 }
-.cell {
+
+/* ページタイトル */
+.title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+
+/* ローディング・エラー */
+.note {
+  color: var(--text-sub);
   font-size: 14px;
-} */
+  padding: 12px 0;
+}
+
+/* ============================================================
+   ステータスセクション（凸カード）
+   ============================================================ */
+
+.section {
+  background: var(--bg);
+  border-radius: var(--radius);
+  box-shadow:
+    8px 8px 20px var(--shadow-dark),
+    -8px -8px 20px var(--shadow-light);
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* セクションヘッダ（バッジ＋件数） */
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.sectionCount {
+  font-size: 12px;
+  color: var(--text-sub);
+  font-weight: 500;
+}
+
+/* ============================================================
+   申請行（凹インセットカード）
+   ============================================================ */
+
+.item {
+  background: var(--bg);
+  border-radius: 14px;
+  box-shadow:
+    inset 4px 4px 10px var(--shadow-dark),
+    inset -4px -4px 10px var(--shadow-light);
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* 行の上段：ID・金額を横並び */
+.itemRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.itemId {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.itemId:hover {
+  color: #4a6fa8;
+}
+
+.itemAmount {
+  font-size: 13px;
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+/* 差戻しコメント行 */
+.returnComment {
+  font-size: 12px;
+  color: var(--accent4);
+  background: rgba(224, 123, 123, 0.08);
+  border-radius: 8px;
+  padding: 6px 10px;
+  line-height: 1.5;
+}
+
+.returnCommentLabel {
+  font-weight: 600;
+  margin-right: 4px;
+}
