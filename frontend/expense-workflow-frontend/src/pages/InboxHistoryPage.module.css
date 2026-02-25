@@ -1,0 +1,94 @@
+/* 目的：操作履歴ページのスタイル */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.requestId {
+  font-size: 13px;
+  color: var(--text-sub);
+  margin: 0;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* 履歴1件：凸カード */
+.item {
+  background: var(--bg);
+  border-radius: var(--radius);
+  box-shadow:
+    8px 8px 20px var(--shadow-dark),
+    -8px -8px 20px var(--shadow-light);
+  padding: 16px 20px;
+  display: grid;
+  grid-template-columns: 80px 1fr 160px;
+  grid-template-rows: auto auto;
+  gap: 6px 12px;
+  align-items: center;
+}
+
+.action {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--accent);
+}
+
+.actor {
+  font-size: 14px;
+  color: var(--text-main);
+}
+
+.date {
+  font-size: 12px;
+  color: var(--text-sub);
+  text-align: right;
+}
+
+/* コメント：凹エリア */
+.comment {
+  grid-column: 1 / -1;
+  font-size: 13px;
+  color: var(--text-main);
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 10px 14px;
+  box-shadow:
+    inset 3px 3px 8px var(--shadow-dark),
+    inset -3px -3px 8px var(--shadow-light);
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+/* 詳細に戻るボタン：凸ボタン */
+.btnBack {
+  flex: 1;
+  padding: 13px 0;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+  background: var(--bg);
+  text-decoration: none;
+  text-align: center;
+  transition: all 0.2s ease;
+  box-shadow:
+    5px 5px 12px var(--shadow-dark),
+    -5px -5px 12px var(--shadow-light);
+}
+
+.btnBack:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    7px 7px 16px var(--shadow-dark),
+    -7px -7px 16px var(--shadow-light);
+}

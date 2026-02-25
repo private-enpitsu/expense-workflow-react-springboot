@@ -80,4 +80,12 @@ public interface ExpenseRequestMapper { // MyBatisが実装を生成するため
             @Param("requestId") Long requestId,
             @Param("applicantUserId") Long applicantUserId
     );
+    
+    // 承認者本人が担当する申請の操作履歴を古い順に取得する
+    List<RequestHistoryItemResponse>
+        selectHistoryByRequestIdAndApprover(
+            @Param("requestId") Long requestId,
+            @Param("approverUserId") Long approverUserId
+    );
+    
 }
