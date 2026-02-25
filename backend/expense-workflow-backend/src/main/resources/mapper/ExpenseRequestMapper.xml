@@ -84,11 +84,13 @@
 	<select id="selectInboxItems"
 		resultType="com.example.expenseworkflow.controller.dto.InboxItemResponse">
 		SELECT er.id AS id, er.title AS title,
-		er.amount AS amount, er.status AS status FROM
-		expense_requests er
-		WHERE er.current_approver_id = #{approverUserId}
-		AND er.status =
-		'SUBMITTED' ORDER BY er.id ASC
+	    er.amount AS amount, er.status AS status FROM
+	    expense_requests er
+	    WHERE er.current_approver_id = #{approverUserId}
+	    AND er.status IN (
+	        'SUBMITTED','APPROVED','RETURNED','REJECTED'
+	    )
+	    ORDER BY er.id ASC
 	</select>
 
 	<select id="selectExpenseRequestByIdAndApprover"
@@ -151,7 +153,7 @@
 		AND status = 'SUBMITTED' <!-- SUBMITTED のときだけ却下可能にする -->
 	</update>
 
-<!--履歴取得のSQL-->
+<!--申請者の履歴取得のSQL-->
     <select id="selectHistoryByRequestIdAndApplicant"
         resultType="com.example.expenseworkflow.controller.dto.RequestHistoryItemResponse">
         SELECT
@@ -164,6 +166,22 @@
         JOIN expense_requests er ON er.id = era.request_id
         WHERE era.request_id = #{requestId}
         AND er.applicant_id = #{applicantUserId}
+        ORDER BY era.created_at ASC
+    </select>
+    
+<!--    承認者用の履歴取得SQL-->
+    <select id="selectHistoryByRequestIdAndApprover"
+        resultType="com.example.expenseworkflow.controller.dto.RequestHistoryItemResponse">
+        SELECT
+            era.action       AS action,
+            u.name           AS actorName,
+            DATE_FORMAT(era.created_at, '%Y/%m/%d %H:%i') AS createdAt,
+            era.comment      AS comment
+        FROM expense_request_actions era
+        JOIN users u ON u.id = era.actor_id
+        JOIN expense_requests er ON er.id = era.request_id
+        WHERE era.request_id = #{requestId}
+        AND er.current_approver_id = #{approverUserId}
         ORDER BY era.created_at ASC
     </select>
     

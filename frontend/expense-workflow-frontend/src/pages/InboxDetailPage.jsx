@@ -224,6 +224,12 @@ export default function InboxDetailPage() {
 
           {/* 一覧に戻る */}
           <div className={styles.actions}>
+            <Link
+              to={`/inbox/${requestId}/history`}
+              className={styles.btnHistory}
+            >
+              履歴を見る
+            </Link>  {/* 追加 */}
             <Link to="/inbox" className={styles.btnBack}>
               一覧に戻る
             </Link>

@@ -21,6 +21,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.example.expenseworkflow.controller.dto.InboxItemResponse;
 import com.example.expenseworkflow.controller.dto.RequestDetailResponse;
+import com.example.expenseworkflow.controller.dto.RequestHistoryItemResponse;
 import com.example.expenseworkflow.store.RequestStore;
 
 import lombok.RequiredArgsConstructor;
@@ -121,6 +122,18 @@ public class WorkflowController {
 		}
 		return ResponseEntity.ok().build();
 	}
+	
+    // 承認者本人が担当する申請の操作履歴を返す
+    @GetMapping("/inbox/{id}/history")
+    public ResponseEntity<List<RequestHistoryItemResponse>>
+            getInboxHistory(
+                HttpSession session,
+                @PathVariable("id") Long id) {
+        Long userId = requireUserId(session);
+        List<RequestHistoryItemResponse> history =
+            requestStore.getHistoryForApprover(userId, id);
+        return ResponseEntity.ok(history);
+    }
 
 	 // セッションからユーザーIDを「必須で」取り出す共通処理。取れない/不正なら401にします。
 	private Long requireUserId(HttpSession session) {

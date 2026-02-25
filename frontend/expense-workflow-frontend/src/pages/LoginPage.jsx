@@ -2,22 +2,25 @@
 // [呼び出し元] App.jsx の <Route path="/login" element={<LoginPage />} />
 // [変更点] スタイルをニューモーフィズムデザインに合わせて更新
 
-import { useAtomValue, useSetAtom } from "jotai";
-import { useLocation, useNavigate } from "react-router-dom";
-import { healthSnapshotAtom, toastAtom } from "../lib/atoms";
+// import { useAtomValue, useSetAtom } from "jotai";
+import { useSetAtom } from "jotai";
+// import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+// import { healthSnapshotAtom, toastAtom } from "../lib/atoms";
+import { toastAtom } from "../lib/atoms";
 import styles from "./LoginPage.module.css";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { apiClient } from "./../lib/apiClient";
 
 export default function LoginPage() {
-  const healthSnapshot = useAtomValue(healthSnapshotAtom);
-  const location = useLocation();
+  // const healthSnapshot = useAtomValue(healthSnapshotAtom);
+  // const location = useLocation();
   const setToast = useSetAtom(toastAtom);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const fromPathname = location.state?.from?.pathname || "/";
+  const fromPathname = "/";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -77,10 +80,6 @@ export default function LoginPage() {
         </button>
       </form>
 
-      {/* デバッグ情報（開発中のみ） */}
-      <p className={styles.debugInfo}>
-        戻り先: {fromPathname}　／　Last Health: {healthSnapshot.status}
-      </p>
     </div>
   );
 }

@@ -230,5 +230,16 @@ public class RequestStore { // 申請（ExpenseRequest）に関する「読み�
                     requestId, applicantUserId);
         return result != null ? result : List.of();
     }
+    
+ // 承認者本人が担当する申請の操作履歴を取得する
+    public List<RequestHistoryItemResponse>
+            getHistoryForApprover(Long approverUserId, Long requestId) {
+        if (requestId == null) return List.of();
+        List<RequestHistoryItemResponse> result =
+            expenseRequestMapper
+                .selectHistoryByRequestIdAndApprover(
+                    requestId, approverUserId);
+        return result != null ? result : List.of();
+    }
 
 }
