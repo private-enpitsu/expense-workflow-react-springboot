@@ -148,6 +148,35 @@
     5px 5px 12px var(--shadow-dark),
     -5px -5px 12px var(--shadow-light);
 }
+
+.btnWithdraw {
+  flex: 1;
+  padding: 13px 0;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #6b7280;
+  background: var(--bg);
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  box-shadow:
+    5px 5px 12px var(--shadow-dark),
+    -5px -5px 12px var(--shadow-light);
+}
+.btnWithdraw:hover:not(:disabled) {
+  color: #374151;
+  transform: translateY(-2px);
+  box-shadow:
+    7px 7px 16px var(--shadow-dark),
+    -7px -7px 16px var(--shadow-light);
+}
+.btnWithdraw:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .btnBack:hover {
   color: var(--accent);
   transform: translateY(-2px);

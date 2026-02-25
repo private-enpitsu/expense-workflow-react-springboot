@@ -133,7 +133,7 @@
 		AND current_approver_id = #{approverUserId} <!-- 承認者本人の申請だけ更新できるようにして、他人のInbox申請の操作を防ぐ -->
 	</update>
 	
-		<update id="updateStatusToWithdrawn"> <!-- 申請者が申請を取り下げる（DRAFT/RETURNED → WITHDRAWN）ためのSQLを定義する -->
+	<update id="updateStatusToWithdrawn"> <!-- 申請者が申請を取り下げる（DRAFT/RETURNED → WITHDRAWN）ためのSQLを定義する -->
 		UPDATE expense_requests
 		SET status = 'WITHDRAWN',
 		    updated_at = CURRENT_TIMESTAMP

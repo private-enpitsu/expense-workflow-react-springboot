@@ -166,6 +166,22 @@ public class RequestStore { // 申請（ExpenseRequest）に関する「読み�
 		return true; // status更新と履歴INSERTが完了したため成功としてtrueを返す。
 	} // returnRequest を閉じる
 	
+	@Transactional
+	public boolean withdraw(Long applicantUserId, Long id) { // 申請者が申請を取り下げる（DRAFT/RETURNED→WITHDRAWN）処理。成功ならtrue。
+		if (id == null) return false;
+		int updated = expenseRequestMapper
+				.updateStatusToWithdrawn(id, applicantUserId);
+		return updated == 1;
+	}
+
+	@Transactional
+	public boolean reject(Long approverUserId, Long id) { // 承認者が申請を却下する（SUBMITTED→REJECTED）処理。成功ならtrue。
+		if (id == null) return false;
+		int updated = expenseRequestMapper
+				.updateStatusToRejected(id, approverUserId);
+		return updated == 1;
+	}
+	
 	@Transactional // 内容更新（UPDATE）を行うのでトランザクション境界を張る。
 	public boolean updateReturned(Long applicantUserId, Long id, String title, int amount, String note) { // 申請者が差戻し（RETURNED）申請の内容を編集して保存する。
 		if (id == null) { // 引数がnullなら対象が特定できない。

@@ -213,6 +213,104 @@
     5px 5px 12px var(--shadow-dark),
     -5px -5px 12px var(--shadow-light);
 }
+
+/* 却下セクション：差戻しセクションと同じ凸カード構造 */
+.rejectSection {
+  background: var(--bg);
+  border-radius: var(--radius);
+  box-shadow:
+    8px 8px 20px var(--shadow-dark),
+    -8px -8px 20px var(--shadow-light);
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* 却下コメント入力欄：差戻しと同じ凹スタイル、フォーカス時はオレンジのリング */
+.rejectTextarea {
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: var(--bg);
+  font-size: 14px;
+  color: var(--text-main);
+  border: none;
+  outline: none;
+  resize: none;
+  font-family: inherit;
+  transition: box-shadow 0.2s;
+  box-shadow:
+    inset 5px 5px 12px var(--shadow-dark),
+    inset -5px -5px 12px var(--shadow-light);
+}
+.rejectTextarea:focus {
+  box-shadow:
+    inset 5px 5px 12px var(--shadow-dark),
+    inset -5px -5px 12px var(--shadow-light),
+    0 0 0 2px rgba(196, 122, 43, 0.35);
+}
+.rejectTextarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 却下ボタン：オレンジ系（--accent3）の凸ボタン。コメント未入力時はdisabled */
+.btnReject {
+  flex: 1;
+  padding: 13px 0;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent3);
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  box-shadow:
+    5px 5px 12px var(--shadow-dark),
+    -5px -5px 12px var(--shadow-light);
+}
+.btnReject:hover:not(:disabled) {
+  background: #c47a2b;
+  transform: translateY(-2px);
+  box-shadow:
+    7px 7px 16px var(--shadow-dark),
+    -7px -7px 16px var(--shadow-light);
+}
+.btnReject:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btnWithdraw {
+  flex: 1;
+  padding: 13px 0;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #6b7280;
+  background: var(--bg);
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  box-shadow:
+    5px 5px 12px var(--shadow-dark),
+    -5px -5px 12px var(--shadow-light);
+}
+.btnWithdraw:hover:not(:disabled) {
+  color: #374151;
+  transform: translateY(-2px);
+  box-shadow:
+    7px 7px 16px var(--shadow-dark),
+    -7px -7px 16px var(--shadow-light);
+}
+.btnWithdraw:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 .btnBack:hover {
   color: var(--accent);
   transform: translateY(-2px);
