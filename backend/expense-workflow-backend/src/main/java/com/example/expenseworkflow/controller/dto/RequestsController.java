@@ -95,6 +95,18 @@ public class RequestsController {
 	}
 	
 	
+    // 申請者本人の申請の操作履歴を返す
+    @GetMapping("/requests/{id}/history")
+    public ResponseEntity<List<RequestHistoryItemResponse>>
+            getRequestHistory(
+                HttpSession session,
+                @PathVariable("id") Long id) {
+        Long userId = requireUserId(session);
+        List<RequestHistoryItemResponse> history =
+            requestStore.getHistory(userId, id);
+        return ResponseEntity.ok(history);
+    }
+	
 	private Long requireUserId(HttpSession session) { // 未ログインで申請作成できないようにユーザーIDを必須化する
 		Object userIdObj = session != null ? session.getAttribute(SESSION_KEY_USER_ID) : null; // セッションから userId を取り出す
 		if (userIdObj == null) { // セッションに userId が無い場合の分岐をする

@@ -31,6 +31,7 @@ import InboxPage from "./pages/InboxPage";
 import InboxDetailPage from "./pages/InboxDetailPage";
 import RequestCreatePage from "./pages/RequestCreatePage";
 import RequestDetailPage from "./pages/RequestDetailPage";
+import RequestHistoryPage from "./pages/RequestHistoryPage";
 import RequestEditPage from "./pages/RequestEditPage";
 import ToastHost from "./components/ToastHost";
 
@@ -223,6 +224,7 @@ function AppShell() {
                 <Route path="/requests"          element={<RequestsListPage />} />
                 <Route path="/requests/new"      element={<RequestCreatePage />} />
                 <Route path="/requests/:id"      element={<RequestDetailPage />} />
+                <Route path="/requests/:id/history" element={<RequestHistoryPage />} />
                 <Route path="/requests/:id/edit" element={<RequestEditPage />} />
                 <Route path="/inbox"             element={<InboxPage />} />
                 <Route path="/inbox/:id"         element={<InboxDetailPage />} />

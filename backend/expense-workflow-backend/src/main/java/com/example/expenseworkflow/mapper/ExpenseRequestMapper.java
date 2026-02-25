@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import com.example.expenseworkflow.controller.dto.InboxItemResponse;
+import com.example.expenseworkflow.controller.dto.RequestHistoryItemResponse;
 import com.example.expenseworkflow.controller.dto.RequestSummaryResponse;
 import com.example.expenseworkflow.domain.ExpenseRequest;
 
@@ -72,4 +73,11 @@ public interface ExpenseRequestMapper { // MyBatisが実装を生成するため
 			@Param("id") Long id,
 			@Param("approverUserId") Long approverUserId
 	);
+	
+    // 申請者本人の申請の操作履歴を古い順に取得する
+    List<RequestHistoryItemResponse>
+        selectHistoryByRequestIdAndApplicant(
+            @Param("requestId") Long requestId,
+            @Param("applicantUserId") Long applicantUserId
+    );
 }

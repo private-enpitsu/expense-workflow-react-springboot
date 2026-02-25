@@ -147,6 +147,12 @@ export default function RequestDetailPage() {
                   ? "処理中..." : "取り下げ"}
               </button>
             )}
+            <Link
+              to={`/requests/${requestId}/history`}
+              className={styles.btnHistory}
+            >
+              履歴を見る
+            </Link>  {/* 追加 */}
             <Link to="/requests" className={styles.btnBack}>
               一覧に戻る
             </Link>
