@@ -132,5 +132,23 @@
 		WHERE id = #{id} <!-- 対象申請IDを一致させて、別の申請を更新しないようにする -->
 		AND current_approver_id = #{approverUserId} <!-- 承認者本人の申請だけ更新できるようにして、他人のInbox申請の操作を防ぐ -->
 	</update>
+	
+		<update id="updateStatusToWithdrawn"> <!-- 申請者が申請を取り下げる（DRAFT/RETURNED → WITHDRAWN）ためのSQLを定義する -->
+		UPDATE expense_requests
+		SET status = 'WITHDRAWN',
+		    updated_at = CURRENT_TIMESTAMP
+		WHERE id = #{id}
+		AND applicant_id = #{applicantUserId}
+		AND status IN ('DRAFT','RETURNED') <!-- DRAFT（下書き）とRETURNED（差戻し）のときだけ取り下げ可能にする -->
+	</update>
+
+	<update id="updateStatusToRejected"> <!-- 承認者が申請を却下する（SUBMITTED → REJECTED）ためのSQLを定義する -->
+		UPDATE expense_requests
+		SET status = 'REJECTED',
+		    updated_at = CURRENT_TIMESTAMP
+		WHERE id = #{id}
+		AND current_approver_id = #{approverUserId}
+		AND status = 'SUBMITTED' <!-- SUBMITTED のときだけ却下可能にする -->
+	</update>
 
 </mapper>

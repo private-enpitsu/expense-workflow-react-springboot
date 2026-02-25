@@ -5,6 +5,7 @@ import { queryClient } from "./lib/queryClient"; // QueryClient の実体（ア�
 
 import App from './App.jsx' // 既存のルートコンポーネントを読み込む
 
+import "./styles/reset.css" // ✅ リセットCSS
 import './index.css'
 import "./styles/globals.css"; // ✅ グローバルCSS（Tailwind読み込み含む）
 
