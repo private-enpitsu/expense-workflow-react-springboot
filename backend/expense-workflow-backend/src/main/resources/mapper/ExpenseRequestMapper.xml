@@ -151,4 +151,20 @@
 		AND status = 'SUBMITTED' <!-- SUBMITTED のときだけ却下可能にする -->
 	</update>
 
+<!--履歴取得のSQL-->
+    <select id="selectHistoryByRequestIdAndApplicant"
+        resultType="com.example.expenseworkflow.controller.dto.RequestHistoryItemResponse">
+        SELECT
+            era.action       AS action,
+            u.name           AS actorName,
+            DATE_FORMAT(era.created_at, '%Y/%m/%d %H:%i') AS createdAt,
+            era.comment      AS comment
+        FROM expense_request_actions era
+        JOIN users u ON u.id = era.actor_id
+        JOIN expense_requests er ON er.id = era.request_id
+        WHERE era.request_id = #{requestId}
+        AND er.applicant_id = #{applicantUserId}
+        ORDER BY era.created_at ASC
+    </select>
+    
 </mapper>

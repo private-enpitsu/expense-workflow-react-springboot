@@ -27,3 +27,17 @@ export function toRequestLabel(id) {
   if (!Number.isInteger(num) || num <= 0) return String(id); // 整数でない・0以下の場合は変換不能としてそのまま返す
   return "REQ-" + String(num).padStart(3, "0"); // 3桁ゼロ埋めのREQ-xxx形式に変換して返す（例: 1 → REQ-001）
 }
+
+// 目的：actionコードを日本語ラベルに変換するSOT
+const ACTION_LABEL_MAP = {
+  SUBMIT:   "提出",
+  APPROVE:  "承認",
+  RETURN:   "差戻し",
+  WITHDRAW: "取り下げ",
+  REJECT:   "却下",
+};
+
+export function toActionLabel(action) {
+  if (typeof action !== "string") return "";
+  return ACTION_LABEL_MAP[action] ?? action;
+}

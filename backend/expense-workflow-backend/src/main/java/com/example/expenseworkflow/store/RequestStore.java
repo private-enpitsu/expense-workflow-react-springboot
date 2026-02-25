@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.expenseworkflow.controller.dto.InboxItemResponse;
 import com.example.expenseworkflow.controller.dto.RequestDetailResponse;
+import com.example.expenseworkflow.controller.dto.RequestHistoryItemResponse;
 import com.example.expenseworkflow.controller.dto.RequestSummaryResponse;
 import com.example.expenseworkflow.domain.ExpenseRequest;
 import com.example.expenseworkflow.domain.User;
@@ -121,8 +122,17 @@ public class RequestStore { // 申請（ExpenseRequest）に関する「読み�
 				"Cannot submit because your manager_id is NULL (approver is not configured)." // 禁止理由をメッセージとして返し、404(対象なし)と区別できるようにします。
 			); // ResponseStatusException の生成をここで閉じます。
 		}
-		int updated = expenseRequestMapper.updateStatusForApplicant(id, userId, approverUserId, "SUBMITTED"); // 申請者本人の申請を、DRAFT→SUBMITTEDにしつつ承認者IDも同時にセットします。
-		return updated == 1; // 更新が1件だけ成功した場合のみtrueとし、0件の場合は条件不一致（権限/状態など）としてfalseにします。
+        // 履歴INSERTのためにUPDATE前のstatusを取得する
+        ExpenseRequest current = expenseRequestMapper.selectExpenseRequestById(id);
+        String fromStatus = current != null ? current.getStatus() : "DRAFT";
+
+        int updated = expenseRequestMapper.updateStatusForApplicant(id, userId, approverUserId, "SUBMITTED"); // 申請者本人の申請を、DRAFT→SUBMITTEDにしつつ承認者IDも同時にセットします。
+        if (updated != 1) return false; // 更新できなかった場合は失敗としてfalseを返す
+
+        // 提出履歴をINSERTする
+        expenseRequestMapper.insertExpenseRequestAction(
+            id, userId, "SUBMIT", fromStatus, "SUBMITTED", null);
+        return true;
 	}
 
 	@Transactional // 状態更新（UPDATE）を行うのでトランザクション境界を張る。
@@ -130,8 +140,13 @@ public class RequestStore { // 申請（ExpenseRequest）に関する「読み�
 		if (id == null) { // 引数がnullなら対象が特定できない。
 			return false; // 失敗扱いでfalse。
 		}
-		int updated = expenseRequestMapper.updateStatusForApprover(id, userId, "APPROVED"); // 承認者本人が処理できる申請だけを対象にAPPROVEDへ更新し、更新件数を受け取る。
-		return updated == 1; // 1件更新なら成功、そうでなければ失敗。
+        int updated = expenseRequestMapper.updateStatusForApprover(id, userId, "APPROVED"); // 承認者本人が処理できる申請だけを対象にAPPROVEDへ更新し、更新件数を受け取る。
+        if (updated != 1) return false; // 更新できなかった場合は失敗としてfalseを返す
+
+        // 承認履歴をINSERTする
+        expenseRequestMapper.insertExpenseRequestAction(
+            id, userId, "APPROVE", "SUBMITTED", "APPROVED", null);
+        return true;
 	}
 
 	@Transactional // 状態更新（UPDATE）と履歴INSERTを同一トランザクションにするために境界を張る。
@@ -169,17 +184,31 @@ public class RequestStore { // 申請（ExpenseRequest）に関する「読み�
 	@Transactional
 	public boolean withdraw(Long applicantUserId, Long id) { // 申請者が申請を取り下げる（DRAFT/RETURNED→WITHDRAWN）処理。成功ならtrue。
 		if (id == null) return false;
-		int updated = expenseRequestMapper
-				.updateStatusToWithdrawn(id, applicantUserId);
-		return updated == 1;
+        // 履歴INSERTのためにUPDATE前のstatusを取得する
+        ExpenseRequest current = expenseRequestMapper.selectExpenseRequestById(id);
+        String fromStatus = current != null ? current.getStatus() : "DRAFT";
+
+        int updated = expenseRequestMapper
+                .updateStatusToWithdrawn(id, applicantUserId);
+        if (updated != 1) return false; // 更新できなかった場合は失敗としてfalseを返す
+
+        // 取り下げ履歴をINSERTする
+        expenseRequestMapper.insertExpenseRequestAction(
+            id, applicantUserId, "WITHDRAW", fromStatus, "WITHDRAWN", null);
+        return true;
 	}
 
 	@Transactional
 	public boolean reject(Long approverUserId, Long id) { // 承認者が申請を却下する（SUBMITTED→REJECTED）処理。成功ならtrue。
 		if (id == null) return false;
-		int updated = expenseRequestMapper
-				.updateStatusToRejected(id, approverUserId);
-		return updated == 1;
+        int updated = expenseRequestMapper
+                .updateStatusToRejected(id, approverUserId);
+        if (updated != 1) return false; // 更新できなかった場合は失敗としてfalseを返す
+
+        // 却下履歴をINSERTする
+        expenseRequestMapper.insertExpenseRequestAction(
+            id, approverUserId, "REJECT", "SUBMITTED", "REJECTED", null);
+        return true;
 	}
 	
 	@Transactional // 内容更新（UPDATE）を行うのでトランザクション境界を張る。
@@ -191,5 +220,15 @@ public class RequestStore { // 申請（ExpenseRequest）に関する「読み�
 		return updated == 1; // 更新が1件だけ成功した場合のみtrueとし、0件の場合は条件不一致（権限/状態など）としてfalseにする。
 	}
 
+    // 申請者本人の申請の操作履歴を取得する
+    public List<RequestHistoryItemResponse>
+            getHistory(Long applicantUserId, Long requestId) {
+        if (requestId == null) return List.of();
+        List<RequestHistoryItemResponse> result =
+            expenseRequestMapper
+                .selectHistoryByRequestIdAndApplicant(
+                    requestId, applicantUserId);
+        return result != null ? result : List.of();
+    }
 
 }

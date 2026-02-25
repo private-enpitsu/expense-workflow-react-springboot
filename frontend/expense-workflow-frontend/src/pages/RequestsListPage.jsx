@@ -20,6 +20,8 @@ const STATUS_SECTIONS = [
   { status: "DRAFT",     badgeClass: "badge badge-draft"     },
   { status: "SUBMITTED", badgeClass: "badge badge-submitted" },
   { status: "APPROVED",  badgeClass: "badge badge-approved"  },
+  { status: "WITHDRAWN", badgeClass: "badge badge-withdrawn" },
+  { status: "REJECTED",  badgeClass: "badge badge-rejected"  },
 ];
 
 export default function RequestsListPage() {
