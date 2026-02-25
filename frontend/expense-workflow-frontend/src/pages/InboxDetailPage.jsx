@@ -34,6 +34,7 @@ export default function InboxDetailPage() {
   const setToast = useSetAtom(toastAtom);
 
   const [returnComment, setReturnComment] = useState("");
+  const [rejectComment, setRejectComment] = useState("");
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["requestDetailForInbox", requestId],
@@ -76,7 +77,40 @@ export default function InboxDetailPage() {
     },
   });
 
-  const isWorking = Boolean(approveMutation.isPending || returnMutation.isPending);
+  // 却下のミューテーションも同様に定義する（API呼び出しと成功・失敗時の処理をまとめる）
+  const rejectMutation = useMutation({
+    mutationFn: async () => {
+      await apiClient.post(
+        `/requests/${requestId}/reject`,
+        { comment: rejectComment }
+      );
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries(
+        { queryKey: ["inbox"] }
+      );
+      await queryClient.invalidateQueries({
+        queryKey: ["requestDetailForInbox", requestId]
+      });
+      setToast({ open: true, type: "success",
+                 message: "却下しました" });
+      navigate("/inbox", { replace: true });
+    },
+    onError: (e) => {
+      const msg = e?.response?.status
+        ? `HTTP ${e.response.status}` : String(e);
+      setToast({ open: true, type: "error",
+                 message: `却下に失敗しました: ${msg}` });
+    },
+  });
+
+  const canReject = Boolean(rejectComment.trim().length > 0);
+
+  const isWorking = Boolean(
+    approveMutation.isPending
+    || returnMutation.isPending
+    || rejectMutation.isPending
+  );
   const canReturn = Boolean(returnComment.trim().length > 0);
 
   const errorLabel = error
@@ -158,6 +192,32 @@ export default function InboxDetailPage() {
                 disabled={!canReturn || isWorking}
               >
                 {returnMutation.isPending ? "処理中..." : "差戻す"}
+              </button>
+            </div>
+          </div>
+
+          {/* 却下セクション */}
+          <div className={styles.rejectSection}>
+            <span className={styles.sectionTitle}>
+              却下コメント（必須）
+            </span>
+            <textarea
+              className={styles.rejectTextarea}
+              value={rejectComment}
+              onChange={(e) => setRejectComment(e.target.value)}
+              placeholder="却下理由を入力してください"
+              rows={4}
+              disabled={isWorking}
+            />
+            <div className={styles.actions}>
+              <button
+                type="button"
+                className={styles.btnReject}
+                onClick={() => rejectMutation.mutate()}
+                disabled={!canReject || isWorking}
+              >
+                {rejectMutation.isPending
+                  ? "処理中..." : "却下"}
               </button>
             </div>
           </div>

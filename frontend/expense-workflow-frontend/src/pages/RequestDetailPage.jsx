@@ -6,8 +6,10 @@
   今回変更点: ニューモーフィズムデザイン（凸カード・凹フィールド・凸ボタン）を適用した
 */
 
-import { useQuery } from "@tanstack/react-query";
-import { useParams, Link } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useSetAtom } from "jotai";
+import { toastAtom } from "../lib/atoms";
 
 import { apiClient } from "../lib/apiClient";
 import { toStatusLabel, toRequestLabel } from "../lib/statusLabel";
@@ -26,6 +28,34 @@ function statusBadgeClass(status) {
 
 export default function RequestDetailPage() {
   const { id: requestId } = useParams();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const setToast = useSetAtom(toastAtom);
+
+
+  // 申請取り下げのミューテーションを定義する（API呼び出しと成功・失敗時の処理をまとめる）
+  const withdrawMutation = useMutation({
+    mutationFn: async () => {
+      await apiClient.post(`/requests/${requestId}/withdraw`);
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["requests"] });
+      await queryClient.invalidateQueries(
+        { queryKey: ["request", requestId] }
+      );
+      setToast({ open: true, type: "success",
+                 message: "取り下げました" });
+      navigate("/requests", { replace: true });
+    },
+    onError: (e) => {
+      const msg = e?.response?.status
+        ? `HTTP ${e.response.status}` : String(e);
+      setToast({ open: true, type: "error",
+                 message: `取り下げに失敗しました: ${msg}` });
+    },
+  });
+
+
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["request", requestId],
@@ -41,6 +71,7 @@ export default function RequestDetailPage() {
     : "";
 
   const canEdit = Boolean(data && (data.status === "RETURNED" || data.status === "DRAFT"));
+  const canWithdraw = Boolean( data && (data.status === "DRAFT" || data.status === "RETURNED"));
   const isReturned = Boolean(data && data.status === "RETURNED");
 
   return (
@@ -104,6 +135,17 @@ export default function RequestDetailPage() {
               <Link to={`/requests/${requestId}/edit`} className={styles.btnEdit}>
                 修正する
               </Link>
+            )}
+            {canWithdraw && (
+              <button
+                type="button"
+                className={styles.btnWithdraw}
+                onClick={() => withdrawMutation.mutate()}
+                disabled={withdrawMutation.isPending}
+              >
+                {withdrawMutation.isPending
+                  ? "処理中..." : "取り下げ"}
+              </button>
             )}
             <Link to="/requests" className={styles.btnBack}>
               一覧に戻る

@@ -93,6 +93,34 @@ public class WorkflowController {
 		} // 失敗時分岐を閉じる
 		return ResponseEntity.ok().build(); // 成功時は200 OK（ボディなし）を返す
 	} // returnRequest を閉じる
+	
+	// 申請者が申請を取り下げる（DRAFT/RETURNED→WITHDRAWN）
+	@PostMapping("/requests/{id}/withdraw")
+	public ResponseEntity<Void> withdraw(
+			HttpSession session,
+			@PathVariable("id") Long id) {
+		Long userId = requireUserId(session);
+		boolean ok = requestStore.withdraw(userId, id);
+		if (!ok) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+		}
+		return ResponseEntity.ok().build();
+	}
+
+	// 承認者が申請を却下する（SUBMITTED→REJECTED）
+	@PostMapping("/requests/{id}/reject")
+	public ResponseEntity<Void> reject(
+			HttpSession session,
+			@PathVariable("id") Long id,
+			@org.springframework.web.bind.annotation.RequestBody
+			com.example.expenseworkflow.controller.dto.ReturnRequestRequest body) {
+		Long userId = requireUserId(session);
+		boolean ok = requestStore.reject(userId, id);
+		if (!ok) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+		}
+		return ResponseEntity.ok().build();
+	}
 
 	 // セッションからユーザーIDを「必須で」取り出す共通処理。取れない/不正なら401にします。
 	private Long requireUserId(HttpSession session) {

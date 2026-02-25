@@ -113,11 +113,13 @@ function NavItem({ to, label }) {
 const isActive =
   to === "/"
     ? location.pathname === "/"
-    : to === "/requests"
-      ? location.pathname === "/requests" ||
-        (location.pathname.startsWith("/requests") &&
-         !location.pathname.startsWith("/requests/new"))  // /new は除外
-      : location.pathname.startsWith(to);
+    : to === "/requests/new"
+      ? location.pathname === "/requests/new"
+      : to === "/requests"
+        ? location.pathname === "/requests"
+        : to === "/inbox"
+          ? location.pathname === "/inbox"
+          : location.pathname === to;
 
   return (
     <Link

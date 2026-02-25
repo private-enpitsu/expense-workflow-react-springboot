@@ -232,6 +232,8 @@ textarea::placeholder { color: var(--text-sub); }
 .badge-submitted { background: #fdebd5; color: #c47a2b; }
 .badge-approved  { background: #d6f5e8; color: #3a9e71; }
 .badge-returned  { background: #fcdede; color: #c44a4a; }
+.badge-withdrawn { background: #e8e8e8; color: #6b7280; } /* 取り下げ：グレー */
+.badge-rejected  { background: #fdebd5; color: #c47a2b; } /* 却下：オレンジ */
 
 /* ローディング・エラー・空状態 */
 .state-loading, .state-empty {

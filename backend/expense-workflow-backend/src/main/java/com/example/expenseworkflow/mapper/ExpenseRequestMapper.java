@@ -62,4 +62,14 @@ public interface ExpenseRequestMapper { // MyBatisが実装を生成するため
 			@Param("amount") int amount, // 更新後の金額を受け取り、amountへセットするために使う
 			@Param("note") String note // 更新後の備考を受け取り、noteへセットするために使う
 	); // 更新件数（0または1）を返し、1なら更新成功として扱う
+	
+	int updateStatusToWithdrawn( // 申請者が申請を取り下げる（DRAFT/RETURNED→WITHDRAWN）ためのメソッドを宣言する
+			@Param("id") Long id,
+			@Param("applicantUserId") Long applicantUserId
+	);
+
+	int updateStatusToRejected( // 承認者が申請を却下する（SUBMITTED→REJECTED）ためのメソッドを宣言する
+			@Param("id") Long id,
+			@Param("approverUserId") Long approverUserId
+	);
 }
