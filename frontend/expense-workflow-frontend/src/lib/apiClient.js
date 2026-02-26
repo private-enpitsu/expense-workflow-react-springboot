@@ -11,11 +11,12 @@
 import axios from "axios"; // HTTPクライアントライブラリAxiosを読み込む（以後これを共通で使う）
 //                                                                 // 空行の代わり（全行コメントルール対応）
 
-export const apiClient = axios.create({ // 共通設定済みのAxiosインスタンスを作り、全API呼び出しで再利用する
+export const apiClient = axios.create({
+  // 共通設定済みのAxiosインスタンスを作り、全API呼び出しで再利用する
+  baseURL:
+    "https://expense-workflow-react-springboot-production.up.railway.app/api",
   // baseURL: "http://localhost:8080", // バックエンドのベースURLを固定し、各画面でURL直書きを避ける
-  baseURL: "/api",
+  // baseURL: "/api",
   timeout: 10000, // 通信が固まったときに待ち続けないようにタイムアウトを設定する（ms）
-  // withCredentials: true, // セッションCookie運用にする場合はtrueにする（今回はhealth確認なので未設定のまま）
+  withCredentials: true, // セッションCookie運用にする場合はtrueにする（★Railway利用の際にtrueにした）
 }); // 共通クライアント定義の終わり
-
-
