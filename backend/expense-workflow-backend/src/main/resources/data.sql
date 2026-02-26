@@ -10,7 +10,7 @@ REPLACE INTO `users`
 VALUES
   (1,
    'user1@example.com',
-   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy',
+   '$2a$10$S7LUgukvAMtErZNWQ60zdeEZRsfje3BVN0w21REkN7RkI4F32UrUu',
    'Approver 1',
    'APPLICANT',
    2,
@@ -21,7 +21,7 @@ REPLACE INTO `users`
 VALUES
   (2,
    'admin1@example.com',
-   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy',
+   '$2a$10$S7LUgukvAMtErZNWQ60zdeEZRsfje3BVN0w21REkN7RkI4F32UrUu',
    'Admin 1',
    'APPROVER',
    NULL,
