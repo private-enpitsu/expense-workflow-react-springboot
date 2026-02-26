@@ -5,24 +5,23 @@
 -- =============================================
 
 -- user1@example.com（APPLICANT / 上長: id=2）
-INSERT IGNORE INTO `users`
+REPLACE INTO `users`
   (`id`, `email`, `password_hash`, `name`, `role`, `manager_id`, `is_active`)
 VALUES
   (1,
    'user1@example.com',
-   '$2b$10$Yeuk047KpYk4zi19uYle7ueRNBWb8yh/IO/4ShH2MiYNyHglKIcze',
+   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy',
    'Approver 1',
    'APPLICANT',
    2,
    1);
 
--- admin1@example.com（APPROVER / 上長なし）
-INSERT IGNORE INTO `users`
+REPLACE INTO `users`
   (`id`, `email`, `password_hash`, `name`, `role`, `manager_id`, `is_active`)
 VALUES
   (2,
    'admin1@example.com',
-   '$2b$10$Yeuk047KpYk4zi19uYle7ueRNBWb8yh/IO/4ShH2MiYNyHglKIcze',
+   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy',
    'Admin 1',
    'APPROVER',
    NULL,
