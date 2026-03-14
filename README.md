@@ -1,121 +1,161 @@
-# Workflow App（ワークフロー申請・承認アプリ）
-React（Frontend） + Java/Spring Boot（Backend）で作る、申請→承認フローを備えた業務向けワークフローアプリです。
-まず「動く機能（MVP）」を優先して開発し、Docker化は後から段階的に導入します。
+# Workflow App（経費申請・承認ワークフロー）
+
+React + Java/Spring Boot で構築した、業務向けの申請・承認フローアプリです。  
+ロールベースの権限管理・申請ステータス管理・操作履歴など、実務アプリの典型要素を一通り実装しています。
+
+🔗 **デモURL**：https://sincere-empathy-production.up.railway.app/  
+※ テスト用アカウントは下記「デモ用ログイン情報」を参照してください。
 
 ---
 
-## 目的
-- 就職用ポートフォリオとして、業務アプリの典型要素を一通り実装する
-  （認証・権限・申請フロー・承認・履歴）
-- フロントとバックを分離し、API連携型の構成で開発する
-- 初期はローカル環境で安定動作を作り、Docker化は後回しで学習しながら実施する
+## 📸 スクリーンショット
+
+### ログイン画面
+
+![ログイン画面](_screenshots/login.png_)
+
+### 申請一覧（一般ユーザー）
+
+![申請一覧](_screenshots/application_list.png_)
+
+### 申請作成
+
+![申請作成](_screenshots/create_application.png_)
+
+### 承認・差戻し画面
+
+![承認画面](_screenshots/approve.png_)
+
+### 操作履歴
+
+![操作履歴](_screenshots/history.png_)
 
 ---
 
-## リポジトリ構成（モノレポ）
-1つのGitHubリポジトリに `frontend/` と `backend/` を同居させて管理します。
+## 🔑 デモ用ログイン情報
 
+| ロール       | メールアドレス     | パスワード |
+| ------------ | ------------------ | ---------- |
+| 一般ユーザー | user1@example.com  | password   |
+| 承認者       | admin1@example.com | password   |
+
+---
+
+## ✅ 実装済み機能
+
+| 機能                 | 概要                                           |
+| -------------------- | ---------------------------------------------- |
+| ログイン・ログアウト | Spring Security によるセッション認証           |
+| ロール別表示         | 一般ユーザー／承認者でメニュー・操作を切り替え |
+| 申請作成             | 経費申請フォームの入力・登録                   |
+| 申請一覧・詳細       | 申請のステータス確認・詳細表示                 |
+| 承認・差戻し         | 承認者によるステータス更新・コメント付与       |
+| 操作履歴             | 申請ごとの承認・差戻し履歴をタイムライン表示   |
+
+---
+
+## 🛠 技術スタック
+
+### フロントエンド
+
+- React 18
+- Vite
+- React Router v6
+- Jotai（状態管理）
+- Axios
+
+### バックエンド
+
+- Java 17
+- Spring Boot 3
+- Spring Security（セッション認証）
+- MyBatis
+- MySQL 8
+
+### インフラ
+
+- Railway（フロントエンド・バックエンド・DB をそれぞれデプロイ）
+
+---
+
+## 🗂 リポジトリ構成
+
+```
 expense-workflow-react-springboot/
-  frontend/      # React（package.json）
-  backend/       # Spring Boot（build.gradle or pom.xml）
-  docs/          # 設計・仕様（任意）
-  README.md
-  .gitignore
-
-
-
-### ルール
-- `frontend/` と `backend/` は **それぞれ単独で起動できる状態**にする
-- 仕様（画面一覧 / API仕様 / ER図など）は `docs/` と README に集約する
+├── frontend/
+│   └── expense-workflow-frontend/   # React アプリ
+└── backend/                         # Spring Boot アプリ
+```
 
 ---
 
-## 開発方針（フェーズ）
-### Phase 0：土台（最初に固める）
-- 画面一覧（申請作成／一覧／詳細／承認／管理など）
-- データモデル（最低限のテーブルと項目）
-- API一覧（エンドポイント・リクエスト/レスポンス）
-- 権限（例：一般ユーザー／承認者／管理者）
+## 🚀 ローカル起動手順
 
-**成果物**：`docs/` に「画面一覧」「API仕様」「ER図（簡易）」がある状態
+### 前提条件
 
----
+- Node.js 18以上
+- Java 17以上
+- MySQL 8（またはDockerでMySQL起動）
 
-### Phase 1：最小で動く流れ（MVP）
-**「申請 → 承認」まで一本つながる**ことを最優先。
+### 1. リポジトリをクローン
 
-- 申請作成（フロント） → 登録API（バック）
-- 申請一覧／詳細表示（フロント） → 取得API（バック）
-- 承認／差戻し（フロント） → 更新API（バック）
+```bash
+git clone https://github.com/private-enpitsu/expense-workflow-react-springboot.git
+cd expense-workflow-react-springboot
+```
 
-**成果物**：最低限の画面とAPIで一連の業務フローが動く
+### 2. バックエンド起動
 
----
+```bash
+cd backend
 
-### Phase 2：業務らしさの追加
-- 状態管理（下書き／申請中／承認済み／差戻し など）
-- 承認履歴・コメント
-- 検索・フィルタ（申請者、期間、状態）
-- 入力バリデーション（フロント＋バック）
+# application.properties に DB 接続情報を設定（下記参照）
+./gradlew bootRun
+```
 
-**成果物**：実務アプリとして「それっぽい」操作性と監査性
+`application.properties` の設定例：
 
----
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/workflow_db
+spring.datasource.username=root
+spring.datasource.password=yourpassword
+```
 
-### Phase 3：品質・運用を意識
-- 例外処理／エラーメッセージ統一
-- テスト（最低限：サービス層やAPIのテスト）
-- 環境切替（dev/prod）
-- ドキュメント整備（READMEの手順、構成図）
+### 3. フロントエンド起動
 
----
+```bash
+cd frontend/expense-workflow-frontend
+npm install
+npm run dev
+```
 
-## Docker化の方針（後から段階導入）
-### 方針
-- 最初は **ローカルで安定動作**を作る（DBもローカルでOK）
-- Docker化は段階導入する（振り回されないため）
-
-### Docker導入の推奨順
-1. **MySQLだけ**コンテナ化（backendはローカルのまま接続）
-2. backendをコンテナ化
-3. frontendをコンテナ化（必要なら）
-
-### 後からDocker化しやすくする最低ルール
-- 接続情報やURLを **環境変数で切り替え可能**にする
-  例：DBホスト、DB名、ユーザー、パス、APIベースURL
-- `localhost固定` を避け、dev/prodで差し替え可能にする（profile等）
+ブラウザで `http://localhost:5173` を開く。
 
 ---
 
-## 開発運用ルール（ミスを減らす）
-- **1機能 = 1PR**（申請作成、承認、一覧…など）
-- バック → フロントの順で作ると手戻りが減る
-  - API（Request/Response）確定 → フロント接続
-- 仕様変更は `docs/` と README を先に更新してから実装する
+## 📐 主要な設計ポイント
+
+### ロールベースアクセス制御（RBAC）
+
+Spring Security の設定でエンドポイントごとにロールを制限。フロントエンドもロールに応じてメニュー・ボタンの表示を切り替えています（一般ユーザー／承認者）。
+
+### 申請ステータスの状態遷移
+
+```
+下書き → 申請中 → 承認済み
+                → 差戻し → 申請中（再申請）
+```
+
+### セッション認証とCORS対応
+
+フロントエンド（Railway）とバックエンド（Railway）がクロスドメインのため、`SameSite=None; Secure` の Cookie 設定で対応。
+
+### 操作履歴の記録
+
+承認・差戻しのたびに操作者・日時・コメントをDBに記録。申請詳細画面でタイムライン表示。
 
 ---
 
-## READMEに必ず書くこと（ポートフォリオ重要）
-- アプリ概要（何ができるか）
-- 画面一覧（スクショがあると強い）
-- 技術スタック（React / Spring Boot / DB / MyBatisなど）
-- 起動手順（frontend/backendそれぞれ）
-- テスト方法（ある場合）
-- 主要な設計ポイント（権限、状態遷移、監査ログ等）
+## 📄 License
 
----
-
-## 起動手順（例・後で埋める）
-### Backend
-- `backend/` 配下で起動
-  - Gradle / Maven の起動コマンドを記載
-
-### Frontend
-- `frontend/` 配下で起動
-  - `npm install`
-  - `npm run dev`（または `npm start`）
-
----
-
-## License
-TBD
+MIT
