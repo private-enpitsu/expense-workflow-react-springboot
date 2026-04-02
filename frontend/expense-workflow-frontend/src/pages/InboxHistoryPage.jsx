@@ -1,8 +1,5 @@
 /*
-  目的：承認者が操作履歴を確認する画面
-  URL：/inbox/:id/history
-  呼び出し元：App.jsx の Route
-  依存：TanStack Query / apiClient / statusLabel / CSS Modules
+  承認者が操作履歴を確認する画面
 */
 import { useQuery } from "@tanstack/react-query";
 import { useParams, Link } from "react-router-dom";
@@ -16,9 +13,7 @@ export default function InboxHistoryPage() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["inboxHistory", requestId],
     queryFn: async () => {
-      const res = await apiClient.get(
-        `/inbox/${requestId}/history`
-      );
+      const res = await apiClient.get(`/inbox/${requestId}/history`);
       return res.data;
     },
     enabled: Boolean(requestId),
@@ -27,37 +22,23 @@ export default function InboxHistoryPage() {
   return (
     <div className={styles.page}>
       <h2>操作履歴</h2>
-      <p className={styles.requestId}>
-        {toRequestLabel(requestId)}
-      </p>
+      <p className={styles.requestId}>{toRequestLabel(requestId)}</p>
 
-      {isLoading && (
-        <p className="state-loading">Loading...</p>
-      )}
-      {error && (
-        <p className="state-error">エラーが発生しました</p>
-      )}
+      {isLoading && <p className="state-loading">Loading...</p>}
+      {error && <p className="state-error">エラーが発生しました</p>}
 
       {!isLoading && !error && data && (
         <div className={styles.list}>
-          {data.length === 0 && (
-            <p className="state-empty">履歴がありません</p>
-          )}
+          {data.length === 0 && <p className="state-empty">履歴がありません</p>}
           {data.map((item, i) => (
             <div key={i} className={styles.item}>
               <span className={styles.action}>
                 {toActionLabel(item.action)}
               </span>
-              <span className={styles.actor}>
-                {item.actorName}
-              </span>
-              <span className={styles.date}>
-                {item.createdAt}
-              </span>
+              <span className={styles.actor}>{item.actorName}</span>
+              <span className={styles.date}>{item.createdAt}</span>
               {item.comment && (
-                <span className={styles.comment}>
-                  {item.comment}
-                </span>
+                <span className={styles.comment}>{item.comment}</span>
               )}
             </div>
           ))}
@@ -65,10 +46,7 @@ export default function InboxHistoryPage() {
       )}
 
       <div className={styles.actions}>
-        <Link
-          to={`/inbox/${requestId}`}
-          className={styles.btnBack}
-        >
+        <Link to={`/inbox/${requestId}`} className={styles.btnBack}>
           詳細に戻る
         </Link>
       </div>

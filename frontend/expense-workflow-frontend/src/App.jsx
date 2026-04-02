@@ -1,13 +1,3 @@
-/*
-  src/App.jsx // ファイルパスを明示する
-  目的: ルーティングを提供し、/ はBackend Check（疎通UI）を維持しつつ、/login を表示するためのルートコンポーネントを定義する // “Health”命名を避けて疎通UIの役割で表現する
-  呼び出し元/使用箇所: src/main.jsx から <App /> として読み込まれ、アプリ全体のルートとして描画される // どこから呼ばれるかを明確化する
-  依存: react-router-dom（BrowserRouter/Routes/Route/Link）, @tanstack/react-query（useQuery）, jotai（atom/useSetAtom）, ./lib/apiClient（Axiosクライアント）, ./App.module.css（CSS Modules）, ./pages/LoginPage // 参照している主要依存を列挙する
-  今回の変更点: /requests/:id ルート（表示だけ）を追加し、ナビゲーションに Request Detail（/requests/1）を追加した（/ のHealthは壊さない） // 今回のAxis（/requests/:id表示）に合わせて説明を更新する
-  入出力: 画面表示のみ（Props なし）。/api/health のレスポンス（例: { status: "OK" }）を表示に反映する // URLは維持する前提を明示する
-  注意点: これは命名の置換のみで、疎通確認の実行経路（/api/health 呼び出し）は変えない // L4（既存を壊さない）に寄せる
-*/
-
 import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSetAtom } from "jotai";
@@ -37,8 +27,6 @@ import RequestEditPage from "./pages/RequestEditPage";
 import ToastHost from "./components/ToastHost";
 
 import styles from "./App.module.css";
-
-import './index.css'; // リセットCSSをインポートする
 
 /* ============================================================
    疎通確認ページ（/ のまま維持）
@@ -87,11 +75,19 @@ function HealthCheckPage() {
   useEffect(() => {
     if (isLoading) return;
     if (errorMessage) {
-      setToast({ open: true, type: "error", message: `Health 失敗: ${errorMessage}` });
+      setToast({
+        open: true,
+        type: "error",
+        message: `Health 失敗: ${errorMessage}`,
+      });
       return;
     }
     if (data?.status) {
-      setToast({ open: true, type: "success", message: `Health 成功: ${data.status}` });
+      setToast({
+        open: true,
+        type: "success",
+        message: `Health 成功: ${data.status}`,
+      });
     }
   }, [isLoading, errorMessage, data?.status, setToast]);
 
@@ -112,16 +108,16 @@ function HealthCheckPage() {
 ============================================================ */
 function NavItem({ to, label }) {
   const location = useLocation();
-const isActive =
-  to === "/"
-    ? location.pathname === "/"
-    : to === "/requests/new"
-      ? location.pathname === "/requests/new"
-      : to === "/requests"
-        ? location.pathname === "/requests"
-        : to === "/inbox"
-          ? location.pathname === "/inbox"
-          : location.pathname === to;
+  const isActive =
+    to === "/"
+      ? location.pathname === "/"
+      : to === "/requests/new"
+        ? location.pathname === "/requests/new"
+        : to === "/requests"
+          ? location.pathname === "/requests"
+          : to === "/inbox"
+            ? location.pathname === "/inbox"
+            : location.pathname === to;
 
   return (
     <Link
@@ -151,7 +147,9 @@ function AppShell() {
   const isLoggedIn = !isMeLoading && meHttpStatus !== 401 && !meError;
   const role = isLoggedIn ? (meData?.role ?? "") : "";
   const isApplicant = Boolean(isLoggedIn && role === "APPLICANT");
-  const isApprover  = Boolean(isLoggedIn && (role === "APPROVER" || role === "ADMIN"));
+  const isApprover = Boolean(
+    isLoggedIn && (role === "APPROVER" || role === "ADMIN"),
+  );
 
   const meLabel = isMeLoading
     ? "確認中..."
@@ -172,8 +170,14 @@ function AppShell() {
       navigate("/login", { replace: true });
     },
     onError: (error) => {
-      const msg = error?.response ? `HTTP ${error.response.status}` : String(error);
-      setToast({ open: true, type: "error", message: `ログアウト失敗: ${msg}` });
+      const msg = error?.response
+        ? `HTTP ${error.response.status}`
+        : String(error);
+      setToast({
+        open: true,
+        type: "error",
+        message: `ログアウト失敗: ${msg}`,
+      });
     },
   });
 
@@ -189,14 +193,12 @@ function AppShell() {
 
           {isApplicant && (
             <>
-              <NavItem to="/requests"     label="申請一覧" />
+              <NavItem to="/requests" label="申請一覧" />
               <NavItem to="/requests/new" label="申請作成" />
             </>
           )}
 
-          {isApprover && (
-            <NavItem to="/inbox" label="受信箱" />
-          )}
+          {isApprover && <NavItem to="/inbox" label="受信箱" />}
 
           <span className={styles.navUser}>{meDisplay}</span>
 
@@ -222,14 +224,23 @@ function AppShell() {
               <Route path="/" element={<HealthCheckPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route element={<RequireAuth />}>
-                <Route path="/requests"          element={<RequestsListPage />} />
-                <Route path="/requests/new"      element={<RequestCreatePage />} />
-                <Route path="/requests/:id"      element={<RequestDetailPage />} />
-                <Route path="/requests/:id/history" element={<RequestHistoryPage />} />
-                <Route path="/requests/:id/edit" element={<RequestEditPage />} />
-                <Route path="/inbox"             element={<InboxPage />} />
-                <Route path="/inbox/:id"         element={<InboxDetailPage />} />
-                <Route path="/inbox/:id/history" element={<InboxHistoryPage />} />
+                <Route path="/requests" element={<RequestsListPage />} />
+                <Route path="/requests/new" element={<RequestCreatePage />} />
+                <Route path="/requests/:id" element={<RequestDetailPage />} />
+                <Route
+                  path="/requests/:id/history"
+                  element={<RequestHistoryPage />}
+                />
+                <Route
+                  path="/requests/:id/edit"
+                  element={<RequestEditPage />}
+                />
+                <Route path="/inbox" element={<InboxPage />} />
+                <Route path="/inbox/:id" element={<InboxDetailPage />} />
+                <Route
+                  path="/inbox/:id/history"
+                  element={<InboxHistoryPage />}
+                />
               </Route>
             </Routes>
           </div>

@@ -1,9 +1,5 @@
 /*
-  src/pages/RequestEditPage.jsx
-  目的: /requests/:id/edit の「申請編集」ページ。RETURNED の申請だけ編集・再提出できる。ニューモーフィズムデザインを適用した
-  呼び出し元/使用箇所: src/App.jsx の <Route path="/requests/:id/edit" element={<RequestEditPage />} />
-  入力と出力: 入力=URLの :id / 出力=RETURNEDなら編集フォーム＋保存＋再提出、それ以外は案内表示
-  今回変更点: ニューモーフィズムデザイン（凸カード・凹input・凸ボタン）を適用した
+  /requests/:id/edit の「申請編集」ページ。RETURNED の申請だけ編集・再提出できる。
 */
 
 import { useState } from "react";
@@ -45,7 +41,9 @@ export default function RequestEditPage() {
     setIsEditStarted(true);
   };
 
-  const canEdit = Boolean(data && (data.status === "RETURNED" || data.status === "DRAFT"));
+  const canEdit = Boolean(
+    data && (data.status === "RETURNED" || data.status === "DRAFT"),
+  );
   const isReturned = Boolean(data && data.status === "RETURNED");
 
   const saveMutation = useMutation({
@@ -53,10 +51,14 @@ export default function RequestEditPage() {
       ensureEditDraft();
       const t = isEditStarted ? title : (data?.title ?? "");
       const a = isEditStarted ? amount : String(data?.amount ?? 0);
-      const n = isEditStarted ? note  : (data?.note ?? "");
+      const n = isEditStarted ? note : (data?.note ?? "");
       const numericAmount = Number(a);
       const safeAmount = Number.isFinite(numericAmount) ? numericAmount : 0;
-      await apiClient.patch(`/requests/${requestId}`, { title: t, amount: safeAmount, note: n });
+      await apiClient.patch(`/requests/${requestId}`, {
+        title: t,
+        amount: safeAmount,
+        note: n,
+      });
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["request", requestId] });
@@ -64,8 +66,14 @@ export default function RequestEditPage() {
       setToast({ open: true, type: "success", message: "保存しました" });
     },
     onError: (err) => {
-      const msg = err?.response?.status ? `HTTP ${err.response.status}` : String(err);
-      setToast({ open: true, type: "error", message: `保存に失敗しました: ${msg}` });
+      const msg = err?.response?.status
+        ? `HTTP ${err.response.status}`
+        : String(err);
+      setToast({
+        open: true,
+        type: "error",
+        message: `保存に失敗しました: ${msg}`,
+      });
     },
   });
 
@@ -81,14 +89,24 @@ export default function RequestEditPage() {
       navigate(`/requests/${requestId}`, { replace: true });
     },
     onError: (err) => {
-      const msg = err?.response?.status ? `HTTP ${err.response.status}` : String(err);
-      setToast({ open: true, type: "error", message: `再提出に失敗しました: ${msg}` });
+      const msg = err?.response?.status
+        ? `HTTP ${err.response.status}`
+        : String(err);
+      setToast({
+        open: true,
+        type: "error",
+        message: `再提出に失敗しました: ${msg}`,
+      });
     },
   });
 
-  const isWorking = Boolean(saveMutation.isPending || resubmitMutation.isPending);
+  const isWorking = Boolean(
+    saveMutation.isPending || resubmitMutation.isPending,
+  );
   const errorLabel = error
-    ? error?.response?.status ? `HTTP ${error.response.status}` : String(error)
+    ? error?.response?.status
+      ? `HTTP ${error.response.status}`
+      : String(error)
     : "";
 
   return (
@@ -96,14 +114,16 @@ export default function RequestEditPage() {
       <h2>申請編集</h2>
 
       {isLoading && <p className="state-loading">Loading...</p>}
-      {error    && <p className="state-error">エラー：{errorLabel}</p>}
+      {error && <p className="state-error">エラー：{errorLabel}</p>}
 
       {!isLoading && !error && data && (
         <>
           {/* RETURNED以外かつDRAFT以外：編集不可の案内 */}
           {!canEdit && (
             <div className={styles.notEditable}>
-              <p>この申請は下書き（DRAFT）または差戻し（RETURNED）のときだけ編集できます。</p>
+              <p>
+                この申請は下書き（DRAFT）または差戻し（RETURNED）のときだけ編集できます。
+              </p>
               <p>現在の状態：{toStatusLabel(data.status)}</p>
             </div>
           )}
@@ -112,20 +132,24 @@ export default function RequestEditPage() {
           {isReturned && data.lastReturnComment && (
             <div className={styles.returnComment}>
               <span className={styles.returnCommentLabel}>差戻しコメント</span>
-              <span className={styles.returnCommentValue}>{data.lastReturnComment}</span>
+              <span className={styles.returnCommentValue}>
+                {data.lastReturnComment}
+              </span>
             </div>
           )}
 
           {/* DRAFT / RETURNED：編集フォーム */}
           {canEdit && (
             <div className={styles.card}>
-
               <label className={styles.field}>
                 <span>件名</span>
                 <input
                   value={isEditStarted ? title : (data.title ?? "")}
                   onFocus={() => ensureEditDraft()}
-                  onChange={(e) => { ensureEditDraft(); setTitle(e.target.value); }}
+                  onChange={(e) => {
+                    ensureEditDraft();
+                    setTitle(e.target.value);
+                  }}
                   disabled={isWorking}
                   placeholder="例）交通費精算"
                 />
@@ -136,7 +160,10 @@ export default function RequestEditPage() {
                 <input
                   value={isEditStarted ? amount : String(data.amount ?? 0)}
                   onFocus={() => ensureEditDraft()}
-                  onChange={(e) => { ensureEditDraft(); setAmount(e.target.value); }}
+                  onChange={(e) => {
+                    ensureEditDraft();
+                    setAmount(e.target.value);
+                  }}
                   disabled={isWorking}
                   inputMode="numeric"
                   placeholder="例）1200"
@@ -148,13 +175,15 @@ export default function RequestEditPage() {
                 <textarea
                   value={isEditStarted ? note : (data.note ?? "")}
                   onFocus={() => ensureEditDraft()}
-                  onChange={(e) => { ensureEditDraft(); setNote(e.target.value); }}
+                  onChange={(e) => {
+                    ensureEditDraft();
+                    setNote(e.target.value);
+                  }}
                   disabled={isWorking}
                   rows={4}
                   placeholder="例）領収書あり"
                 />
               </label>
-
             </div>
           )}
 

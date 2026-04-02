@@ -1,10 +1,5 @@
 /*
-  src/pages/RequestCreatePage.jsx
-  目的: /requests/new の「申請作成」ページ。ニューモーフィズムデザインを適用した
-  呼び出し元/使用箇所: src/App.jsx の <Route path="/requests/new" element={<RequestCreatePage />} />
-  入力と出力: Props なし / 出力=申請作成フォーム（保存・提出ボタン付き）
-  依存: react / react-router-dom / @tanstack/react-query / jotai / apiClient / statusLabel / CSS Modules
-  今回変更点: 入力欄・ボタンにニューモーフィズムデザイン（凹input・凸button）を適用した
+  /requests/new の「申請作成」ページ。
 */
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -34,13 +29,23 @@ export default function RequestCreatePage() {
     },
     onSuccess: async (created) => {
       await queryClient.invalidateQueries({ queryKey: ["requests"] });
-      setToast({ open: true, type: "success", message: `保存しました: ${toRequestLabel(created?.id)}` });
-      navigate(created?.id ? `/requests/${created.id}` : "/requests", { replace: true });
+      setToast({
+        open: true,
+        type: "success",
+        message: `保存しました: ${toRequestLabel(created?.id)}`,
+      });
+      navigate(created?.id ? `/requests/${created.id}` : "/requests", {
+        replace: true,
+      });
     },
     onError: (error) => {
       const status = error?.response?.status ?? null;
       const msg = status ? `HTTP ${status}` : String(error);
-      setToast({ open: true, type: "error", message: `保存に失敗しました: ${msg}` });
+      setToast({
+        open: true,
+        type: "error",
+        message: `保存に失敗しました: ${msg}`,
+      });
     },
   });
 
@@ -58,17 +63,29 @@ export default function RequestCreatePage() {
     onSuccess: async (result) => {
       await queryClient.invalidateQueries({ queryKey: ["requests"] });
       await queryClient.invalidateQueries({ queryKey: ["inbox"] });
-      setToast({ open: true, type: "success", message: `提出しました: ${toRequestLabel(result?.id)}` });
-      navigate(result?.id ? `/requests/${result.id}` : "/requests", { replace: true });
+      setToast({
+        open: true,
+        type: "success",
+        message: `提出しました: ${toRequestLabel(result?.id)}`,
+      });
+      navigate(result?.id ? `/requests/${result.id}` : "/requests", {
+        replace: true,
+      });
     },
     onError: (error) => {
       const status = error?.response?.status ?? null;
       const msg = status ? `HTTP ${status}` : String(error);
-      setToast({ open: true, type: "error", message: `提出に失敗しました: ${msg}` });
+      setToast({
+        open: true,
+        type: "error",
+        message: `提出に失敗しました: ${msg}`,
+      });
     },
   });
 
-  const isSubmitting = Boolean(createMutation.isPending || submitNewMutation.isPending);
+  const isSubmitting = Boolean(
+    createMutation.isPending || submitNewMutation.isPending,
+  );
   const canSubmit = Boolean(title.trim().length > 0);
 
   return (

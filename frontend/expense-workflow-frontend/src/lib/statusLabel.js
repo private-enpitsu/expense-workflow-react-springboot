@@ -1,8 +1,6 @@
-/* 目的: 申請ステータス（内部コード）をUI表示用の日本語ラベルへ変換する関数を提供する。 */ // このファイルの役割を説明する
-/* 呼び出し元: src/pages/RequestsListPage.jsx / src/pages/RequestDetailPage.jsx / src/pages/InboxPage.jsx から import して使う。 */ // どこから使われるかを書く
-/* 入力と出力: 入力=ステータス文字列（例: "DRAFT"）/ 出力=表示用ラベル（例: "下書き"）。 */ // 何を受け取り何を返すかを書く
-/* 依存: なし（純粋な変換関数だけ）。 */ // 依存関係が無いことを書く
-/* 今回変更点: toRequestLabel を追加し、数値IDをREQ-xxx形式へ変換するSOTをこのファイルに集約した。 */
+/*
+申請ステータス（内部コード）をUI表示用の日本語ラベルへ変換する関数を提供する。
+*/
 
 // 内部コード→表示ラベルの対応表を1箇所に固定して二重定義を防ぐ
 const STATUS_LABEL_MAP = {
@@ -11,7 +9,7 @@ const STATUS_LABEL_MAP = {
   APPROVED: "承認済み",
   RETURNED: "差戻し",
   WITHDRAWN: "取り下げ",
-  REJECTED:  "却下",
+  REJECTED: "却下",
 };
 
 // ステータス文字列を表示ラベルへ変換する関数を公開する
@@ -30,11 +28,11 @@ export function toRequestLabel(id) {
 
 // 目的：actionコードを日本語ラベルに変換するSOT
 const ACTION_LABEL_MAP = {
-  SUBMIT:   "提出",
-  APPROVE:  "承認",
-  RETURN:   "差戻し",
+  SUBMIT: "提出",
+  APPROVE: "承認",
+  RETURN: "差戻し",
   WITHDRAW: "取り下げ",
-  REJECT:   "却下",
+  REJECT: "却下",
 };
 
 export function toActionLabel(action) {

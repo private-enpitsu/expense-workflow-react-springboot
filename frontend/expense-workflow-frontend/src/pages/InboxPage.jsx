@@ -1,9 +1,5 @@
 /*
-  src/pages/InboxPage.jsx
-  目的: 承認者向けの受信箱一覧。ニューモーフィズムデザインを適用した
-  呼び出し元/使用箇所: src/App.jsx の <Route path="/inbox" element={<InboxPage />} />
-  入力と出力: 入力なし / 出力=承認待ち申請の一覧（各行クリックで詳細へ遷移）
-  今回変更点: table廃止・凹インセットカード行＋バッジ表示のニューモーフィズムデザインに変更した
+  承認者向けの受信箱一覧
 */
 
 import { Link } from "react-router-dom";
@@ -16,9 +12,9 @@ import styles from "./InboxPage.module.css";
 // セクション定義：表示順・バッジクラスを一元管理する
 const INBOX_SECTIONS = [
   { status: "SUBMITTED", badgeClass: "badge badge-submitted" },
-  { status: "RETURNED",  badgeClass: "badge badge-returned"  },
-  { status: "APPROVED",  badgeClass: "badge badge-approved"  },
-  { status: "REJECTED",  badgeClass: "badge badge-rejected"  },
+  { status: "RETURNED", badgeClass: "badge badge-returned" },
+  { status: "APPROVED", badgeClass: "badge badge-approved" },
+  { status: "REJECTED", badgeClass: "badge badge-rejected" },
 ];
 
 export default function InboxPage() {
@@ -31,7 +27,9 @@ export default function InboxPage() {
   });
 
   const errorLabel = error
-    ? error?.response?.status ? `HTTP ${error.response.status}` : String(error)
+    ? error?.response?.status
+      ? `HTTP ${error.response.status}`
+      : String(error)
     : "";
 
   return (
@@ -39,7 +37,7 @@ export default function InboxPage() {
       <h2>受信箱</h2>
 
       {isLoading && <p className="state-loading">Loading...</p>}
-      {error     && <p className="state-error">エラー：{errorLabel}</p>}
+      {error && <p className="state-error">エラー：{errorLabel}</p>}
 
       {!isLoading && !error && Array.isArray(data) && (
         <>
@@ -48,11 +46,9 @@ export default function InboxPage() {
             if (items.length === 0) return null;
             return (
               <section key={status} className={styles.section}>
-              <div className={styles.sectionHeader}>
-                <span className={badgeClass}>
-                  {toStatusLabel(status)}
-                </span>
-              </div>
+                <div className={styles.sectionHeader}>
+                  <span className={badgeClass}>{toStatusLabel(status)}</span>
+                </div>
                 {items.map((item) => (
                   <Link
                     key={item.id}
@@ -62,9 +58,7 @@ export default function InboxPage() {
                     <span className={styles.itemId}>
                       {toRequestLabel(item.id)}
                     </span>
-                    <span className={styles.itemTitle}>
-                      {item.title}
-                    </span>
+                    <span className={styles.itemTitle}>{item.title}</span>
                     <span className={styles.itemAmount}>
                       ¥{item.amount.toLocaleString()}
                     </span>

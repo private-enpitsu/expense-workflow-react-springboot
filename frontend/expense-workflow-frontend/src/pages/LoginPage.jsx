@@ -1,6 +1,5 @@
-// [目的] /login で「ログインフォーム送信 → セッション確立 → ログイン後に元の画面へ戻る」を実装する
+// /login で「ログインフォーム送信 → セッション確立 → ログイン後に元の画面へ戻る」を実装する
 // [呼び出し元] App.jsx の <Route path="/login" element={<LoginPage />} />
-// [変更点] スタイルをニューモーフィズムデザインに合わせて更新
 
 // import { useAtomValue, useSetAtom } from "jotai";
 import { useSetAtom } from "jotai";
@@ -31,7 +30,11 @@ export default function LoginPage() {
     try {
       await apiClient.post("/auth/login", { email, password });
       await queryClient.invalidateQueries(["me"]);
-      setToast({ open: true, type: "success", message: "ログインに成功しました。" });
+      setToast({
+        open: true,
+        type: "success",
+        message: "ログインに成功しました。",
+      });
       navigate(fromPathname, { replace: true });
     } catch (error) {
       const httpStatus = error.response?.status ?? null;
@@ -79,7 +82,6 @@ export default function LoginPage() {
           {isSubmitting ? "ログイン中..." : "ログイン"}
         </button>
       </form>
-
     </div>
   );
 }
