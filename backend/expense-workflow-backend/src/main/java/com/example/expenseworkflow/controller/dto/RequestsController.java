@@ -1,25 +1,21 @@
-// このファイルは、申請のCRUD（一覧/作成/詳細）だけを提供するために存在します。 // 目的を自然文で説明する
-// このAPIは、フロントの RequestsListPage と RequestCreatePage と RequestDetailPage が /api/requests を通じて呼び出します。 // 呼び出し元を自然文で説明する
-// 入力は、POST時のJSON（title/amount/note）と、詳細取得時のURL{id}です。出力は、申請サマリの配列または詳細のJSONです。 // 入出力を自然文で説明する
-// 依存は、Spring Web と Jackson と、メモリ保存SOTの InMemoryRequestStore です（DBは使いません）。 // 依存と前提を自然文で説明する
-// 今回変更点: getRequestDetail で lastReturnComment を RequestDetailResponse へ渡すようにした // 今回変更点を自然文で説明する
+// このファイルは、申請のCRUD（一覧/作成/詳細）だけを提供するために存在します。
 
 package com.example.expenseworkflow.controller.dto;
 
-import java.util.Collections; // 読み取り専用ビューを返すためにCollectionsを使うので読み込む
-import java.util.List; // 返却型としてListを使うので読み込む
+import java.util.Collections;
+import java.util.List;
 
 import jakarta.servlet.http.HttpSession;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping; // GETのエンドポイントを定義するために読み込む
-import org.springframework.web.bind.annotation.PatchMapping; // PATCHのエンドポイントを定義するために読み込む
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping; // POSTのエンドポイントを定義するために読み込む
-import org.springframework.web.bind.annotation.RequestBody; // JSONボディを引数に受け取るために読み込む
-import org.springframework.web.bind.annotation.RequestMapping; // コントローラ全体のパス接頭辞を付けるために読み込む
-import org.springframework.web.bind.annotation.RestController; // RESTコントローラとして登録するために読み込む
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.example.expenseworkflow.controller.UpdateRequestRequest;
@@ -118,4 +114,4 @@ public class RequestsController {
 		throw new ResponseStatusException(HttpStatus.UNAUTHORIZED); // 型が想定外なら未ログイン扱いで401を返す
 	}
 
-} //RequestsController
+}

@@ -1,8 +1,4 @@
-// [目的] /api/me を「ログイン状態判定の正」として、未ログイン=401／ログイン中=200（ユーザー情報返却）を確定する // ファイルの役割
-// [呼び出し元/使用箇所] フロントの useQuery(['me']) が GET /api/me を呼び、200/401でログイン状態を判定する // どこから使われるか
-// [入力と出力] 入力=HTTP GET /api/me / 出力=未ログイン:401、ログイン中:200＋MeResponse(JSON) // 入出力
-// [依存／前提] AuthController がセッションへ保存した LOGIN_USER_* を参照する前提（HttpSession） // 依存と前提
-
+// /api/me を「ログイン状態判定の正」として、未ログイン=401／ログイン中=200（ユーザー情報返却）を確定する
 
 package com.example.expenseworkflow.controller;
 
@@ -14,23 +10,21 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.expenseworkflow.controller.dto.MeResponse; // /api/me が200のときに返すレスポンスDTO型を参照するために読み込む
+import com.example.expenseworkflow.controller.dto.MeResponse;
 import com.example.expenseworkflow.domain.User;
 import com.example.expenseworkflow.mapper.UserMapper;
 
 import lombok.RequiredArgsConstructor;
 
+// /api/me を提供するコントローラ
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
-public class MeController { // /api/me を提供するコントローラ
+public class MeController {
 	
 	private static final String SESSION_KEY_USER_ID = "SESSION_KEY_USER_ID"; // AuthController と同じキーでユーザーIDを読む
 	private final UserMapper userMapper;
 	
-//	public MeController(UserMapper userMapper) { // コンストラクタDIで UserMapper を受け取る
-//		this.userMapper = userMapper;
-//	}
 	
 	@GetMapping("/me")
 	public ResponseEntity<MeResponse> me(HttpSession session) {

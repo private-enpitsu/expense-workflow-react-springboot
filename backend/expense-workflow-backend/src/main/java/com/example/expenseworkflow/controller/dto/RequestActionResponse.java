@@ -1,9 +1,4 @@
-// [目的] 申請詳細APIのレスポンスに含める「履歴actions」の1要素を表すDTOを提供する // このファイルの目的を説明する
-// [呼び出し元/使用箇所] RequestsController が RequestDetailResponse.actions に入れて返す要素として使う // どこから使われるかを説明する
-// [入力と出力] 入力=コンストラクタ引数(action/fromStatus/toStatus/comment/createdAt/actorId) 出力=getter経由でJSON化される値 // 入出力を説明する
-// [依存／前提] Lombok(@Getter/@AllArgsConstructor) と SpringのJackson変換が有効である前提で動作する // 依存関係を説明する
-// [今回変更点] 設計の「詳細+履歴actionsを含む」を満たすため、actions要素DTOを新設した（現段階は空配列で返す土台） // 今回変更点を説明する
-
+// 申請詳細APIのレスポンスに含める「履歴actions」の1要素を表すDTOを提供する
 
 package com.example.expenseworkflow.controller.dto;
 

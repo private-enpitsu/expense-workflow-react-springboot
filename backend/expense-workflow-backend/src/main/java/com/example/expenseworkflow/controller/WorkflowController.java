@@ -1,8 +1,4 @@
-// このファイルは、状態遷移とInbox（承認者の受信箱）を担当する WorkflowController を提供するために存在します。 // 目的を自然文で説明する
-// このControllerは、フロントのInbox画面が GET /api/inbox を呼ぶときの入口として利用されます。 // 呼び出し元/使用箇所を自然文で説明する
-// 入力はHTTPリクエストで、出力は InboxItemResponse の配列（今回はダミー2件）です。 // 入力と出力を自然文で説明する
-// 依存は Spring Web（RestController等）と、DTOをJSONに変換するJackson（Spring標準）です。 // 依存関係を自然文で説明する
-// 今回は /api/inbox が空配列ではなくダミー2件を返すようにして、一覧APIの形を先に確定します。 // 今回変更点を自然文で説明する
+// このファイルは、状態遷移とInbox（承認者の受信箱）を担当する WorkflowController を提供するために存在します。
 
 package com.example.expenseworkflow.controller;
 

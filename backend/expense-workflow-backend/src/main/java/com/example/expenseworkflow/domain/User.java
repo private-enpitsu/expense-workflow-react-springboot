@@ -2,7 +2,7 @@ package com.example.expenseworkflow.domain;
 
 import lombok.Data;
 
-@Data // アクセッサ
+@Data
 public class User {
 	
 	private Long id; // users.id（主キー） // 行コメント

@@ -18,9 +18,4 @@
   </select> <!-- findById 終わり -->
 </mapper> <!-- mapper 終わり -->
 
-<!-- // ヘッダ開始コメント --> <!-- 行コメント -->
-<!-- backend/expense-workflow-backend/src/main/resources/mapper/UserMapper.xml --> <!-- ファイルパスコメント -->
-<!-- 目的: users テーブルの SELECT を定義し、UserMapper（Java）から呼ばれるSQLを提供する --> <!-- 役割コメント -->
-<!-- 呼び出し元/使用箇所: UserMapper.findByEmail / UserMapper.findById から呼ばれる --> <!-- 利用箇所コメント -->
-<!-- 入力と出力: 入力=email または id / 出力=User（resultMapでマッピング） --> <!-- 入出力コメント -->
-<!-- 依存／前提: users のカラム（password_hash 等）が _確定DB.xlsx の定義どおり存在すること --> <!-- 前提コメント -->
+<!-- 目的: users テーブルの SELECT を定義し、UserMapper（Java）から呼ばれるSQLを提供する -->

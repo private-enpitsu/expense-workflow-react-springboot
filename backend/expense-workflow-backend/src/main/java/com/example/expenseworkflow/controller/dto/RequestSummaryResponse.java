@@ -1,23 +1,20 @@
-// [目的] /api/requests の GET/POST の返却で使う「申請サマリ」を表すDTOを提供する // このファイルの目的を説明する
-// [呼び出し元/使用箇所] RequestsController が new RequestSummaryResponse(...) で生成し、そのままJSONとして返す // どこで使われるかを説明する
-// [入力と出力] 入力=コンストラクタ引数(id/title/amount/status/note/lastReturnComment) / 出力=getter経由でJSON化される値 // 入出力を説明する
-// [依存／前提] Lombok(@Getter/@AllArgsConstructor) と SpringのJackson変換が有効である前提で動作する // 依存関係を説明する
-// [今回変更点] lastReturnComment フィールドを追加し、差戻しコメントをサマリ経由で詳細DTOへ渡せるようにした // 今回の変更点を説明する
+// /api/requests の GET/POST の返却で使う「申請サマリ」を表すDTOを提供する
 
-package com.example.expenseworkflow.controller.dto; // RequestsControllerからimportして使うdtoパッケージを宣言する
+package com.example.expenseworkflow.controller.dto;
 
-import lombok.AllArgsConstructor; // Controller側で簡単に生成できる全引数コンストラクタを作るために読み込む
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+// 申請サマリを表す返却DTOクラスを定義する
 @Data
 @NoArgsConstructor
-@AllArgsConstructor // Controllerで new するときに必要な全引数コンストラクタを生成する
-public class RequestSummaryResponse { // 申請サマリを表す返却DTOクラスを定義する
+@AllArgsConstructor
+public class RequestSummaryResponse {
 	private Long  id; // 申請ID（例：REQ-001）を返すフィールドを定義する
 	private String title; // 件名を返すフィールドを定義する
 	private int amount; // 金額を返すフィールドを定義する
 	private String status; // 状態（例：DRAFT）を返すフィールドを定義する
 	private String note; // 備考を返すフィールドを定義する
 	private String lastReturnComment; // 最新の差戻しコメントを返すフィールドを定義する（差戻しなしの場合はnull）
-} // DTOクラス定義を閉じる
+}

@@ -1,15 +1,11 @@
-// [目的] GET /api/requests/{id} のレスポンスとして「申請詳細+履歴actions」を返すDTOを提供する // このファイルの目的を説明する
-// [呼び出し元/使用箇所] RequestsController.getRequestDetail が ResponseEntity.ok(...) で返すボディとして使う // どこから使われるかを説明する
-// [入力と出力] 入力=コンストラクタ引数(id/title/amount/status/note/actions/lastReturnComment) 出力=getter経由でJSON化される値 // 入出力を説明する
-// [依存／前提] Lombok(@Getter/@AllArgsConstructor) と SpringのJackson変換が有効である前提で動作する // 依存関係を説明する
-// [今回変更点] lastReturnComment フィールドを追加し、申請者画面で差戻しコメントを表示できるようにした // 今回変更点を説明する
+// GET /api/requests/{id} のレスポンスとして「申請詳細+履歴actions」を返すDTOを提供する
 
-package com.example.expenseworkflow.controller.dto; // Controller入出力DTOの置き場として統一したパッケージを宣言する
+package com.example.expenseworkflow.controller.dto;
 
-import java.util.List; // actionsを配列で保持するためにListを使うので読み込む
+import java.util.List;
 
-import lombok.AllArgsConstructor; // 全引数コンストラクタを自動生成して組み立てを簡単にするために読み込む
-import lombok.Getter; // JSON化で参照されるgetterを自動生成するために読み込む
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 // 申請詳細レスポンスDTOクラスを定義する
 @Getter
@@ -22,4 +18,4 @@ public class RequestDetailResponse {
 	private String note; // 備考を返すフィールドを保持する
 	private List<RequestActionResponse> actions; // 履歴actionsを配列で返すフィールドを保持する
 	private String lastReturnComment; // 最新の差戻しコメントを返すフィールドを保持する（差戻しなしの場合はnull）
-} // DTOクラス定義を閉じる
+}

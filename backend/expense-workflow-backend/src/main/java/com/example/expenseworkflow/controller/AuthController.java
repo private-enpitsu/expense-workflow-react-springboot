@@ -1,7 +1,4 @@
-// [目的] POST /api/auth/login でDBの users を照合し、ログイン成功時にセッションへユーザー情報を保存する（最小ログイン） // ファイルの役割
-// [呼び出し元/使用箇所] フロントの useMutation(login) などが呼び、成功後に ['me'] をinvalidateして /api/me を再取得する想定 // どこから使われるか
-// [入力と出力] 入力=JSON { email, password } / 出力=成功:204(セッション作成)・失敗:401(認証失敗)・不正入力:400 // 入出力
-// [依存／前提] MyBatis(UserMapper)で users を参照／BCryptで password_hash を照合／セッションはHttpOnly Cookie(JSESSIONID)前提 // 依存と前提
+// POST /api/auth/login でDBの users を照合し、ログイン成功時にセッションへユーザー情報を保存する（最小ログイン）
 
 package com.example.expenseworkflow.controller;
 
@@ -15,14 +12,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.expenseworkflow.controller.dto.LoginRequest; // login入力DTOをcontroller外のファイル定義で統一するために読み込む
-import com.example.expenseworkflow.domain.User; // users の1行を表すドメインを使うために読み込む
-import com.example.expenseworkflow.mapper.UserMapper; // users を検索するMyBatis Mapperを使うために読み込む
+import com.example.expenseworkflow.controller.dto.LoginRequest;
+import com.example.expenseworkflow.domain.User;
+import com.example.expenseworkflow.mapper.UserMapper;
 
-
+// ログインAPIを提供するコントローラクラス
 @RestController
 @RequestMapping("/api/auth")
-public class AuthController { // ログインAPIを提供するコントローラクラス
+public class AuthController {
 	
 	// セッションに保存するキーを定義する
 	private static final String SESSION_KEY_USER_ID = "SESSION_KEY_USER_ID"; // セッションに保存する userId のキー名（MeController と一致させる）
