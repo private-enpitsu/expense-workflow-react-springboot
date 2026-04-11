@@ -79,11 +79,12 @@ export default function RequestsListPage() {
                     to={`/requests/${req.id}`}
                     className={styles.item}
                   >
-                    {/* ID・金額 */}
+                    {/* ID・件名・金額 */}
                     <div className={styles.itemRow}>
                       <span className={styles.itemId}>
                         {toRequestLabel(req.id)}
                       </span>
+                      <span className={styles.itemTitle}>{req.title}</span>
                       <span className={styles.itemAmount}>
                         ¥{req.amount.toLocaleString()}
                       </span>
