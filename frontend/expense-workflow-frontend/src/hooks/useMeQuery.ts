@@ -3,7 +3,16 @@ GET /api/me を TanStack Query で取得し、ログイン判定（200=ログイ
 */
 
 import { useQuery } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { apiClient } from "../lib/apiClient";
+
+// バックエンドの MeResponse DTO に対応する型
+export type MeResponse = {
+  userId: number;
+  username: string;
+  email: string;
+  role: "USER" | "APPLICANT" | "APPROVER" | "ADMIN";
+};
 
 export function useMeQuery() {
   const fetchMe = async () => {
@@ -11,7 +20,7 @@ export function useMeQuery() {
     return res.data; // 成功したらレスポンスの JSON 部分だけ返す
   };
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery<MeResponse, AxiosError>({
     queryKey: ["me"], // キャッシュキーは "me" で固定する（ユーザーデータは1人分しかないため）
     queryFn: fetchMe, // 先ほど定義した取得関数を使う
     retry: false, // 認証エラーなどで失敗しても自動リトライしない（401のときに何度も呼び出すのを避けるため）

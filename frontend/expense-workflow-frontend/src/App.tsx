@@ -10,6 +10,7 @@ import {
   useNavigate,
   useLocation,
 } from "react-router-dom";
+import { AxiosError } from "axios";
 import { apiClient } from "./lib/apiClient";
 
 import { useMeQuery } from "./hooks/useMeQuery";
@@ -29,15 +30,27 @@ import ToastHost from "./components/ToastHost";
 import styles from "./App.module.css";
 
 /* ============================================================
+   型定義
+============================================================ */
+type HealthResponse = {
+  status: string;
+};
+
+type NavItemProps = {
+  to: string;
+  label: string;
+};
+
+/* ============================================================
    疎通確認ページ（/ のまま維持）
 ============================================================ */
 function HealthCheckPage() {
-  const fetchHealth = async () => {
-    const res = await apiClient.get("/health");
+  const fetchHealth = async (): Promise<HealthResponse> => {
+    const res = await apiClient.get<HealthResponse>("/health");
     return res.data;
   };
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery<HealthResponse, AxiosError>({
     queryKey: ["health"],
     queryFn: fetchHealth,
     refetchOnWindowFocus: false,
@@ -106,7 +119,7 @@ function HealthCheckPage() {
 /* ============================================================
    NavItem：アクティブ判定付きリンク
 ============================================================ */
-function NavItem({ to, label }) {
+function NavItem({ to, label }: NavItemProps) {
   const location = useLocation();
   const isActive =
     to === "/"
@@ -130,7 +143,7 @@ function NavItem({ to, label }) {
 }
 
 /* ============================================================
-   AppShell：上部ナビ＋中央コンテンツカード
+   AppShell：上部ナビ + 中央コンテンツカード
 ============================================================ */
 function AppShell() {
   const navigate = useNavigate();
@@ -169,9 +182,10 @@ function AppShell() {
       setToast({ open: true, type: "success", message: "ログアウトしました" });
       navigate("/login", { replace: true });
     },
-    onError: (error) => {
-      const msg = error?.response
-        ? `HTTP ${error.response.status}`
+    onError: (error: unknown) => {
+      const axiosError = error as AxiosError;
+      const msg = axiosError?.response
+        ? `HTTP ${axiosError.response.status}`
         : String(error);
       setToast({
         open: true,
@@ -217,7 +231,6 @@ function AppShell() {
           </button>
         </nav>
 
-        {/* ===== メインコンテンツ（ニューモーフィズムカードで中央表示） ===== */}
         <main className={styles.main}>
           <div className={styles.contentCard}>
             <Routes>

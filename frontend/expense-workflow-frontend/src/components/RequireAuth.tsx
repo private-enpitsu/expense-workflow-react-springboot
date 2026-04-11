@@ -4,12 +4,13 @@
 */
 
 import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { type ReactElement } from "react";
 import { useMeQuery } from "../hooks/useMeQuery";
 
 import styles from "../App.module.css";
 
 // 認証が必要なルートを保護するガードコンポーネントを定義する
-export default function RequireAuth() {
+export default function RequireAuth(): ReactElement {
   // ログイン後に元のページへ戻すため現在のURLを保持
   const location = useLocation();
 

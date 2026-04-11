@@ -1,11 +1,11 @@
 /*
   フロントからバックエンドAPIを呼ぶためのAxios共通クライアントを1か所に集約する // 各画面でURLを直書きしないため
-  依存: axios（HTTPクライアント） // 主要依存だけを書く
+  依存: axios（HTTPクライアント） // 主要依存
 */
 
-import axios from "axios";
+import axios, { AxiosInstance } from "axios";
 
-export const apiClient = axios.create({
+export const apiClient: AxiosInstance = axios.create({
   // 共通設定済みのAxiosインスタンスを作り、全API呼び出しで再利用する
   baseURL:
     // "https://expense-workflow-react-springboot-production.up.railway.app/api", //（★Railwayで設定したBackendのURL）

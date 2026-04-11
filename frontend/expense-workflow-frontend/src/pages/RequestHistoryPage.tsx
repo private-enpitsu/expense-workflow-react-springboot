@@ -4,17 +4,27 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useParams, Link } from "react-router-dom";
+import { AxiosError } from "axios";
 import { apiClient } from "../lib/apiClient";
-import { toActionLabel, toRequestLabel } from "../lib/statusLabel";
+import { toActionLabel, toRequestLabel, ActionCode } from "../lib/statusLabel";
 import styles from "./RequestHistoryPage.module.css";
 
-export default function RequestHistoryPage() {
-  const { id: requestId } = useParams();
+type HistoryItem = {
+  action: ActionCode;
+  actorName: string;
+  createdAt: string;
+  comment?: string;
+};
 
-  const { data, isLoading, error } = useQuery({
+export default function RequestHistoryPage() {
+  const { id: requestId } = useParams<{ id: string }>();
+
+  const { data, isLoading, error } = useQuery<HistoryItem[], AxiosError>({
     queryKey: ["requestHistory", requestId],
     queryFn: async () => {
-      const res = await apiClient.get(`/requests/${requestId}/history`);
+      const res = await apiClient.get<HistoryItem[]>(
+        `/requests/${requestId}/history`,
+      );
       return res.data;
     },
     enabled: Boolean(requestId),

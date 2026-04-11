@@ -6,14 +6,33 @@ import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSetAtom } from "jotai";
+import { AxiosError } from "axios";
 
 import { toastAtom } from "../lib/atoms";
 import { apiClient } from "../lib/apiClient";
-import { toStatusLabel, toRequestLabel } from "../lib/statusLabel";
+import { toStatusLabel, StatusCode } from "../lib/statusLabel";
 import styles from "./RequestEditPage.module.css";
 
+// バックエンドの RequestDetailResponse DTO に対応する型
+type RequestDetail = {
+  id: number;
+  title: string;
+  amount: number;
+  status: StatusCode;
+  note?: string;
+  lastReturnComment?: string;
+};
+
+// onError の共通ヘルパー
+function toErrorMsg(e: unknown): string {
+  const axiosError = e as AxiosError;
+  return axiosError?.response?.status
+    ? `HTTP ${axiosError.response.status}`
+    : String(e);
+}
+
 export default function RequestEditPage() {
-  const { id: requestId } = useParams();
+  const { id: requestId } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const setToast = useSetAtom(toastAtom);
@@ -23,10 +42,10 @@ export default function RequestEditPage() {
   const [note, setNote] = useState("");
   const [isEditStarted, setIsEditStarted] = useState(false);
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery<RequestDetail, AxiosError>({
     queryKey: ["request", requestId],
     queryFn: async () => {
-      const res = await apiClient.get(`/requests/${requestId}`);
+      const res = await apiClient.get<RequestDetail>(`/requests/${requestId}`);
       return res.data;
     },
     enabled: typeof requestId === "string" && requestId.length > 0,
@@ -65,14 +84,11 @@ export default function RequestEditPage() {
       await queryClient.invalidateQueries({ queryKey: ["requests"] });
       setToast({ open: true, type: "success", message: "保存しました" });
     },
-    onError: (err) => {
-      const msg = err?.response?.status
-        ? `HTTP ${err.response.status}`
-        : String(err);
+    onError: (e: unknown) => {
       setToast({
         open: true,
         type: "error",
-        message: `保存に失敗しました: ${msg}`,
+        message: `保存に失敗しました: ${toErrorMsg(e)}`,
       });
     },
   });
@@ -88,14 +104,11 @@ export default function RequestEditPage() {
       setToast({ open: true, type: "success", message: "再提出しました" });
       navigate(`/requests/${requestId}`, { replace: true });
     },
-    onError: (err) => {
-      const msg = err?.response?.status
-        ? `HTTP ${err.response.status}`
-        : String(err);
+    onError: (e: unknown) => {
       setToast({
         open: true,
         type: "error",
-        message: `再提出に失敗しました: ${msg}`,
+        message: `再提出に失敗しました: ${toErrorMsg(e)}`,
       });
     },
   });

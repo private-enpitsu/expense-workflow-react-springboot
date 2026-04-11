@@ -4,13 +4,27 @@
 
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 
 import { apiClient } from "../lib/apiClient";
-import { toStatusLabel, toRequestLabel } from "../lib/statusLabel";
+import { toStatusLabel, toRequestLabel, StatusCode } from "../lib/statusLabel";
 import styles from "./InboxPage.module.css";
 
+// バックエンドの InboxItemResponse DTO に対応する型
+type InboxItem = {
+  id: number;
+  title: string;
+  amount: number;
+  status: StatusCode;
+};
+
+type InboxSection = {
+  status: StatusCode;
+  badgeClass: string;
+};
+
 // セクション定義：表示順・バッジクラスを一元管理する
-const INBOX_SECTIONS = [
+const INBOX_SECTIONS: InboxSection[] = [
   { status: "SUBMITTED", badgeClass: "badge badge-submitted" },
   { status: "RETURNED", badgeClass: "badge badge-returned" },
   { status: "APPROVED", badgeClass: "badge badge-approved" },
@@ -18,10 +32,10 @@ const INBOX_SECTIONS = [
 ];
 
 export default function InboxPage() {
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery<InboxItem[], AxiosError>({
     queryKey: ["inbox"],
     queryFn: async () => {
-      const res = await apiClient.get("/inbox");
+      const res = await apiClient.get<InboxItem[]>("/inbox");
       return res.data;
     },
   });

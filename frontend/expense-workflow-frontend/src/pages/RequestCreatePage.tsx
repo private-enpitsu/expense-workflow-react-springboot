@@ -6,11 +6,17 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSetAtom } from "jotai";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { AxiosError } from "axios";
 import { toastAtom } from "../lib/atoms";
 import { apiClient } from "../lib/apiClient";
 import { toRequestLabel } from "../lib/statusLabel";
 
 import styles from "./RequestCreatePage.module.css";
+
+// バックエンドの申請作成レスポンスに対応する型
+type CreatedResponse = {
+  id: number;
+};
 
 export default function RequestCreatePage() {
   const navigate = useNavigate();
@@ -21,10 +27,10 @@ export default function RequestCreatePage() {
   const [note, setNote] = useState("");
 
   const createMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (): Promise<CreatedResponse> => {
       const amountNumber = Number(amount || 0);
       const body = { title, amount: amountNumber, note };
-      const res = await apiClient.post("/requests", body);
+      const res = await apiClient.post<CreatedResponse>("/requests", body);
       return res.data;
     },
     onSuccess: async (created) => {
@@ -38,8 +44,8 @@ export default function RequestCreatePage() {
         replace: true,
       });
     },
-    onError: (error) => {
-      const status = error?.response?.status ?? null;
+    onError: (error: unknown) => {
+      const status = (error as AxiosError)?.response?.status ?? null;
       const msg = status ? `HTTP ${status}` : String(error);
       setToast({
         open: true,
@@ -50,7 +56,7 @@ export default function RequestCreatePage() {
   });
 
   const submitNewMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (): Promise<{ id: number }> => {
       const amountNumber = Number(amount || 0);
       const body = { title, amount: amountNumber, note };
       const createdRes = await apiClient.post("/requests", body);
@@ -72,8 +78,8 @@ export default function RequestCreatePage() {
         replace: true,
       });
     },
-    onError: (error) => {
-      const status = error?.response?.status ?? null;
+    onError: (error: unknown) => {
+      const status = (error as AxiosError)?.response?.status ?? null;
       const msg = status ? `HTTP ${status}` : String(error);
       setToast({
         open: true,

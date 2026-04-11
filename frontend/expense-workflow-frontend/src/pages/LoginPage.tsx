@@ -10,7 +10,8 @@ import { toastAtom } from "../lib/atoms";
 import styles from "./LoginPage.module.css";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { apiClient } from "./../lib/apiClient";
+import { AxiosError } from "axios";
+import { apiClient } from "../lib/apiClient";
 
 export default function LoginPage() {
   // const healthSnapshot = useAtomValue(healthSnapshotAtom);
@@ -24,12 +25,12 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
       await apiClient.post("/auth/login", { email, password });
-      await queryClient.invalidateQueries(["me"]);
+      await queryClient.invalidateQueries({ queryKey: ["me"] });
       setToast({
         open: true,
         type: "success",
@@ -37,7 +38,8 @@ export default function LoginPage() {
       });
       navigate(fromPathname, { replace: true });
     } catch (error) {
-      const httpStatus = error.response?.status ?? null;
+      const axiosError = error as AxiosError;
+      const httpStatus = axiosError.response?.status ?? null;
       const message =
         httpStatus === 401
           ? "メールアドレスまたはパスワードが正しくありません（401）"

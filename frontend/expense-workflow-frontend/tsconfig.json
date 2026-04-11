@@ -20,7 +20,7 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"]
+  "include": ["src"]
 }
 
 // {
@@ -64,6 +64,6 @@
 //     "isolatedModules": true,
 //     "noUncheckedSideEffectImports": true,
 //     "moduleDetection": "force",
-//     "skipLibCheck": true
+//     "skipLibCheck": true,
 //   }
 // }

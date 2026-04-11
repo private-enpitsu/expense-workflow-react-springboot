@@ -4,13 +4,28 @@
 
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 
 import { apiClient } from "../lib/apiClient";
-import { toStatusLabel, toRequestLabel } from "../lib/statusLabel";
+import { toStatusLabel, toRequestLabel, StatusCode } from "../lib/statusLabel";
 import styles from "./RequestsListPage.module.css";
 
+// バックエンドの RequestSummaryResponse DTO に対応する型
+type RequestSummary = {
+  id: number;
+  title: string;
+  amount: number;
+  status: StatusCode;
+  lastReturnComment?: string;
+};
+
+type StatusSection = {
+  status: StatusCode;
+  badgeClass: string;
+};
+
 /* ステータスの表示順と各セクションのバッジクラスを定義する */
-const STATUS_SECTIONS = [
+const STATUS_SECTIONS: StatusSection[] = [
   { status: "RETURNED", badgeClass: "badge badge-returned" },
   { status: "DRAFT", badgeClass: "badge badge-draft" },
   { status: "SUBMITTED", badgeClass: "badge badge-submitted" },
@@ -20,10 +35,10 @@ const STATUS_SECTIONS = [
 ];
 
 export default function RequestsListPage() {
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery<RequestSummary[], AxiosError>({
     queryKey: ["requests"],
     queryFn: async () => {
-      const res = await apiClient.get("/requests");
+      const res = await apiClient.get<RequestSummary[]>("/requests");
       return res.data;
     },
     refetchOnWindowFocus: false,

@@ -6,25 +6,45 @@ import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSetAtom } from "jotai";
+import { AxiosError } from "axios";
 
 import { apiClient } from "../lib/apiClient";
 import { toastAtom } from "../lib/atoms";
-import { toStatusLabel, toRequestLabel } from "../lib/statusLabel";
+import { toStatusLabel, toRequestLabel, StatusCode } from "../lib/statusLabel";
 import styles from "./InboxDetailPage.module.css";
 
+// バックエンドの RequestDetailResponse DTO に対応する型
+type InboxDetail = {
+  id: number;
+  title: string;
+  amount: number;
+  status: StatusCode;
+  note?: string;
+};
+
+// onError の共通処理をまとめたヘルパー
+function toErrorMsg(e: unknown): string {
+  const axiosError = e as AxiosError;
+  return axiosError?.response?.status
+    ? `HTTP ${axiosError.response.status}`
+    : String(e);
+}
+
 /* ステータスに対応するバッジクラスを返す */
-function statusBadgeClass(status) {
-  const map = {
+function statusBadgeClass(status: StatusCode): string {
+  const map: Record<StatusCode, string> = {
     DRAFT: "badge badge-draft",
     SUBMITTED: "badge badge-submitted",
     APPROVED: "badge badge-approved",
     RETURNED: "badge badge-returned",
+    WITHDRAWN: "badge badge-withdrawn",
+    REJECTED: "badge badge-rejected",
   };
   return map[status] ?? "badge";
 }
 
 export default function InboxDetailPage() {
-  const { id: requestId } = useParams();
+  const { id: requestId } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const setToast = useSetAtom(toastAtom);
@@ -32,10 +52,10 @@ export default function InboxDetailPage() {
   const [returnComment, setReturnComment] = useState("");
   const [rejectComment, setRejectComment] = useState("");
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery<InboxDetail, AxiosError>({
     queryKey: ["requestDetailForInbox", requestId],
     queryFn: async () => {
-      const res = await apiClient.get(`/inbox/${requestId}`);
+      const res = await apiClient.get<InboxDetail>(`/inbox/${requestId}`);
       return res.data;
     },
     enabled: Boolean(requestId),
@@ -53,12 +73,11 @@ export default function InboxDetailPage() {
       setToast({ open: true, type: "success", message: "承認しました" });
       navigate("/inbox", { replace: true });
     },
-    onError: (e) => {
-      const msg = e?.response?.status ? `HTTP ${e.response.status}` : String(e);
+    onError: (e: unknown) => {
       setToast({
         open: true,
         type: "error",
-        message: `承認に失敗しました: ${msg}`,
+        message: `承認に失敗しました: ${toErrorMsg(e)}`,
       });
     },
   });
@@ -77,12 +96,11 @@ export default function InboxDetailPage() {
       setToast({ open: true, type: "success", message: "差戻しました" });
       navigate("/inbox", { replace: true });
     },
-    onError: (e) => {
-      const msg = e?.response?.status ? `HTTP ${e.response.status}` : String(e);
+    onError: (e: unknown) => {
       setToast({
         open: true,
         type: "error",
-        message: `差戻しに失敗しました: ${msg}`,
+        message: `差戻しに失敗しました: ${toErrorMsg(e)}`,
       });
     },
   });
@@ -102,16 +120,16 @@ export default function InboxDetailPage() {
       setToast({ open: true, type: "success", message: "却下しました" });
       navigate("/inbox", { replace: true });
     },
-    onError: (e) => {
-      const msg = e?.response?.status ? `HTTP ${e.response.status}` : String(e);
+    onError: (e: unknown) => {
       setToast({
         open: true,
         type: "error",
-        message: `却下に失敗しました: ${msg}`,
+        message: `却下に失敗しました: ${toErrorMsg(e)}`,
       });
     },
   });
 
+  const canReturn = Boolean(returnComment.trim().length > 0);
   const canReject = Boolean(rejectComment.trim().length > 0);
 
   const isWorking = Boolean(
@@ -119,7 +137,6 @@ export default function InboxDetailPage() {
     returnMutation.isPending ||
     rejectMutation.isPending,
   );
-  const canReturn = Boolean(returnComment.trim().length > 0);
 
   const errorLabel = error
     ? error?.response?.status

@@ -2,6 +2,10 @@
 申請ステータス（内部コード）をUI表示用の日本語ラベルへ変換する関数を提供する。
 */
 
+// ステータス・アクションコードをリテラル型で定義して誤字をコンパイル時に検出する
+export type StatusCode = keyof typeof STATUS_LABEL_MAP;
+export type ActionCode = keyof typeof ACTION_LABEL_MAP;
+
 // 内部コード→表示ラベルの対応表を1箇所に固定して二重定義を防ぐ
 const STATUS_LABEL_MAP = {
   DRAFT: "下書き",
@@ -13,13 +17,13 @@ const STATUS_LABEL_MAP = {
 };
 
 // ステータス文字列を表示ラベルへ変換する関数を公開する
-export function toStatusLabel(status) {
+export function toStatusLabel(status: unknown): string {
   if (typeof status !== "string") return ""; // 文字列以外が来た場合は表示崩れを避けるため空文字を返す
-  return STATUS_LABEL_MAP[status] ?? status; // 対応表にあれば日本語、無ければ元の値をそのまま返して未知値にも耐える
+  return STATUS_LABEL_MAP[status as StatusCode] ?? status; // 対応表にあれば日本語、無ければ元の値をそのまま返して未知値にも耐える
 }
 
 // 数値IDをUI表示用のREQ-xxx形式へ変換する関数を公開する（表示変換のSOT）
-export function toRequestLabel(id) {
+export function toRequestLabel(id: number | string | null | undefined): string {
   if (id === null || id === undefined) return ""; // nullやundefinedが来た場合は表示崩れを避けるため空文字を返す
   const num = Number(id); // 数値・文字列どちらで来ても変換できるようにNumberへ統一する
   if (!Number.isInteger(num) || num <= 0) return String(id); // 整数でない・0以下の場合は変換不能としてそのまま返す
@@ -35,7 +39,7 @@ const ACTION_LABEL_MAP = {
   REJECT: "却下",
 };
 
-export function toActionLabel(action) {
+export function toActionLabel(action: unknown): string {
   if (typeof action !== "string") return "";
-  return ACTION_LABEL_MAP[action] ?? action;
+  return ACTION_LABEL_MAP[action as ActionCode] ?? action;
 }
