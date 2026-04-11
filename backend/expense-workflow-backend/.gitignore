@@ -34,7 +34,7 @@ build/
 
 
 ### エクリプス プロジェクト設定
-*.properties
+###*.properties
 
 
 # .gitignore は
