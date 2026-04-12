@@ -1,4 +1,7 @@
-// /api/requests の POST 入力（title/amount/note）を受け取るDTOを提供する
+/**
+ * POST /api/requests の入力値を受け取るリクエストDTOクラス。
+ * 申請の新規作成時に、件名・金額・備考をリクエストボディから受け取る。
+ */
 
 package com.example.expenseworkflow.controller.dto;
 

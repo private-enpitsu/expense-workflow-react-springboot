@@ -1,3 +1,8 @@
+/**
+ * 経費申請ワークフローアプリのSpring Bootエントリポイント。
+ * {@link org.springframework.boot.SpringApplication#run} を呼び出してアプリを起動する。
+ */
+
 package com.example.expenseworkflow;
 
 import org.springframework.boot.SpringApplication;

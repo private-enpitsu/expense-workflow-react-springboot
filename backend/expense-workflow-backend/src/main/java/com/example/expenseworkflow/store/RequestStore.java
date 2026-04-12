@@ -1,3 +1,11 @@
+/**
+ * 申請（ExpenseRequest）に関するビジネスロジックとDB操作を集約するサービスクラス。
+ * Controllerからの呼び出しを受け、{@link com.example.expenseworkflow.mapper.ExpenseRequestMapper} へSQL実行を委譲する。
+ * 申請の一覧取得・新規作成・詳細取得・状態遷移（提出/承認/差戻し/取り下げ/却下）・
+ * 内容編集・操作履歴取得などのユースケースを提供する。
+ * 状態変更を伴う操作はすべて {@code @Transactional} でトランザクション管理する。
+ */
+
 package com.example.expenseworkflow.store;
 
 import java.util.ArrayList;

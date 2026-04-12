@@ -1,6 +1,8 @@
-/*
- users テーブルへアクセスする MyBatis Mapper インターフェースを定義し、ログイン（findByEmail）と /api/me 判定（findById）に使う
-*/
+/**
+ * usersテーブルへのアクセスを担うMyBatis Mapperインターフェース。
+ * SQLはresources/mapper/UserMapper.xmlに定義する。
+ * ログイン照合（findByEmail）と /api/me のセッション検証（findById）に使用する。
+ */
 
 package com.example.expenseworkflow.mapper;
 

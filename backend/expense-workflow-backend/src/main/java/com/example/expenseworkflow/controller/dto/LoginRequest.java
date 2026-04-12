@@ -1,4 +1,7 @@
-// POST /api/auth/login の入力（email/password）を型として受け取るためのDTOを提供する
+/**
+ * POST /api/auth/login の入力値を受け取るリクエストDTOクラス。
+ * email と password をリクエストボディから受け取り、{@link com.example.expenseworkflow.controller.AuthController} で使用する。
+ */
 
 package com.example.expenseworkflow.controller.dto;
 

@@ -1,4 +1,7 @@
-// /api/requests/{id} の PATCH 入力（title/amount/note）を受け取るDTOを提供する
+/**
+ * PATCH /api/requests/{id} の入力値を受け取るリクエストDTOクラス。
+ * 差戻し（RETURNED）申請の編集保存時に、件名・金額・備考を受け取る。
+ */
 
 package com.example.expenseworkflow.controller;
 

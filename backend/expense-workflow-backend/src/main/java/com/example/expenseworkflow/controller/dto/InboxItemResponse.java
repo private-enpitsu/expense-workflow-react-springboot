@@ -1,4 +1,7 @@
-// GET /api/inbox の返却で使う「承認待ち一覧の1行」を表すDTOを提供する
+/**
+ * GET /api/inbox のレスポンスとして、承認待ち一覧の1行を表すDTOクラス。
+ * 承認者のInbox一覧画面で必要な最小情報（id・件名・金額・ステータス）を保持する。
+ */
 
 package com.example.expenseworkflow.controller.dto;
 

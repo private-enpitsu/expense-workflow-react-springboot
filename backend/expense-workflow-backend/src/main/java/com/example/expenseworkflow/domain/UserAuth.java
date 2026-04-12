@@ -1,4 +1,8 @@
-// users から取得する「認証に必要な最小情報（passwordHash含む）」を保持するための型を提供する
+/**
+ * ログイン認証に必要な最小限のユーザー情報を保持するドメインクラス。
+ * {@link User} と異なり、パスワードハッシュを含む認証専用の型として定義する。
+ * BCryptによるパスワード照合にのみ使用し、APIレスポンスには含めない。
+ */
 
 package com.example.expenseworkflow.domain;
 

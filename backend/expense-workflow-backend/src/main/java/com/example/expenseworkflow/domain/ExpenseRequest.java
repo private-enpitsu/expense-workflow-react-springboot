@@ -1,3 +1,9 @@
+/**
+ * expense_requestsテーブルの1レコードを表すドメインクラス（エンティティ）。
+ * 申請者ID・承認者ID・件名・金額・ステータス・日付・差戻しコメントなど、
+ * 申請に関するすべての属性を保持する。MyBatisのMapperによりDBと対応付けられる。
+ */
+
 package com.example.expenseworkflow.domain;
 
 import java.time.LocalDate;

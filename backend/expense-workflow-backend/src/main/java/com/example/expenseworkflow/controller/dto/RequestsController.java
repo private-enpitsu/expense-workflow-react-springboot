@@ -1,4 +1,14 @@
-// このファイルは、申請のCRUD（一覧/作成/詳細）だけを提供するために存在します。
+/**
+ * 申請（ExpenseRequest）のCRUD操作を提供するコントローラクラス。
+ * <ul>
+ *   <li>GET    /api/requests       : ログインユーザー自身の申請一覧取得</li>
+ *   <li>POST   /api/requests       : 申請の新規作成</li>
+ *   <li>GET    /api/requests/{id}  : 申請詳細取得（自分の申請のみ）</li>
+ *   <li>PATCH  /api/requests/{id}  : 差戻し（RETURNED）申請の内容編集</li>
+ *   <li>GET    /api/requests/{id}/history : 申請者向け操作履歴取得</li>
+ * </ul>
+ * 実処理は {@link com.example.expenseworkflow.store.RequestStore} に委譲する。
+ */
 
 package com.example.expenseworkflow.controller.dto;
 

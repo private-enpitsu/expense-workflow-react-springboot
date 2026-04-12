@@ -1,3 +1,9 @@
+/**
+ * usersテーブルの1レコードを表すドメインクラス（エンティティ）。
+ * ユーザーID・email・表示名・ロール・上長ID・有効フラグ・パスワードハッシュを保持する。
+ * ロール（APPLICANT/APPROVER等）によってアクセスできるAPIが異なる。
+ */
+
 package com.example.expenseworkflow.domain;
 
 import lombok.Data;

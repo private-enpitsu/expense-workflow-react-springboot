@@ -1,4 +1,8 @@
-// /api/requests の GET/POST の返却で使う「申請サマリ」を表すDTOを提供する
+/**
+ * GET /api/requests・POST /api/requests のレスポンスとして、申請のサマリ情報を返すDTOクラス。
+ * 一覧表示や作成直後の確認に必要な情報（id・件名・金額・ステータス・備考・差戻しコメント）を保持する。
+ */
+
 
 package com.example.expenseworkflow.controller.dto;
 

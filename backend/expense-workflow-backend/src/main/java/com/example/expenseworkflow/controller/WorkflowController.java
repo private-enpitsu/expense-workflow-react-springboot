@@ -1,4 +1,17 @@
-// このファイルは、状態遷移とInbox（承認者の受信箱）を担当する WorkflowController を提供するために存在します。
+/**
+ * ワークフロー（状態遷移・承認者Inbox）系のHTTPエンドポイントを提供するコントローラクラス。
+ * <ul>
+ *   <li>GET  /api/inbox           : 承認者のInbox一覧取得</li>
+ *   <li>GET  /api/inbox/{id}      : 承認者の申請詳細取得</li>
+ *   <li>GET  /api/inbox/{id}/history : 承認者向け操作履歴取得</li>
+ *   <li>POST /api/requests/{id}/submit   : 申請提出（DRAFT→SUBMITTED）</li>
+ *   <li>POST /api/requests/{id}/approve  : 承認（SUBMITTED→APPROVED）</li>
+ *   <li>POST /api/requests/{id}/return   : 差戻し（SUBMITTED→RETURNED）</li>
+ *   <li>POST /api/requests/{id}/withdraw : 取り下げ（DRAFT/RETURNED→WITHDRAWN）</li>
+ *   <li>POST /api/requests/{id}/reject   : 却下（SUBMITTED→REJECTED）</li>
+ * </ul>
+ * 実処理は {@link com.example.expenseworkflow.store.RequestStore} に委譲する。
+ */
 
 package com.example.expenseworkflow.controller;
 

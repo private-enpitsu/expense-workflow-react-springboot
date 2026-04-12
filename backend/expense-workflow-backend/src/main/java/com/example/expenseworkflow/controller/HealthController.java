@@ -1,3 +1,9 @@
+/**
+ * アプリケーションの起動確認用エンドポイントを提供するコントローラクラス。
+ * GET /api/health に対して {@code {"status":"ok"}} を返すだけのシンプルな疎通確認API。
+ * Railway等のデプロイ環境でのヘルスチェックにも利用できる。
+ */
+
 package com.example.expenseworkflow.controller;
 
 import java.util.Map;

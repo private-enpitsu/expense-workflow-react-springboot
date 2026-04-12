@@ -1,4 +1,11 @@
-// POST /api/auth/login でDBの users を照合し、ログイン成功時にセッションへユーザー情報を保存する（最小ログイン）
+/**
+ * ログイン・ログアウトAPIを提供するコントローラクラス。
+ * <ul>
+ *   <li>POST /api/auth/login  : email/passwordをDBと照合し、成功時にセッションへuserIdを保存する</li>
+ *   <li>POST /api/auth/logout : セッションからuserIdを削除して未ログイン状態に戻す</li>
+ * </ul>
+ * パスワード照合にはBCryptを使用し、認証情報はサーバサイドセッションで管理する。
+ */
 
 package com.example.expenseworkflow.controller;
 

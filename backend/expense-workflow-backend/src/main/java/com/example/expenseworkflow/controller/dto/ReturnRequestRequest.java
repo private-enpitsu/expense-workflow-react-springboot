@@ -1,4 +1,7 @@
-// 差戻し（RETURNED）操作の入力として、コメント文字列を受け取るDTOを提供する
+/**
+ * 差戻し（POST /api/requests/{id}/return）・却下操作の入力値を受け取るリクエストDTOクラス。
+ * 承認者が差戻し理由として入力したコメント文字列を保持する。
+ */
 
 package com.example.expenseworkflow.controller.dto;
 

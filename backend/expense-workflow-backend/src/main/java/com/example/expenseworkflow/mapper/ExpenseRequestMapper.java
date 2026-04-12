@@ -1,3 +1,9 @@
+/**
+ * expense_requests・expense_request_actionsテーブルへのアクセスを担うMyBatis Mapperインターフェース。
+ * SQLはresources/mapper/ExpenseRequestMapper.xmlに定義し、このインターフェースにマッピングする。
+ * 申請の一覧取得・詳細取得・INSERT・ステータス更新・履歴INSERT・操作履歴取得などの操作を提供する。
+ */
+
 package com.example.expenseworkflow.mapper;
 
 import java.util.List;

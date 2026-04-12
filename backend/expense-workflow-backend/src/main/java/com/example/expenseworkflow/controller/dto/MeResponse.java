@@ -1,4 +1,7 @@
-// GET /api/me が「ログイン中=200」のときに返すユーザー情報（id/email/role）を表現するDTOを提供する
+/**
+ * GET /api/me のレスポンスとして、ログイン中ユーザーの情報を返すDTOクラス。
+ * パスワードハッシュ等の機密情報を除いた、フロントエンドへ公開してよい情報（id・email・role）のみを保持する。
+ */
 
 package com.example.expenseworkflow.controller.dto;
 

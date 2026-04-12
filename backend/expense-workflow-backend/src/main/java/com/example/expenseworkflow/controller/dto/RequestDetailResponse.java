@@ -1,4 +1,7 @@
-// GET /api/requests/{id} のレスポンスとして「申請詳細+履歴actions」を返すDTOを提供する
+/**
+ * GET /api/requests/{id}・GET /api/inbox/{id} のレスポンスとして、申請の詳細情報を返すDTOクラス。
+ * 申請の基本情報（id・件名・金額・ステータス・備考）に加えて、操作履歴（actions）と差戻しコメントを保持する。
+ */
 
 package com.example.expenseworkflow.controller.dto;
 

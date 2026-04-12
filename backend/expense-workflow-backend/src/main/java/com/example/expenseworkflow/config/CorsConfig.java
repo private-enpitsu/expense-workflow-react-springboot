@@ -1,8 +1,16 @@
+/**
+ * CORS（クロスオリジンリソース共有）の許可ルールを一元管理するコンフィグクラス。
+ * {@link WebMvcConfigurer#addCorsMappings} をオーバーライドし、
+ * フロントエンド（Vite開発サーバ・Railwayデプロイ先）からのリクエストを許可する。
+ * セッションCookieを使用するため {@code allowCredentials(true)} を設定している。
+ */
+
 package com.example.expenseworkflow.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
 
 @Configuration
 public class CorsConfig implements WebMvcConfigurer {

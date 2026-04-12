@@ -1,4 +1,7 @@
-// 申請詳細APIのレスポンスに含める「履歴actions」の1要素を表すDTOを提供する
+/**
+ * 申請詳細レスポンスに含まれる操作履歴（actions配列）の1要素を表すDTOクラス。
+ * 操作種別・遷移前後のステータス・コメント・操作日時・操作者IDを保持する。
+ */
 
 package com.example.expenseworkflow.controller.dto;
 
