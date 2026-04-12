@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSetAtom } from "jotai";
 import { healthSnapshotAtom, toastAtom } from "./lib/atoms";
@@ -26,6 +26,8 @@ import RequestHistoryPage from "./pages/RequestHistoryPage";
 import InboxHistoryPage from "./pages/InboxHistoryPage";
 import RequestEditPage from "./pages/RequestEditPage";
 import ToastHost from "./components/ToastHost";
+import { setSlowResponseHandler } from "./lib/apiClient";
+import DbWakingOverlay from "./components/DbWakingOverlay";
 
 import styles from "./App.module.css";
 
@@ -146,6 +148,11 @@ function NavItem({ to, label }: NavItemProps) {
    AppShell：上部ナビ + 中央コンテンツカード
 ============================================================ */
 function AppShell() {
+  const [isDbWaking, setIsDbWaking] = useState(false);
+  useEffect(() => {
+    setSlowResponseHandler(setIsDbWaking);
+  }, []);
+
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const setToast = useSetAtom(toastAtom);
@@ -197,6 +204,7 @@ function AppShell() {
 
   return (
     <>
+      <DbWakingOverlay isVisible={isDbWaking} />
       <h1 className={styles.site_title}>Expense Workflow App</h1>
       <div className={styles.app}>
         <ToastHost />
