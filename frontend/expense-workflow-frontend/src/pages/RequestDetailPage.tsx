@@ -13,6 +13,11 @@ import { toStatusLabel, toRequestLabel, StatusCode } from "../lib/statusLabel";
 import styles from "./RequestDetailPage.module.css";
 
 // バックエンドの RequestDetailResponse DTO に対応する型
+type RequestAction = {
+  action: string;
+  comment?: string;
+};
+
 type RequestDetail = {
   id: number;
   title: string;
@@ -20,6 +25,7 @@ type RequestDetail = {
   status: StatusCode;
   note?: string;
   lastReturnComment?: string;
+  actions?: RequestAction[];
 };
 
 /* ステータスに対応するバッジクラスを返す */
@@ -146,6 +152,24 @@ export default function RequestDetailPage() {
               </span>
             </div>
           )}
+
+          {/* 却下コメント（REJECTEDかつコメントありのみ） */}
+          {data.status === "REJECTED" &&
+            (() => {
+              const rejectComment = data.actions?.findLast(
+                (a: RequestAction) => a.action === "REJECT",
+              )?.comment;
+              return rejectComment ? (
+                <div className={styles.returnComment}>
+                  <span className={styles.returnCommentLabel}>
+                    却下コメント
+                  </span>
+                  <span className={styles.returnCommentValue}>
+                    {rejectComment}
+                  </span>
+                </div>
+              ) : null;
+            })()}
 
           {/* アクションボタン */}
           <div className={styles.actions}>

@@ -125,7 +125,7 @@ public class WorkflowController {
 			@org.springframework.web.bind.annotation.RequestBody
 			com.example.expenseworkflow.controller.dto.ReturnRequestRequest body) {
 		Long userId = requireUserId(session);
-		boolean ok = requestStore.reject(userId, id);
+		boolean ok = requestStore.reject(userId, id, body.getComment());
 		if (!ok) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 		}
