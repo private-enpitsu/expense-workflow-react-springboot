@@ -18,16 +18,16 @@ const STATUS_LABEL_MAP = {
 
 // ステータス文字列を表示ラベルへ変換する関数を公開する
 export function toStatusLabel(status: unknown): string {
-  if (typeof status !== "string") return ""; // 文字列以外が来た場合は表示崩れを避けるため空文字を返す
-  return STATUS_LABEL_MAP[status as StatusCode] ?? status; // 対応表にあれば日本語、無ければ元の値をそのまま返して未知値にも耐える
+  if (typeof status !== "string") return "";
+  return STATUS_LABEL_MAP[status as StatusCode] ?? status;
 }
 
 // 数値IDをUI表示用のREQ-xxx形式へ変換する関数を公開する（表示変換のSOT）
 export function toRequestLabel(id: number | string | null | undefined): string {
-  if (id === null || id === undefined) return ""; // nullやundefinedが来た場合は表示崩れを避けるため空文字を返す
-  const num = Number(id); // 数値・文字列どちらで来ても変換できるようにNumberへ統一する
-  if (!Number.isInteger(num) || num <= 0) return String(id); // 整数でない・0以下の場合は変換不能としてそのまま返す
-  return "REQ-" + String(num).padStart(3, "0"); // 3桁ゼロ埋めのREQ-xxx形式に変換して返す（例: 1 → REQ-001）
+  if (id === null || id === undefined) return "";
+  const num = Number(id);
+  if (!Number.isInteger(num) || num <= 0) return String(id);
+  return "REQ-" + String(num).padStart(3, "0");
 }
 
 // 目的：actionコードを日本語ラベルに変換するSOT

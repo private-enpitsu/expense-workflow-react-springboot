@@ -10,16 +10,14 @@ import { toastAtom } from "../lib/atoms";
 import styles from "./ToastHost.module.css";
 
 export default function ToastHost() {
-  const [toast, setToast] = useAtom(toastAtom); // toastAtomの状態（open/type/message）を読み書きする // toastAtom から現在のToast状態と更新関数を取得する
+  // toastAtomの状態（open/type/message）を読み書きする
+  const [toast, setToast] = useAtom(toastAtom);
 
   // toast.open が true になったら自動で閉じるタイマーをセットする
   useEffect(() => {
-    // open が false のときは何もしない
     if (!toast.open) return;
 
-    // 一定時間後にToastを閉じるためのタイマー
     const timerId = window.setTimeout(() => {
-      // 既存メッセージは維持したまま open だけ false にする
       setToast((prev) => ({ ...prev, open: false }));
     }, 2500);
 

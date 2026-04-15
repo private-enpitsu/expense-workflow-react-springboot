@@ -49,32 +49,32 @@ public class WorkflowController {
 	
 	 // GET /inbox をこのメソッドに割り当てます（受信箱＝承認待ち等の一覧を返す想定）。
 	@GetMapping("/inbox")
-	public ResponseEntity<List<InboxItemResponse>> inbox(HttpSession session) { // HTTPレスポンスとしてInboxItemResponseのリストを返す。HttpSessionはサーバ側セッション（ログイン判定に使う）。
-		Long userId = requireUserId(session); // セッションからユーザーIDを必須取得。未ログイン/不正なら例外で401にします。
-		List<InboxItemResponse> items = requestStore.inbox(userId); // 指定ユーザーのInbox一覧をRequestStoreから取得します（DBやメモリ等はRequestStore側の責務）。
-		return ResponseEntity.ok(items); // HTTP 200でJSON（items）を返します。
+	public ResponseEntity<List<InboxItemResponse>> inbox(HttpSession session) {
+		Long userId = requireUserId(session);
+		List<InboxItemResponse> items = requestStore.inbox(userId);
+		return ResponseEntity.ok(items);
 	}
 
 	// 承認者が自分のInbox申請を詳細取得する（GET /api/inbox/{id}）
 	@GetMapping("/inbox/{id}")
 	public ResponseEntity<RequestDetailResponse> inboxDetail(HttpSession session, @PathVariable("id") Long id) {
 		Long userId = requireUserId(session); // 未ログインなら401にする
-		RequestDetailResponse detail = requestStore.findByIdForApprover(userId, id); // 承認者専用の詳細取得をStoreへ委譲する
-		if (detail == null) { // 見つからない/権限なしの場合
+		RequestDetailResponse detail = requestStore.findByIdForApprover(userId, id);
+		if (detail == null) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 		}
 		return ResponseEntity.ok(detail);
 	}
 
 	// 申請を提出してDRAFT→SUBMITTEDへ遷移させる
-	@PostMapping("/requests/{id}/submit") // POST /requests/{id}/submit をこのメソッドに割り当てます（{id}はパス変数）。
-	public ResponseEntity<Void> submit(HttpSession session, @PathVariable("id") Long id) { // 戻りはボディなし（Void）。成功/失敗はHTTPステータスで表す設計です。idはURLの {id} を数値で受け取ります。 { // 戻りはボディなし（Void）。成功/失敗はHTTPステータスで表す設計です。idはURLの {id} を文字列で受け取ります。
-		Long userId = requireUserId(session); // セッションからユーザーIDを必須取得（未ログインなら401）。
-		boolean ok = requestStore.submit(userId, id); // 申請を「提出」する処理を委譲。成功したらtrue、対象がない/権限なし等ならfalseにする想定。
-		if (!ok) { // submitが失敗（false）だった場合の分岐です。
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // 404 Not Found（ボディなし）を返します（対象申請が存在しない、などの表現）。
+	@PostMapping("/requests/{id}/submit")
+	public ResponseEntity<Void> submit(HttpSession session, @PathVariable("id") Long id) {
+		Long userId = requireUserId(session);
+		boolean ok = requestStore.submit(userId, id);
+		if (!ok) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 		}
-		return ResponseEntity.ok().build(); // 成功時は200 OK（ボディなし）を返します。
+		return ResponseEntity.ok().build();
 	}
 
 	// 申請を承認してSUBMITTED→APPROVEDへ遷移させる
@@ -89,20 +89,20 @@ public class WorkflowController {
 	}
 
 	// 申請を差戻してSUBMITTED→RETURNEDへ遷移させる
-	@PostMapping("/requests/{id}/return") // 差戻し操作のURLをこのメソッドに割り当てる
-	public ResponseEntity<Void> returnRequest( // 差戻しのHTTPエンドポイントを定義する
-			HttpSession session, // セッションからログインユーザーIDを取得するために受け取る
-			@PathVariable("id") Long id, // パス変数の申請ID（REQ-xxx形式）を受け取る
-			@org.springframework.web.bind.annotation.RequestBody com.example.expenseworkflow.controller.dto.ReturnRequestRequest body // JSONボディからコメントを受け取る
+	@PostMapping("/requests/{id}/return")
+	public ResponseEntity<Void> returnRequest(
+			HttpSession session,
+			@PathVariable("id") Long id,
+			@org.springframework.web.bind.annotation.RequestBody com.example.expenseworkflow.controller.dto.ReturnRequestRequest body
 	) { // メソッド定義を開始する
-		Long userId = requireUserId(session); // セッションからユーザーIDを必須取得し、未ログインなら401にする
-		String comment = body != null ? body.getComment() : null; // ボディが無い場合でもNPEにならないようにコメントを取り出す
-		boolean ok = requestStore.returnRequest(userId, id, comment); // 差戻し（状態更新＋履歴INSERT）をStoreへ委譲する
-		if (!ok) { // 差戻しが失敗した場合の分岐をする
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // 対象が無い/権限や状態が合わない場合は404相当で隠す
+		Long userId = requireUserId(session);
+		String comment = body != null ? body.getComment() : null;
+		boolean ok = requestStore.returnRequest(userId, id, comment);
+		if (!ok) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 		} // 失敗時分岐を閉じる
-		return ResponseEntity.ok().build(); // 成功時は200 OK（ボディなし）を返す
-	} // returnRequest を閉じる
+		return ResponseEntity.ok().build();
+	}
 	
 	// 申請者が申請を取り下げる（DRAFT/RETURNED→WITHDRAWN）
 	@PostMapping("/requests/{id}/withdraw")
@@ -146,14 +146,14 @@ public class WorkflowController {
 
 	 // セッションからユーザーIDを「必須で」取り出す共通処理。取れない/不正なら401にします。
 	private Long requireUserId(HttpSession session) {
-		Object userIdObj = session != null ? session.getAttribute(SESSION_KEY_USER_ID) : null; // sessionがnullでないならキーで属性を取得。nullならuserIdObjもnullにします（NPE回避）。
-		if (userIdObj == null) { // セッションにユーザーIDが入っていない＝未ログイン等の扱い。
-			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED); // 401 Unauthorizedを例外で発生させ、SpringにHTTP化させます。
+		Object userIdObj = session != null ? session.getAttribute(SESSION_KEY_USER_ID) : null;
+		if (userIdObj == null) {
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
 		}
-		if (userIdObj instanceof Long) { // 取り出した値の型がLongであることを確認します（想定通りの型かチェック）。
-			return (Long) userIdObj; // Longにキャストして呼び出し元へ返します。
+		if (userIdObj instanceof Long) {
+			return (Long) userIdObj;
 		}
-		throw new ResponseStatusException(HttpStatus.UNAUTHORIZED); // 型が想定外（String等）なら不正状態として401にします（安全側に倒す）。
+		throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
 	}
 
 } //WorkflowController

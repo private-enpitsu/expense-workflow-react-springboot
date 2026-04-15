@@ -15,10 +15,7 @@ createRoot(rootElement).render(
   // Reactアプリを #root に描画する
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      {" "}
-      {/* TanStack Query をアプリ全体で使えるようにする */}
-      <App /> {/* 既存のApp（health確認UI）をそのまま表示する */}
-    </QueryClientProvider>{" "}
-    {/* Provider を閉じる（ここまでが TanStack Query の適用範囲） */}
+      <App />
+    </QueryClientProvider>
   </StrictMode>,
 );

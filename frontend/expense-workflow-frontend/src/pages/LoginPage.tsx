@@ -1,11 +1,8 @@
 // /login で「ログインフォーム送信 → セッション確立 → ログイン後に元の画面へ戻る」を実装する
 // [呼び出し元] App.jsx の <Route path="/login" element={<LoginPage />} />
 
-// import { useAtomValue, useSetAtom } from "jotai";
 import { useSetAtom } from "jotai";
-// import { useLocation, useNavigate } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-// import { healthSnapshotAtom, toastAtom } from "../lib/atoms";
 import { toastAtom } from "../lib/atoms";
 import styles from "./LoginPage.module.css";
 import { useQueryClient } from "@tanstack/react-query";
@@ -14,8 +11,6 @@ import { AxiosError } from "axios";
 import { apiClient } from "../lib/apiClient";
 
 export default function LoginPage() {
-  // const healthSnapshot = useAtomValue(healthSnapshotAtom);
-  // const location = useLocation();
   const setToast = useSetAtom(toastAtom);
   const navigate = useNavigate();
   const queryClient = useQueryClient();

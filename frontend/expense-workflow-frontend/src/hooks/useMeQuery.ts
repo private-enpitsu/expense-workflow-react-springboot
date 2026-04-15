@@ -21,13 +21,13 @@ export function useMeQuery() {
   };
 
   const { data, isLoading, error } = useQuery<MeResponse, AxiosError>({
-    queryKey: ["me"], // キャッシュキーは "me" で固定する（ユーザーデータは1人分しかないため）
-    queryFn: fetchMe, // 先ほど定義した取得関数を使う
-    retry: false, // 認証エラーなどで失敗しても自動リトライしない（401のときに何度も呼び出すのを避けるため）
-    refetchOnWindowFocus: false, // 画面に戻ってきたときに再取得しない（認証状態が変わることはあまりないため）
+    queryKey: ["me"],
+    queryFn: fetchMe,
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 
-  const httpStatus = error?.response?.status ?? null; // エラーがAxiosエラーならHTTPステータスを取り出す。そうでなければ null を返す
+  const httpStatus = error?.response?.status ?? null;
 
-  return { data, isLoading, error, httpStatus }; // 呼び出し側が認証状態を判定できるように、HTTPステータスも含めて返す
+  return { data, isLoading, error, httpStatus };
 }

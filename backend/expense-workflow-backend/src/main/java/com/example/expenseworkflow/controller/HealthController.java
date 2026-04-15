@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api")
 public class HealthController {
 
-    @GetMapping("/health") // GET /api/health をこのメソッドに割り当てる
-    public Map<String, String> health() { // 疎通確認のための最小レスポンスを返す
-        return Map.of("status", "ok"); // 返却JSON: {"status":"ok"} を生成して返す
+    @GetMapping("/health")
+    public Map<String, String> health() {
+        return Map.of("status", "ok");
     }
 }
