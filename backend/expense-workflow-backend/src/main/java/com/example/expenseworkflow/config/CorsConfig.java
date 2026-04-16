@@ -22,7 +22,8 @@ public class CorsConfig implements WebMvcConfigurer {
                 .allowedOrigins( // 許可するフロントのOrigin（開発用の最小セット）
                         "http://localhost:5173", // Viteのデフォルト開発サーバOrigin
                         "http://localhost:3000",  // もし3000で動かす場合にも対応（最小の追加）
-                        "https://sincere-empathy-production.up.railway.app" // RailwayフロントエンドURL
+                        "https://sincere-empathy-production.up.railway.app", // RailwayフロントエンドURL
+                        "https://handsome-mindfulness-production.up.railway.app"
                 )
                 .allowedMethods("GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS") // CORSを許可する
                 .allowedHeaders("*") // 送信ヘッダは一旦全許可（healthでは実害が少ないため）
