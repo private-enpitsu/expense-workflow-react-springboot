@@ -59,6 +59,12 @@
   gap: 10px;
 }
 
+@media screen and (max-width: 430px) {
+  .card {
+    padding: 18px;
+  }
+}
+
 /* ============================================================
    差戻しセクション（凸カード）
    ============================================================ */
@@ -112,6 +118,12 @@
   cursor: not-allowed;
 }
 
+@media screen and (max-width: 430px) {
+  .returnSection {
+    padding: 18px;
+  }
+}
+
 /* ============================================================
    アクションボタン行
    ============================================================ */
@@ -148,8 +160,8 @@
 .btnApprove:active:not(:disabled) {
   transform: none;
   box-shadow:
-    inset 4px 4px 8px rgba(0,0,0,0.15),
-    inset -2px -2px 6px rgba(255,255,255,0.1);
+    inset 4px 4px 8px rgba(0, 0, 0, 0.15),
+    inset -2px -2px 6px rgba(255, 255, 255, 0.1);
 }
 .btnApprove:disabled {
   opacity: 0.5;
@@ -183,8 +195,8 @@
 .btnReturn:active:not(:disabled) {
   transform: none;
   box-shadow:
-    inset 4px 4px 8px rgba(0,0,0,0.15),
-    inset -2px -2px 6px rgba(255,255,255,0.1);
+    inset 4px 4px 8px rgba(0, 0, 0, 0.15),
+    inset -2px -2px 6px rgba(255, 255, 255, 0.1);
 }
 .btnReturn:disabled {
   opacity: 0.5;

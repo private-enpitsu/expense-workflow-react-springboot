@@ -7,6 +7,7 @@ import { apiClient } from "@/lib/apiClient";
 import { toActionLabel, toRequestLabel } from "@/lib/statusLabel";
 import RequireAuth from "@/components/RequireAuth";
 import styles from "./page.module.css";
+import { Fragment } from "react";
 
 function InboxHistoryContent() {
   const params = useParams();
@@ -29,7 +30,8 @@ function InboxHistoryContent() {
       {error && <p className={styles.error}>履歴の取得に失敗しました</p>}
 
       {data && (
-        <>
+        // <>
+        <Fragment>
           {data.length === 0 && (
             <p className={styles.empty}>履歴はありません</p>
           )}
@@ -61,7 +63,7 @@ function InboxHistoryContent() {
               </div>
             ),
           )}
-        </>
+        </Fragment>
       )}
 
       <div className={styles.actions}>
