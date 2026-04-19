@@ -19,6 +19,7 @@ function NavItem({ href, label }: { href: string; label: string }) {
   return (
     <Link
       href={href}
+      prefetch={false}
       className={`${styles.navLink} ${isActive ? styles.navLinkActive : ""}`}
     >
       {label}
