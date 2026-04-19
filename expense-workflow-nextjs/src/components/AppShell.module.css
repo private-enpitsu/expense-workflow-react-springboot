@@ -1,0 +1,115 @@
+/* --- アプリ全体ラッパー --- */
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+/* タイトル */
+.site_title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 50px;
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+
+/* ナビバー */
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px 32px;
+  background: var(--bg);
+  flex-wrap: wrap;
+}
+
+/* ナビリンク（凸ボタン） */
+.navLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border-radius: 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-sub);
+  text-decoration: none;
+  background: var(--bg);
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  box-shadow:
+    5px 5px 12px var(--shadow-dark),
+    -5px -5px 12px var(--shadow-light);
+  white-space: nowrap;
+}
+.navLink:hover {
+  color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow:
+    7px 7px 16px var(--shadow-dark),
+    -7px -7px 16px var(--shadow-light);
+}
+
+/* アクティブ（凹） */
+.navLinkActive {
+  color: var(--accent);
+  box-shadow:
+    inset 4px 4px 8px var(--shadow-dark),
+    inset -4px -4px 8px var(--shadow-light);
+  transform: none;
+}
+.navLinkActive:hover {
+  transform: none;
+  box-shadow:
+    inset 4px 4px 8px var(--shadow-dark),
+    inset -4px -4px 8px var(--shadow-light);
+}
+.navLink:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ユーザー表示（凹インセット） */
+.navUser {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 18px;
+  border-radius: 14px;
+  font-size: 13px;
+  color: var(--text-sub);
+  background: var(--bg);
+  box-shadow:
+    inset 3px 3px 7px var(--shadow-dark),
+    inset -3px -3px 7px var(--shadow-light);
+  white-space: nowrap;
+}
+
+/* メインコンテンツエリア */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 40px 24px 60px;
+  width: 100%;
+}
+
+/* コンテンツカード */
+.contentCard {
+  width: 85%;
+  max-width: 600px;
+  background: var(--bg);
+  border-radius: var(--radius);
+  box-shadow:
+    8px 8px 20px var(--shadow-dark),
+    -8px -8px 20px var(--shadow-light);
+  padding: 40px 48px;
+}

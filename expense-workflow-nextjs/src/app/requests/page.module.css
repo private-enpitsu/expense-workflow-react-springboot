@@ -1,0 +1,128 @@
+/* ============================================================
+   RequestsListPage.module.css
+   ステータス別セクション表示（ニューモーフィズム準拠）
+   ============================================================ */
+
+/* ページ全体ラッパー */
+.page {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* ページタイトル */
+.title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+
+/* ローディング・エラー */
+.note {
+  color: var(--text-sub);
+  font-size: 14px;
+  padding: 12px 0;
+}
+
+/* ============================================================
+   ステータスセクション（凸カード）
+   ============================================================ */
+
+.section {
+  background: var(--bg);
+  border-radius: var(--radius);
+  box-shadow:
+    8px 8px 20px var(--shadow-dark),
+    -8px -8px 20px var(--shadow-light);
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* セクションヘッダ（バッジ＋件数） */
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.sectionCount {
+  font-size: 12px;
+  color: var(--text-sub);
+  font-weight: 500;
+}
+
+/* ============================================================
+   申請行（凹インセットカード → ホバーで凸浮上）
+   ============================================================ */
+
+.item {
+  background: var(--bg);
+  border-radius: 14px;
+  box-shadow:
+    inset 4px 4px 10px var(--shadow-dark),
+    inset -4px -4px 10px var(--shadow-light);
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-decoration: none;
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.item:hover {
+  box-shadow:
+    4px 4px 12px var(--shadow-dark),
+    -4px -4px 12px var(--shadow-light);
+  transform: translateY(-2px);
+}
+
+/* 行の上段：ID・金額を横並び */
+.itemRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.itemId {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.itemAmount {
+  font-size: 13px;
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+.itemTitle {
+  font-size: 13px;
+  color: var(--text-sub);
+  flex: 1; /* 余白を埋めて金額を右端に寄せる */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 差戻しコメント行 */
+.returnComment {
+  font-size: 12px;
+  color: var(--accent4);
+  background: rgba(224, 123, 123, 0.08);
+  border-radius: 8px;
+  padding: 6px 10px;
+  line-height: 1.5;
+}
+
+.returnCommentLabel {
+  font-weight: 600;
+  margin-right: 4px;
+}

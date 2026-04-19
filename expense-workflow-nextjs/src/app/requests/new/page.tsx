@@ -1,0 +1,166 @@
+"use client";
+
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSetAtom } from "jotai";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { AxiosError } from "axios";
+import { toastAtom } from "../../../lib/atoms";
+import { apiClient } from "../../../lib/apiClient";
+import { toRequestLabel } from "../../../lib/statusLabel";
+import RequireAuth from "../../../components/RequireAuth";
+import styles from "./page.module.css";
+
+type CreatedResponse = {
+  id: number;
+};
+
+function RequestCreateContent() {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const setToast = useSetAtom(toastAtom);
+  const [title, setTitle] = useState("");
+  const [amount, setAmount] = useState("");
+  const [note, setNote] = useState("");
+
+  const createMutation = useMutation({
+    mutationFn: async (): Promise<CreatedResponse> => {
+      const amountNumber = Number(amount || 0);
+      const body = { title, amount: amountNumber, note };
+      const res = await apiClient.post<CreatedResponse>("/requests", body);
+      return res.data;
+    },
+    onSuccess: async (created) => {
+      await queryClient.invalidateQueries({ queryKey: ["requests"] });
+      setToast({
+        open: true,
+        type: "success",
+        message: `保存しました: ${toRequestLabel(created?.id)}`,
+      });
+      router.replace(created?.id ? `/requests/${created.id}` : "/requests");
+    },
+    onError: (error: unknown) => {
+      const status = (error as AxiosError)?.response?.status ?? null;
+      const msg = status ? `HTTP ${status}` : String(error);
+      setToast({
+        open: true,
+        type: "error",
+        message: `保存に失敗しました: ${msg}`,
+      });
+    },
+  });
+
+  const submitNewMutation = useMutation({
+    mutationFn: async (): Promise<{ id: number }> => {
+      const amountNumber = Number(amount || 0);
+      const body = { title, amount: amountNumber, note };
+      const createdRes = await apiClient.post("/requests", body);
+      const created = createdRes.data;
+      const newId = created?.id ?? null;
+      if (!newId) throw new Error("created.id is missing");
+      await apiClient.post(`/requests/${newId}/submit`);
+      return { id: newId };
+    },
+    onSuccess: async (result) => {
+      await queryClient.invalidateQueries({ queryKey: ["requests"] });
+      await queryClient.invalidateQueries({ queryKey: ["inbox"] });
+      setToast({
+        open: true,
+        type: "success",
+        message: `提出しました: ${toRequestLabel(result?.id)}`,
+      });
+      router.replace(result?.id ? `/requests/${result.id}` : "/requests");
+    },
+    onError: (error: unknown) => {
+      const status = (error as AxiosError)?.response?.status ?? null;
+      const msg = status ? `HTTP ${status}` : String(error);
+      setToast({
+        open: true,
+        type: "error",
+        message: `提出に失敗しました: ${msg}`,
+      });
+    },
+  });
+
+  const isSubmitting = Boolean(
+    createMutation.isPending || submitNewMutation.isPending,
+  );
+  const canSubmit = Boolean(title.trim().length > 0);
+
+  return (
+    <div className={styles.container}>
+      <h2>申請作成</h2>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!canSubmit) return;
+          createMutation.mutate();
+        }}
+        className={styles.form}
+      >
+        <ul>
+          <li>
+            <label className={styles.field}>
+              <span>件名</span>
+              <input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                disabled={isSubmitting}
+                placeholder="例）交通費精算"
+              />
+            </label>
+          </li>
+          <li>
+            <label className={styles.field}>
+              <span>金額</span>
+              <input
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                disabled={isSubmitting}
+                placeholder="例）1200"
+                inputMode="numeric"
+              />
+            </label>
+          </li>
+          <li>
+            <label className={styles.field}>
+              <span>備考</span>
+              <textarea
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                disabled={isSubmitting}
+                placeholder="例）領収書あり"
+                rows={4}
+              />
+            </label>
+          </li>
+        </ul>
+        <div className={styles.actions}>
+          <button
+            type="submit"
+            className={styles.btnSave}
+            disabled={isSubmitting || !canSubmit}
+          >
+            {isSubmitting ? "処理中..." : "保存"}
+          </button>
+          <button
+            type="button"
+            className={styles.btnSubmit}
+            disabled={isSubmitting || !canSubmit}
+            onClick={() => submitNewMutation.mutate()}
+          >
+            {isSubmitting ? "処理中..." : "提出"}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+export default function RequestCreatePage() {
+  return (
+    <RequireAuth>
+      <RequestCreateContent />
+    </RequireAuth>
+  );
+}
