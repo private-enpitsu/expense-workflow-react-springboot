@@ -83,3 +83,9 @@
   gap: 10px;
   margin-bottom: 4px;
 }
+
+@media screen and (max-width: 430px) {
+  .section {
+    padding: 18px;
+  }
+}

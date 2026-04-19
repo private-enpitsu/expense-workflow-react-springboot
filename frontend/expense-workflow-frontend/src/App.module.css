@@ -14,12 +14,12 @@
 
 /* タイトル */
 .site_title {
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--text-main);
-    margin: 50px;
-    letter-spacing: 0.5px;
-    text-align: center;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 50px;
+  letter-spacing: 0.5px;
+  text-align: center;
 }
 
 /* ============================================================
@@ -113,7 +113,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: center;       /* 水平中央 */
+  align-items: center; /* 水平中央 */
   justify-content: flex-start;
   padding: 40px 24px 60px;
   width: 100%;
@@ -121,7 +121,7 @@
 
 /* コンテンツを包むカード（参考コード .neu-card 準拠） */
 .contentCard {
-  width: 85%;
+  width: 100%;
   max-width: 600px;
   background: var(--bg);
   border-radius: var(--radius);
@@ -129,6 +129,15 @@
     8px 8px 20px var(--shadow-dark),
     -8px -8px 20px var(--shadow-light);
   padding: 40px 48px;
+}
+
+@media screen and (max-width: 430px) {
+  .main {
+    padding: 40px 13px 60px;
+  }
+  .contentCard {
+    padding: 21px;
+  }
 }
 
 /* ============================================================
@@ -157,4 +166,13 @@
   color: var(--accent4);
   font-size: 13px;
   margin-top: 8px;
+}
+
+@media screen and (max-width: 430px) {
+  .main {
+    padding: 40px 13px 60px;
+  }
+  .contentCard {
+    padding: 21px;
+  }
 }
