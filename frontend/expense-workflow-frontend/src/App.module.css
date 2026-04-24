@@ -167,12 +167,3 @@
   font-size: 13px;
   margin-top: 8px;
 }
-
-@media screen and (max-width: 430px) {
-  .main {
-    padding: 40px 13px 60px;
-  }
-  .contentCard {
-    padding: 21px;
-  }
-}
